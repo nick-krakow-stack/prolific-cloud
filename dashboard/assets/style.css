@@ -286,6 +286,40 @@ a:not(.icon-btn):hover {
 .goal-ring.is-good { --goal-ring-color: var(--success); }
 .goal-ring.is-neutral { --goal-ring-color: var(--text-muted); }
 
+.efficiency-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.efficiency-tile {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-card) 82%, var(--bg));
+}
+.efficiency-label {
+  margin-bottom: 7px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.efficiency-value {
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 850;
+  line-height: 1.1;
+}
+.efficiency-basis {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
 @media (max-width: 520px) {
   .goal-card-grid { gap: 8px; }
   .goal-card { padding: 12px 10px; }
@@ -316,6 +350,18 @@ a:not(.icon-btn):hover {
     align-items: flex-start;
     flex-direction: column;
     gap: 1px;
+  }
+  .efficiency-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .efficiency-tile { padding: 10px; }
+  .efficiency-value { font-size: 18px; }
+}
+
+@media (min-width: 521px) and (max-width: 920px) {
+  .efficiency-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

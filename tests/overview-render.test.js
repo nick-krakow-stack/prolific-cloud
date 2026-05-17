@@ -145,6 +145,7 @@ const checks = [
   ['renders top study list', html.includes('top-study-list') && html.includes('High reward study')],
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders efficiency basis as studies not samples', html.includes('2 Studien &middot; 30 Min') && html.includes('1 Studie') === false && !html.includes('Samples')],
+  ['renders efficiency as four metric tiles', html.includes('class="efficiency-grid"') && (html.match(/class="efficiency-tile"/g) || []).length === 4 && html.includes('<div class="efficiency-label">Heute</div>') && html.includes('<div class="efficiency-label">Gesamt</div>')],
   ['formats singular study count', sandbox.fmtStudyCount(1) === '1 Studie'],
   ['does not render system health in overview', !html.includes('System-Health') && !html.includes('health-grid')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],

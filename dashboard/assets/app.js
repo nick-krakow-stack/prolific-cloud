@@ -1393,21 +1393,22 @@ function renderEfficiencyCard(efficiency, fxRates) {
     ['Gesamt', efficiency.allTime]
   ];
 
-  const rows = periods.map(([label, period]) => `
-    <div class="status-row">
-      <span class="key">${label}</span>
-      <span class="value">${fmtEfficiencyHourlyEur(period, fxRates)}</span>
-    </div>
-    <div class="status-row">
-      <span class="key">Basis</span>
-      <span class="value">${fmtStudyCount(period.sampleCount)} &middot; ${fmtDuration(period.secondsTotal)}</span>
+  const tiles = periods.map(([label, period]) => `
+    <div class="efficiency-tile">
+      <div class="efficiency-label">${label}</div>
+      <div class="efficiency-value">${fmtEfficiencyHourlyEur(period, fxRates)}</div>
+      <div class="efficiency-basis">
+        ${fmtStudyCount(period.sampleCount)} &middot; ${fmtDuration(period.secondsTotal)}
+      </div>
     </div>
   `).join('');
 
   return `
     <div class="status-box">
       <h3>Effizienz / Stundenlohn</h3>
-      ${rows}
+      <div class="efficiency-grid">
+        ${tiles}
+      </div>
     </div>
   `;
 }
