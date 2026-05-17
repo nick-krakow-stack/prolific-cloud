@@ -904,6 +904,34 @@ a:not(.icon-btn):hover {
   min-width: 0;
 }
 
+.heatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.heatmap-header h3 {
+  margin: 0;
+}
+.heatmap-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.heatmap-month-label {
+  min-width: 104px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+.heatmap-nav-btn[disabled] {
+  cursor: not-allowed;
+  opacity: .35;
+}
+
 .heatmap-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -1317,6 +1345,13 @@ a:not(.icon-btn):hover {
 }
 
 @media (max-width: 420px) {
+  .heatmap-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .heatmap-month-label {
+    min-width: 92px;
+  }
   .heatmap-grid {
     gap: 4px;
   }

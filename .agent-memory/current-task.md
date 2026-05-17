@@ -4,6 +4,14 @@ Last updated: 2026-05-18
 
 ## Active Task Checklist
 
+- [x] Add previous/next/today controls to the stats calendar heatmap.
+- [x] Disable the next-month button while the selected month is the current server month.
+- [x] Render selected previous months as complete month grids.
+- [x] Extend the stats API heatmap data from current-month-only to historical day buckets.
+- [x] Deploy and verify the live heatmap month navigation.
+
+## Previous Active Task Checklist
+
 - [x] Remove the dedicated `Studien` navigation item and `panel-studies`.
 - [x] Add a `Studien` section at the bottom of the `Statistiken` tab.
 - [x] Show only currently active and not-expired studies in that section by default.
@@ -12,8 +20,6 @@ Last updated: 2026-05-18
 - [x] Reuse the existing study filter, date range, pagination, and lazy-load controls for the expanded list.
 - [x] Make the stats tab fetch fresh study data so active studies update with normal refresh/auto-refresh.
 - [x] Deploy and verify the live navigation and stats-study behavior.
-
-## Previous Active Task Checklist
 
 - [x] Add `monthStats` to the overview API for monthly participation details.
 - [x] Convert `Heute` and `Monatsziel` into side-by-side goal cards.

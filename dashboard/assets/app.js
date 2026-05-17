@@ -1850,11 +1850,67 @@ function dateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
-function monthReferenceDate(days, serverTime) {
+let statsHeatmapMonth = null;
+
+function monthKeyFromDate(date) {
+  if (!date || Number.isNaN(date.getTime())) return null;
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function parseMonthKey(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})$/);
+
+  if (!match) return null;
+
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) return null;
+
+  const date = new Date(Number(match[1]), month - 1, 1);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function currentHeatmapMonthKey(serverTime) {
   const serverDate = serverTime ? new Date(serverTime) : null;
 
   if (serverDate && !Number.isNaN(serverDate.getTime())) {
-    return new Date(serverDate.getFullYear(), serverDate.getMonth(), serverDate.getDate());
+    return monthKeyFromDate(serverDate);
+  }
+
+  return monthKeyFromDate(new Date());
+}
+
+function shiftMonthKey(value, offset) {
+  const date = parseMonthKey(value);
+
+  if (!date) return currentHeatmapMonthKey();
+
+  date.setMonth(date.getMonth() + offset);
+
+  return monthKeyFromDate(date);
+}
+
+function compareMonthKeys(a, b) {
+  const dateA = parseMonthKey(a);
+  const dateB = parseMonthKey(b);
+
+  if (!dateA || !dateB) return 0;
+
+  return dateA.getTime() - dateB.getTime();
+}
+
+function monthReferenceDate(days, serverTime, selectedMonthKey = null) {
+  const selectedMonth = parseMonthKey(selectedMonthKey);
+
+  if (selectedMonth) {
+    return selectedMonth;
+  }
+
+  const serverDate = serverTime ? new Date(serverTime) : null;
+
+  if (serverDate && !Number.isNaN(serverDate.getTime())) {
+    return new Date(serverDate.getFullYear(), serverDate.getMonth(), 1);
   }
 
   const datedDays = days
@@ -1865,9 +1921,21 @@ function monthReferenceDate(days, serverTime) {
   return datedDays[0] || new Date();
 }
 
-function buildMonthHeatmapDays(days, serverTime) {
-  const reference = monthReferenceDate(days, serverTime);
-  const today = monthReferenceDate([], serverTime);
+function heatmapTodayDate(serverTime) {
+  const serverDate = serverTime ? new Date(serverTime) : null;
+
+  if (serverDate && !Number.isNaN(serverDate.getTime())) {
+    return new Date(serverDate.getFullYear(), serverDate.getMonth(), serverDate.getDate());
+  }
+
+  const now = new Date();
+
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function buildMonthHeatmapDays(days, serverTime, selectedMonthKey = null) {
+  const reference = monthReferenceDate(days, serverTime, selectedMonthKey);
+  const today = heatmapTodayDate(serverTime);
   const year = reference.getFullYear();
   const month = reference.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1891,16 +1959,28 @@ function buildMonthHeatmapDays(days, serverTime) {
   });
 }
 
-function renderHeatmap(days, fxRates, serverTime) {
+function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
   if (!days.length && !serverTime) {
     return '<div class="loading">Keine Heatmap-Daten.</div>';
   }
 
-  const monthDays = buildMonthHeatmapDays(days, serverTime);
+  const currentMonthKey = currentHeatmapMonthKey(serverTime);
+  const activeMonthKey = selectedMonthKey || statsHeatmapMonth || currentMonthKey;
+  const monthDays = buildMonthHeatmapDays(days, serverTime, activeMonthKey);
   const maxValue = Math.max(...monthDays.map(day => chartValueMinor(day.earned, fxRates)), 0);
+  const canGoNext = compareMonthKeys(activeMonthKey, currentMonthKey) < 0;
 
   return `
     <div class="heatmap">
+      <div class="heatmap-header">
+        <h3>Kalender-Heatmap</h3>
+        <div class="heatmap-controls" aria-label="Monat ausw&auml;hlen">
+          <button class="filter-icon heatmap-nav-btn" type="button" data-heatmap-nav="prev" aria-label="Vorheriger Monat">&lt;</button>
+          <span class="heatmap-month-label">${escapeHtml(fmtMonthLabel(activeMonthKey))}</span>
+          <button class="filter-icon heatmap-nav-btn" type="button" data-heatmap-nav="next" ${canGoNext ? '' : 'disabled'} aria-label="N&auml;chster Monat">&gt;</button>
+          <button class="filter-reset heatmap-today-btn" type="button" data-heatmap-nav="today">Heute</button>
+        </div>
+      </div>
       <div class="heatmap-grid">
       ${monthDays.map(day => {
         const value = chartValueMinor(day.earned, fxRates);
@@ -2018,7 +2098,6 @@ function renderStats(data) {
 
   return `
     <div class="status-box">
-      <h3>Kalender-Heatmap</h3>
       ${renderHeatmap(normalizeHeatmap(data), fxRates, data.serverTime || data.server_time)}
     </div>
 
@@ -3294,6 +3373,27 @@ function bindStudiesControls() {
       const target = event.target;
 
       if (!target) return;
+
+      const directHeatmapNav = target.dataset ? target.dataset.heatmapNav : null;
+      const heatmapButton = directHeatmapNav ? target : (target.closest ? target.closest('[data-heatmap-nav]') : null);
+      if (heatmapButton && heatmapButton.dataset.heatmapNav) {
+        if (heatmapButton.disabled) return;
+
+        const currentMonth = currentHeatmapMonthKey(cachedData.stats?.serverTime || cachedData.stats?.server_time);
+        const activeMonth = statsHeatmapMonth || currentMonth;
+
+        if (heatmapButton.dataset.heatmapNav === 'prev') {
+          statsHeatmapMonth = shiftMonthKey(activeMonth, -1);
+        } else if (heatmapButton.dataset.heatmapNav === 'next') {
+          const nextMonth = shiftMonthKey(activeMonth, 1);
+          statsHeatmapMonth = compareMonthKeys(nextMonth, currentMonth) > 0 ? currentMonth : nextMonth;
+        } else if (heatmapButton.dataset.heatmapNav === 'today') {
+          statsHeatmapMonth = currentHeatmapMonthKey(cachedData.stats?.serverTime || cachedData.stats?.server_time);
+        }
+
+        rerenderStatsContent();
+        return;
+      }
 
       if (target.id === 'statsShowAllStudies') {
         statsShowAllStudies = !statsShowAllStudies;

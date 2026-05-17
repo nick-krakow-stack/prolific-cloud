@@ -206,6 +206,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   existing sort/filter/date/pagination controls. The stats tab fetches fresh
   study data alongside stats data, so active studies update with normal refresh
   and auto-refresh.
+- Browser review fix: the stats calendar heatmap now has month navigation with
+  previous/next buttons, a German month label such as `Mai 2026`, and a `Heute`
+  button. The next-month button is disabled in the current server month. The
+  stats API now returns historical heatmap buckets from the first available
+  submission month through today instead of current-month-only data.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

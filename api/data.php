@@ -768,7 +768,7 @@ function build_stats_response(PDO $pdo): array {
     return [
         'ok' => true,
         'monthlyComparison' => build_monthly_comparison($pdo, $earnedStatuses, $monthStart, $nextMonthStart, $previousMonthStart),
-        'heatmap' => build_month_heatmap($pdo, $earnedStatuses, $pendingStatuses, $monthStart, $today),
+        'heatmap' => build_heatmap_history($pdo, $earnedStatuses, $pendingStatuses, $today),
         'requesterStats' => build_requester_stats($pdo, $earnedStatuses),
         'monthlyReport' => build_monthly_report($pdo, $earnedStatuses, $pendingStatuses, $monthStart, $nextMonthStart),
         'serverTime' => date('c'),
@@ -1103,6 +1103,65 @@ function build_month_heatmap(
     }
 
     foreach ($stmt->fetchAll() as $row) {
+        $dateKey = $row['stat_date'];
+        $currency = $row['reward_currency'];
+
+        if (!isset($byDate[$dateKey]) || empty($currency)) {
+            continue;
+        }
+
+        $bucket = in_array($row['status'], $pendingStatuses, true) ? 'pending' : 'earned';
+        if (!isset($byDate[$dateKey][$bucket][$currency])) {
+            $byDate[$dateKey][$bucket][$currency] = 0;
+        }
+
+        $byDate[$dateKey][$bucket][$currency] += (int)$row['total'];
+    }
+
+    return array_values($byDate);
+}
+
+function build_heatmap_history(PDO $pdo, array $earnedStatuses, array $pendingStatuses, DateTime $today): array {
+    $allStatuses = array_merge($earnedStatuses, $pendingStatuses);
+    $placeholders = implode(',', array_fill(0, count($allStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
+    $endExclusive = (clone $today)->modify('+1 day')->setTime(0, 0, 0);
+    $stmt = $pdo->prepare("
+        SELECT DATE(completed_at) stat_date,
+               status,
+               reward_currency,
+               SUM({$rewardExpr}) total
+        FROM submissions
+        WHERE status IN ($placeholders)
+          AND completed_at < ?
+          AND {$rewardExpr} > 0
+        GROUP BY DATE(completed_at), status, reward_currency
+        ORDER BY stat_date ASC
+    ");
+    $params = $allStatuses;
+    $params[] = $endExclusive->format('Y-m-d H:i:s');
+    $stmt->execute($params);
+
+    $rows = $stmt->fetchAll();
+
+    if (!$rows) {
+        return build_month_heatmap($pdo, $earnedStatuses, $pendingStatuses, (clone $today)->modify('first day of this month')->setTime(0, 0, 0), $today);
+    }
+
+    $firstDate = new DateTime((string)$rows[0]['stat_date'], $today->getTimezone());
+    $start = $firstDate->modify('first day of this month')->setTime(0, 0, 0);
+    $byDate = [];
+
+    for ($day = clone $start; $day < $endExclusive; $day->modify('+1 day')) {
+        $dateKey = $day->format('Y-m-d');
+        $byDate[$dateKey] = [
+            'date' => $dateKey,
+            'earned' => [],
+            'pending' => [],
+        ];
+    }
+
+    foreach ($rows as $row) {
         $dateKey = $row['stat_date'];
         $currency = $row['reward_currency'];
 

@@ -48,6 +48,7 @@ const stats = {
     delta: { earned: { GBP: 10981 }, percent: 833.8 }
   },
   heatmap: [
+    { date: '2026-04-30', earned: { GBP: 250 }, pending: {} },
     { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
     { date: '2026-05-02', earned: {}, pending: {} }
   ],
@@ -200,6 +201,7 @@ stats.studiesData = studies;
 const statsHtml = sandbox.renderStats(stats);
 const studiesFilterHtml = sandbox.renderStudiesFilterBar ? sandbox.renderStudiesFilterBar() : '';
 const expandedStatsStudiesHtml = sandbox.renderStatsStudiesSection ? sandbox.renderStatsStudiesSection(studies, true) : '';
+const aprilHeatmapHtml = sandbox.renderHeatmap ? sandbox.renderHeatmap(sandbox.normalizeHeatmap(stats), stats.fxRates, stats.serverTime, '2026-04') : '';
 const accountHtml = sandbox.renderAccount({
   ok: true,
   balance: {
@@ -296,6 +298,11 @@ const checks = [
   ['renders monthly report hourly in EUR with separate study and work-hour rows', statsHtml.includes('<span class="key">Stundenlohn</span>') && statsHtml.includes('<span class="value">€16,99/h</span>') && /<span class="key">Stundenlohn<\/span>[\s\S]*<span class="key">Studien<\/span>[\s\S]*<span class="value">14 Studien<\/span>[\s\S]*<span class="key">Arbeitszeit<\/span>[\s\S]*<span class="value">3 Std 30 Min<\/span>/.test(statsHtml) && !statsHtml.includes('£14,40/h &middot; 14 Studien')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders income history in stats tab', statsHtml.includes('<h3>Einnahmen-Verlauf</h3>') && statsHtml.includes('class="daily-chart"') && statsHtml.includes('class="daily-bar"')],
+  ['renders heatmap month navigation', statsHtml.includes('class="heatmap-header"') && statsHtml.includes('data-heatmap-nav="prev"') && statsHtml.includes('Mai 2026') && statsHtml.includes('data-heatmap-nav="next"') && statsHtml.includes('data-heatmap-nav="today"')],
+  ['disables heatmap next button in current month', /data-heatmap-nav="next"[\s\S]*disabled/.test(statsHtml)],
+  ['renders selected previous heatmap month', aprilHeatmapHtml.includes('April 2026') && (aprilHeatmapHtml.match(/class="heatmap-day/g) || []).length === 30 && aprilHeatmapHtml.includes('30.04.') && aprilHeatmapHtml.includes('£2,50') && !/data-heatmap-nav="next"[\s\S]*disabled/.test(aprilHeatmapHtml)],
+  ['stats binds heatmap navigation controls', code.includes("target.dataset.heatmapNav") && code.includes('statsHeatmapMonth = shiftMonthKey') && code.includes('statsHeatmapMonth = currentHeatmapMonthKey')],
+  ['stats endpoint provides historical heatmap data', /'heatmap'\s*=>\s*build_heatmap_history\(/.test(apiData)],
   ['moves studies into stats tab', !appShell.includes('data-tab="studies"') && !appShell.includes('id="panel-studies"') && statsHtml.includes('<h3>Studien</h3>')],
   ['stats studies default shows only active studies', statsHtml.includes('Quality study') && !statsHtml.includes('Older study') && statsHtml.includes('Alle Studien anzeigen') && !statsHtml.includes('id="studiesSort"')],
   ['expanded stats studies keeps the toggle button before filters', expandedStatsStudiesHtml.includes('Studien ausblenden') && expandedStatsStudiesHtml.indexOf('Studien ausblenden') < expandedStatsStudiesHtml.indexOf('id="studiesSort"')],

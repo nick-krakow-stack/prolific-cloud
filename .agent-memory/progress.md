@@ -123,3 +123,7 @@
   shows active, not-expired studies by default and expands the full study list
   with existing filters/pagination via `Alle Studien anzeigen`; after expansion
   the same button stays in place as `Studien ausblenden`.
+- 2026-05-18 - Browser review fix deployed: calendar heatmap in `Statistiken`
+  now supports previous/next month navigation plus `Heute`; next month is
+  disabled in the current server month, and the stats API returns historical
+  heatmap day buckets through today.
