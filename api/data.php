@@ -807,6 +807,7 @@ function build_system_response(PDO $pdo): array {
         ],
         'lastError' => $system['lastError'] ?? null,
         'dbCounts' => $system['dbCounts'] ?? [],
+        'fxRates' => decode_setting_value(get_setting('fxRates')),
         'serverTime' => date('c'),
     ];
 }

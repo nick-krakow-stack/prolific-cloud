@@ -2140,6 +2140,7 @@ function renderSystem(data) {
         </div>
       `).join('')}
     </div>
+    ${renderCurrencySettingsCard(data)}
     ${renderSystemHealthCard(systemHealth)}
     ${renderEvents(data)}
   `;
@@ -2252,7 +2253,6 @@ function renderSettings(data) {
         })}
       </div>
     </form>
-    ${renderCurrencySettingsCard(data)}
     </div>
   `;
 }

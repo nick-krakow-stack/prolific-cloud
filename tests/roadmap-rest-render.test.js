@@ -4,6 +4,8 @@ const vm = require('vm');
 const code = fs.readFileSync('dashboard/assets/app.js', 'utf8');
 const css = fs.readFileSync('dashboard/assets/style.css', 'utf8');
 const appShell = fs.readFileSync('dashboard/app.php', 'utf8');
+const apiData = fs.readFileSync('api/data.php', 'utf8');
+const systemResponseSource = (apiData.match(/function build_system_response[\s\S]*?\n}\n\nfunction build_settings_response/) || [''])[0];
 
 const sandbox = {
   console,
@@ -259,7 +261,8 @@ const checks = [
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['moves system health from settings to system tab', !settingsHtml.includes('System-Health') && !settingsHtml.includes('health-grid') && systemHtml.includes('System-Health') && systemHtml.includes('health-grid')],
   ['moves sync status from tab to system tab', !appShell.includes('data-tab="events"') && !appShell.includes('id="panel-events"') && !appShell.includes('eventsContent') && systemHtml.includes('Sync-Status') && systemHtml.includes('Letzter erfolgreicher Sync') && systemHtml.includes('<details class="log-details">')],
-  ['moves currency box from account to settings', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && settingsHtml.includes('W&auml;hrungen') && settingsHtml.includes('FX-Rates') && settingsHtml.includes('Teilnahmen exportieren')],
+  ['moves currency box from settings to system tab', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && !settingsHtml.includes('W&auml;hrungen') && !settingsHtml.includes('FX-Rates') && systemHtml.includes('W&auml;hrungen') && systemHtml.includes('FX-Rates') && systemHtml.includes('Teilnahmen exportieren')],
+  ['system endpoint provides fx rates for currency box', /'fxRates'\s*=>\s*decode_setting_value\(get_setting\('fxRates'\)\)/.test(systemResponseSource)],
   ['removes account tab from shell', !appShell.includes('data-tab="account"') && !appShell.includes('id="panel-account"') && !appShell.includes('accountContent')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
