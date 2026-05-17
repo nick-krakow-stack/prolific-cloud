@@ -85,6 +85,7 @@ const studies = {
       reward_minor: 500,
       reward_currency: 'GBP',
       estimated_minutes: 10,
+      total_places: 87,
       reward_per_hour: 3000,
       first_seen: '2026-05-17 10:00:00',
       is_active: 1
@@ -121,6 +122,7 @@ const events = {
 const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
 const statsHtml = sandbox.renderStats(stats);
+const studiesHtml = sandbox.renderStudies(studies);
 
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
@@ -133,8 +135,9 @@ const checks = [
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
-  ['does not render study note controls', !sandbox.renderStudies(studies).includes('data-study-note') && !sandbox.renderStudies(studies).includes('Notiz speichern')],
-  ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')],
+  ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],
+  ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
+  ['renders quality tag', studiesHtml.includes('Sehr gut')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],
   ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')],

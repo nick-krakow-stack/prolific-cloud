@@ -2109,6 +2109,19 @@ function renderStudyQualityTag(study) {
   return '<span class="tag tag-inactive">Niedrig</span>';
 }
 
+function renderStudyDetailTile(label, value, modifier) {
+  if (value == null || value === '') return '';
+
+  const className = modifier ? ` study-detail-${modifier}` : '';
+
+  return `
+    <div class="study-detail-tile${className}">
+      <span class="study-detail-label">${escapeHtml(label)}</span>
+      <span class="study-detail-value">${value}</span>
+    </div>
+  `;
+}
+
 // ---- Renderer: Studien ----
 
 function renderStudies(data) {
@@ -2170,23 +2183,25 @@ function renderStudies(data) {
       tags.push(qualityTag);
     }
 
-    const meta = [];
+    const detailTiles = [];
 
     if (s.reward_minor != null) {
-      meta.push(`<span class="reward">${fmtAmount(s.reward_minor, s.reward_currency)}</span>`);
+      detailTiles.push(renderStudyDetailTile('Vergütung', escapeHtml(fmtAmount(s.reward_minor, s.reward_currency)), 'reward'));
     }
 
     if (s.estimated_minutes != null) {
-      meta.push(`${escapeHtml(s.estimated_minutes)} Min`);
+      detailTiles.push(renderStudyDetailTile('Dauer', `${escapeHtml(s.estimated_minutes)} Min`));
     }
 
     if (s.total_places != null) {
-      meta.push(`${escapeHtml(s.total_places)} Plätze`);
+      detailTiles.push(renderStudyDetailTile('Plätze', escapeHtml(s.total_places)));
     }
 
     if (s.reward_per_hour != null) {
-      meta.push(`${fmtAmount(s.reward_per_hour, s.reward_currency)}/h`);
+      detailTiles.push(renderStudyDetailTile('Stundenlohn', `${escapeHtml(fmtAmount(s.reward_per_hour, s.reward_currency))}/h`, 'hourly'));
     }
+
+    detailTiles.push(renderStudyDetailTile('Gesehen', escapeHtml(fmtTimestamp(s.first_seen))));
 
     return `
       <div class="study-card">
@@ -2197,8 +2212,7 @@ function renderStudies(data) {
            title="Auf Prolific öffnen">↗</a>
 
         <div class="name">${escapeHtml(s.name || '(ohne Namen)')}</div>
-        <div class="meta">${meta.join(' · ')}</div>
-        <div class="study-time">🕒 ${fmtTimestamp(s.first_seen)}</div>
+        <div class="study-detail-grid">${detailTiles.join('')}</div>
         <div class="tags">${tags.join('')}</div>
       </div>
     `;

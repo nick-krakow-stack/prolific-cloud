@@ -1144,8 +1144,42 @@ a:not(.icon-btn):hover {
 }
 .study-card .name, .submission-card .name { font-weight: 600; margin-bottom: 4px;
                                              font-size: 14px; }
-.study-card .meta, .submission-card .meta { font-size: 12px; color: var(--text-muted); }
-.study-card .meta .reward { color: var(--primary); font-weight: 600; }
+.submission-card .meta { font-size: 12px; color: var(--text-muted); }
+.study-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.study-detail-tile {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 48%, var(--bg-card));
+}
+.study-detail-label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.study-detail-value {
+  display: block;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.study-detail-reward .study-detail-value,
+.study-detail-hourly .study-detail-value {
+  color: var(--primary);
+}
 .study-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex;
               align-items: center; gap: 4px; }
 .tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
