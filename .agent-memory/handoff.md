@@ -1,18 +1,18 @@
 # Handoff
 
-Last updated: 2026-05-17 18:41:12 +02:00
+Last updated: 2026-05-17 18:55:35 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Dashboard UI terminology now uses `Studie`/`Studien` instead of `Samples` for
-efficiency and monthly-report hourly-rate basis counts. Singular and plural are
-handled by `fmtStudyCount()`.
+The overview no longer renders `System-Health`. The settings API response now
+includes the existing system health payload, and the settings tab renders the
+System-Health card below the settings form.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 66d25dd Use study wording for sample counts
+- Last product commit: 07ceb66 Move system health to settings
 - Last memory commit: pending this task
 
 ## Working Tree
@@ -23,9 +23,11 @@ handled by `fmtStudyCount()`.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/data.php
  M dashboard/assets/app.js
  M tests/overview-render.test.js
  M tests/roadmap-rest-render.test.js
+?? tests/settings-system-source.test.js
 ~~~
 
 ## Verification Snapshot
@@ -33,16 +35,24 @@ handled by `fmtStudyCount()`.
 - Red tests failed before implementation:
   - `node tests\overview-render.test.js`
   - `node tests\roadmap-rest-render.test.js`
+  - `node tests\settings-system-source.test.js`
 - Green checks passed:
   - `node --check dashboard/assets/app.js`
   - `node tests\overview-render.test.js`
   - `node tests\roadmap-rest-render.test.js`
+  - `node tests\settings-system-source.test.js`
   - `node tests\goals-progress-source.test.js`
   - `node tests\settings-goals-source.test.js`
+  - `git check-ignore -v config.php`
+- Server lint passed for `api/data.php` with `php74` and `php84`.
 - Deploy helper uploaded runtime files to production.
 - Production root returned `200`; unauthenticated overview API returned `401`.
-- In-app browser verification showed efficiency basis rows such as
-  `1 Studie · 10 Min` and `26 Studien · 7 Std`; no `Samples` text remained.
+- Production file checks confirmed `renderSystemHealthCard(systemHealth)` only
+  remains in settings rendering and `build_settings_response($pdo)` is deployed.
+- In-app browser verification confirmed the overview DOM no longer contains
+  `SYSTEM-HEALTH`. The browser automation could not trigger the settings tab
+  click in this session, so settings placement is covered by render tests and
+  production file checks.
 
 ## Current State Summary
 
@@ -67,6 +77,7 @@ Owner can continue browser review; next work item is the next review note.
 - Delegate implementation to Sub-Agents whenever tooling supports it.
 - Keep Sub-Agent write scopes separate for parallel work.
 - No Cloudflare deployment workflow applies to this repository.
-- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
+- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens,
+  session secrets, or personal Prolific data into memory files.
 - Keep config.php local and ignored.
 - Preserve root routing through / and absolute frontend paths.

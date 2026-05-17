@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Move the `System-Health` box out of the
+  overview dashboard and place it at the bottom of the settings tab.
 - 2026-05-17 - Browser feedback: Study list rows should use small detail
   tiles/cards instead of one compact text line for reward, duration, places,
   hourly rate, and seen time.

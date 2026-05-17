@@ -1,9 +1,13 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:41:12 +02:00
+Last updated: 2026-05-17 18:55:35 +02:00
 
 ## Active Task Checklist
 
+- [x] Remove `System-Health` from the overview dashboard.
+- [x] Add `System-Health` to the bottom of the settings tab.
+- [x] Include system health data in the settings API response.
+- [x] Deploy the System-Health relocation and verify production files.
 - [x] Replace `Samples` wording with `Studie`/`Studien` in dashboard UI.
 - [x] Add render tests for pluralized study wording.
 - [x] Deploy terminology fix and verify live efficiency card.

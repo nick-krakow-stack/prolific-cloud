@@ -184,6 +184,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   today detail card with `Verdient` and `Ausstehend` rows is removed.
 - Browser review fix: efficiency and monthly-report basis labels use
   `Studie`/`Studien` instead of `Samples`.
+- Browser review fix: `System-Health` is no longer rendered in the overview.
+  `/api/data.php?type=settings` now includes `system` data, and the settings
+  renderer places the System-Health card below the settings form.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

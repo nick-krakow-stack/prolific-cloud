@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: `System-Health` was removed from
+  the overview dashboard and moved to the bottom of the settings tab. The
+  settings endpoint now includes the same system health payload used by the
+  dashboard renderer.
 - 2026-05-17 - Browser review fix deployed: replaced dashboard UI wording
   `Samples` with German `Studie`/`Studien` for efficiency basis and monthly
   report hourly-rate basis. Live browser verification showed `1 Studie · 10 Min`
