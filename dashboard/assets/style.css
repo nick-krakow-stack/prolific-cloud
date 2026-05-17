@@ -1350,6 +1350,7 @@ a:not(.icon-btn):hover {
 }
 #panel-submissions .date-filter {
   flex-wrap: nowrap;
+  position: relative;
 }
 #panel-submissions .date-filter input[type="date"] {
   width: 126px;
@@ -1371,6 +1372,33 @@ a:not(.icon-btn):hover {
   margin-right: 2px;
   color: var(--text-muted);
   font-size: 12px;
+}
+.date-filter-popover {
+  position: relative;
+}
+.date-filter-popover legend {
+  margin-right: 0;
+}
+.date-filter-toggle {
+  color: var(--text);
+}
+.date-filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: max-content;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+.date-filter-panel[hidden] {
+  display: none;
 }
 .filter-reset {
   min-height: 31px;
@@ -1403,6 +1431,14 @@ a:not(.icon-btn):hover {
 .filter-icon:hover {
   border-color: var(--primary);
   color: var(--link-hover);
+}
+@media (max-width: 620px) {
+  .date-filter-panel {
+    left: auto;
+    right: 0;
+    flex-wrap: wrap;
+    min-width: min(320px, calc(100vw - 32px));
+  }
 }
 .study-pagination {
   display: flex;

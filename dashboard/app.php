@@ -118,8 +118,15 @@ require_login();
         </select>
       </label>
 
-      <fieldset class="date-filter" aria-label="Zeitraum">
-        <legend>Zeitraum:</legend>
+      <fieldset class="date-filter date-filter-popover" aria-label="Zeitraum">
+        <legend>Zeitraum</legend>
+        <button id="submissionsDateToggle"
+                class="filter-icon date-filter-toggle"
+                type="button"
+                aria-label="Zeitraum auswaehlen"
+                aria-expanded="false"
+                aria-controls="submissionsDatePanel">&#128197;</button>
+        <div id="submissionsDatePanel" class="date-filter-panel" hidden>
         <label>Von
           <input id="submissionsDateFrom" type="date">
         </label>
@@ -127,11 +134,12 @@ require_login();
           <input id="submissionsDateTo" type="date">
         </label>
         <button id="submissionsDateReset" class="filter-reset" type="button">Zurücksetzen</button>
-        <a class="filter-icon export-icon"
-           href="/api/export.php?type=submissions&amp;format=csv"
-           title="Teilnahmen als CSV exportieren"
-           aria-label="Teilnahmen als CSV exportieren">&#8681;</a>
+        </div>
       </fieldset>
+      <a class="filter-icon export-icon"
+         href="/api/export.php?type=submissions&amp;format=csv"
+         title="Teilnahmen als CSV exportieren"
+         aria-label="Teilnahmen als CSV exportieren">&#8681;</a>
     </div>
     <div id="submissionsContent" class="loading">Lade…</div>
   </section>

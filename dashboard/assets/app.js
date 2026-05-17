@@ -3144,6 +3144,55 @@ function refreshSubmissionsList(options = {}) {
   el.addEventListener('input', () => refreshSubmissionsList({ resetPage: true }));
 });
 
+const submissionsDateToggle = $('submissionsDateToggle');
+const submissionsDatePanel = $('submissionsDatePanel');
+
+function setSubmissionsDatePanelOpen(isOpen) {
+  if (!submissionsDateToggle || !submissionsDatePanel) return;
+
+  submissionsDatePanel.hidden = !isOpen;
+
+  if (isOpen) {
+    submissionsDateToggle.setAttribute('aria-expanded', 'true');
+  } else {
+    submissionsDateToggle.setAttribute('aria-expanded', 'false');
+  }
+}
+
+if (submissionsDateToggle && submissionsDatePanel) {
+  submissionsDateToggle.addEventListener('click', event => {
+    event.stopPropagation();
+
+    const shouldOpen = submissionsDatePanel.hidden;
+    setSubmissionsDatePanelOpen(shouldOpen);
+
+    if (shouldOpen) {
+      const submissionsDateFrom = $('submissionsDateFrom');
+
+      if (submissionsDateFrom && typeof submissionsDateFrom.showPicker === 'function') {
+        try {
+          submissionsDateFrom.showPicker();
+        } catch (error) {
+          submissionsDateFrom.focus();
+        }
+      } else if (submissionsDateFrom) {
+        submissionsDateFrom.focus();
+      }
+    }
+  });
+
+  submissionsDatePanel.addEventListener('click', event => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener('click', () => setSubmissionsDatePanelOpen(false));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      setSubmissionsDatePanelOpen(false);
+    }
+  });
+}
+
 const submissionsDateReset = $('submissionsDateReset');
 
 if (submissionsDateReset) {
