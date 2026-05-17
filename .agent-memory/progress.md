@@ -1,5 +1,7 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: monthly report month labels now
+  render in German format, e.g. `Mai 2026`, while the API keeps `YYYY-MM`.
 - 2026-05-17 - Browser review fix deployed: requester analysis now renders as a
   responsive table with columns for requester, count, earnings, hourly rate, and
   approval rate.

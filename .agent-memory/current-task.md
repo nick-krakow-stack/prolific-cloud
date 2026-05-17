@@ -4,6 +4,8 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Format monthly report month labels in German, e.g. `Mai 2026`.
+- [x] Deploy monthly report month-label review fix to production and verify runtime files.
 - [x] Convert requester analysis to a column table.
 - [x] Label requester columns: Anzahl, Verdienst, Stundenlohn, Approval-Rate.
 - [x] Deploy requester analysis review fix to production and verify runtime files.

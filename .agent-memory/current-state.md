@@ -153,6 +153,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: stats requester analysis renders as a responsive table.
   Columns are requester, count, earnings, hourly rate, and `Approval-Rate`
   (`APPROVED / (APPROVED + REJECTED)`, pending excluded).
+- Browser review fix: the monthly report keeps API month values as `YYYY-MM`,
+  but renders them in German display format such as `Mai 2026`.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell
