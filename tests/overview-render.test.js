@@ -116,7 +116,7 @@ const checks = [
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders efficiency basis as studies not samples', html.includes('2 Studien &middot; 30 Min') && html.includes('1 Studie') === false && !html.includes('Samples')],
   ['formats singular study count', sandbox.fmtStudyCount(1) === '1 Studie'],
-  ['renders system health grid', html.includes('health-grid') && html.includes('API')],
+  ['does not render system health in overview', !html.includes('System-Health') && !html.includes('health-grid')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
   ['daily goal includes pending rewards', html.includes('£8,00 von £10,00') && html.includes('80 %')],

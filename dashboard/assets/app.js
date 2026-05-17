@@ -1370,7 +1370,6 @@ function renderExpandedOverview(data) {
   const efficiencyStats = readEfficiencyStats(data);
   const topStudies = readTopStudies(data);
   const dailyStats = readDailyStats(data);
-  const systemHealth = readSystemHealth(data);
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
   const statusTotal = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
   const approvedCount = statusCount(statusCounts, ['APPROVED']);
@@ -1569,7 +1568,6 @@ function renderExpandedOverview(data) {
   html += renderEfficiencyCard(efficiencyStats);
   html += renderTopStudiesCard(topStudies);
   html += renderDailyStatsCard(dailyStats, fxRates);
-  html += renderSystemHealthCard(systemHealth);
 
   return html;
 }
@@ -1964,8 +1962,10 @@ function renderSettings(data) {
   const settings = asObject(data.settings);
   const goals = asObject(settings.goals);
   const thresholds = asObject(settings.thresholds);
+  const systemHealth = readSystemHealth(data);
 
   return `
+    <div class="settings-stack">
     <form id="settingsForm" class="settings-form" novalidate>
       <div class="settings-header">
         <div>
@@ -2013,6 +2013,8 @@ function renderSettings(data) {
         })}
       </div>
     </form>
+    ${renderSystemHealthCard(systemHealth)}
+    </div>
   `;
 }
 

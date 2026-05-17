@@ -73,6 +73,13 @@ const settings = {
   settings: {
     goals: { daily_gbp_minor: 500, monthly_gbp_minor: 15000 },
     thresholds: { great_hourly_gbp_minor: 1200, ok_hourly_gbp_minor: 800 }
+  },
+  system: {
+    api: 'ok',
+    lastSyncAt: '2026-05-17T11:59:00Z',
+    lastError: null,
+    dbCounts: { studies: 12, submissions: 34, events: 5, syncLog: 3 },
+    serverTime: '2026-05-17T12:00:00Z'
   }
 };
 
@@ -149,6 +156,7 @@ const checks = [
   ['renders monthly report basis as studies not samples', statsHtml.includes('14 Studien') && !statsHtml.includes('Samples')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
+  ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],

@@ -88,7 +88,7 @@ try {
                 json_response(save_dashboard_settings());
             }
 
-            json_response(build_settings_response());
+            json_response(build_settings_response($pdo));
 
         default:
             json_error('Unbekannter type-Parameter.', 400);
@@ -775,10 +775,11 @@ function build_system_response(PDO $pdo): array {
     ];
 }
 
-function build_settings_response(): array {
+function build_settings_response(PDO $pdo): array {
     return [
         'ok' => true,
         'settings' => load_dashboard_settings(),
+        'system' => build_system_response($pdo)['system'],
         'serverTime' => date('c'),
     ];
 }
