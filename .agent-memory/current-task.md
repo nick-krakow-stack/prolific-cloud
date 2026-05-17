@@ -1,9 +1,14 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:24:22 +02:00
+Last updated: 2026-05-17 18:36:02 +02:00
 
 ## Active Task Checklist
 
+- [x] Merge daily goal and today stats into one `Heute` overview card.
+- [x] Keep `Fortschritt`, `Erreicht`, and `Noch offen` in the merged card.
+- [x] Move `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn` into the merged card.
+- [x] Remove `Verdient` and `Ausstehend` rows from the old today detail card.
+- [x] Deploy merged today card and verify live overview.
 - [x] Diagnose goal progress data flow for earned, pending, and screened-out rewards.
 - [x] Add failing frontend and backend-source tests for goal progress including pending rewards.
 - [x] Update backend goal and forecast basis to `earned + pending`.
@@ -89,6 +94,7 @@ Last updated: 2026-05-17 18:24:22 +02:00
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
+
 
 
 

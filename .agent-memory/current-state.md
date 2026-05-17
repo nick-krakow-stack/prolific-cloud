@@ -178,6 +178,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   effective rewards, and `pending` contains in-review rewards. The UI label
   remains `Erreicht`, while the normal earnings tiles keep earned and pending
   visually separate.
+- Browser review fix: the former `Tagesziel` status card is now the `Heute`
+  status card. It combines daily goal progress with the useful today stats:
+  `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn`. The separate
+  today detail card with `Verdient` and `Ausstehend` rows is removed.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

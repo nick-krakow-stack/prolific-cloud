@@ -1,19 +1,20 @@
 # Handoff
 
-Last updated: 2026-05-17 18:24:22 +02:00
+Last updated: 2026-05-17 18:36:02 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Tagesziel and Monatsziel now calculate progress from GBP `earned + pending`.
-`earned` already includes `APPROVED`, `SCREENED OUT`, and `SCREENED-OUT` through
-the effective reward helper; `pending` adds `AWAITING REVIEW`. The visible label
-stays `Erreicht`. Earnings tiles still display earned and pending separately.
+The overview no longer renders a separate `Tagesziel` card and separate `Heute`
+detail card. The daily goal card is now titled `Heute`; it keeps `Fortschritt`,
+`Erreicht`, and `Noch offen`, then appends `Teilnahmen`, `Ø pro Teilnahme`, and
+`Effektiver Stundenlohn`. The old `Verdient` and `Ausstehend` detail rows are
+removed from that section.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 64f21d4 Include pending rewards in goal progress
+- Last product commit: 073bfa2 Merge today goal and stats card
 - Last memory commit: pending this task
 
 ## Working Tree
@@ -24,31 +25,28 @@ stays `Erreicht`. Earnings tiles still display earned and pending separately.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/data.php
  M dashboard/assets/app.js
  M tests/overview-render.test.js
-?? tests/goals-progress-source.test.js
 ~~~
 
 ## Verification Snapshot
 
-- Red tests failed before implementation:
-  - `node tests\overview-render.test.js`
-  - `node tests\goals-progress-source.test.js`
+- Red test first: `node tests\overview-render.test.js` failed on the missing
+  merge behavior before implementation.
 - Green checks passed:
   - `node --check dashboard/assets/app.js`
   - `node tests\overview-render.test.js`
+  - `node tests\roadmap-rest-render.test.js`
   - `node tests\goals-progress-source.test.js`
   - `node tests\settings-goals-source.test.js`
-  - `node tests\roadmap-rest-render.test.js`
-- Local `php` is not in PATH.
-- Server temp lint before deploy passed with `php74` and `php84`.
+- Read-only Explorer review reported no findings.
 - Deploy helper uploaded runtime files to production.
-- Production `api/data.php` lint passed with `php74` and `php84`.
 - Production root returned `200`; unauthenticated overview API returned `401`.
-- In-app browser verification showed `TAGESZIEL` as `£7,16 von £30,00`,
-  `Erreicht 23,9 %`, and `MONATSZIEL` as `£157,13 von £600,00`,
-  `Erreicht 26,2 %`.
+- Production `api/data.php` lint passed with `php74` and `php84`.
+- In-app browser verification showed one `HEUTE` status card containing
+  `Fortschritt`, `Erreicht`, `Noch offen`, `Teilnahmen`, `Ø pro Teilnahme`, and
+  `Effektiver Stundenlohn`; `TAGESZIEL`, `Verdient`, and `Ausstehend` were not
+  present in that card.
 
 ## Current State Summary
 

@@ -42,3 +42,8 @@ Last updated: 2026-05-17
 - 2026-05-17 - Browser feedback: Tagesziel and Monatsziel should count not only
   approved rewards, but also in-review and screened-out payments plus existing
   adjustment logic. The label should remain `Erreicht`.
+- 2026-05-17 - Browser feedback: Combine the daily goal card with the separate
+  `Heute` detail card. Rename `Tagesziel` to `Heute`, keep `Fortschritt`,
+  `Erreicht`, and `Noch offen`, then add `Teilnahmen`, `Ø pro Teilnahme`, and
+  `Effektiver Stundenlohn`; remove the separate `Verdient` and `Ausstehend`
+  rows from that detail section.

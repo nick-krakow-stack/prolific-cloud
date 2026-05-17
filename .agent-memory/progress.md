@@ -1,5 +1,11 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: overview now merges the former
+  `Tagesziel` card and the separate `Heute` stats card. The card title is
+  `Heute`, keeps `Fortschritt`, `Erreicht`, and `Noch offen`, then shows
+  `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn`. The old
+  `Verdient` and `Ausstehend` rows in the separate today detail card are gone.
+  Live browser verification showed one `HEUTE` status card and no `TAGESZIEL`.
 - 2026-05-17 - Browser review fix deployed: overview Tagesziel and Monatsziel
   now calculate progress from `earned + pending` in GBP. `earned` already
   includes `APPROVED`, `SCREENED OUT`, and `SCREENED-OUT` with effective reward
@@ -83,3 +89,5 @@
 - 2026-05-17 18:04:50 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 18:19:52 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 18:19:54 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 18:33:41 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 18:33:44 +02:00 - Stop hook ran and refreshed central memory snapshot.
