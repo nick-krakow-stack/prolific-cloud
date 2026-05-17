@@ -33,12 +33,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: pending heatmap month-grid commit
+- Last product commit before this snapshot: 4cb1f00 Render heatmap as full month grid
 
 ## Working Tree
 
 ~~~text
-heatmap month-grid changes pending commit/push
+clean after commit/push except this handoff refresh
 ~~~
 
 ## Current State Summary
