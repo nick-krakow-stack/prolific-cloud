@@ -1527,7 +1527,7 @@ function renderSystemHealthCard(systemHealth) {
   const countLabels = {
     studies: 'Studien',
     submissions: 'Teilnahmen',
-    events: 'Events',
+    events: 'Ereignisse',
     syncLog: 'Sync-Log'
   };
   const countRows = ['studies', 'submissions', 'events', 'syncLog'].map(key => `
@@ -2132,7 +2132,7 @@ function renderSystem(data) {
     ['Cron', firstDefined(system, ['cron', 'cronStatus', 'cron_status']) || DASH],
     ['Studien in DB', firstNumber(dbCounts, ['studies', 'study_count', 'studyCount'])],
     ['Teilnahmen in DB', firstNumber(dbCounts, ['submissions', 'submission_count', 'submissionCount'])],
-    ['Events in DB', firstNumber(dbCounts, ['events', 'event_count', 'eventCount'])],
+    ['Ereignisse in DB', firstNumber(dbCounts, ['events', 'event_count', 'eventCount'])],
     ['Serverzeit', fmtDateTime(firstDefined(system, ['serverTime', 'server_time']) || data.serverTime)]
   ];
 
