@@ -22,7 +22,10 @@ settings is implemented and deployed: sliders, exact GBP fields, and debounced
 autosave through the existing protected settings endpoint. Browser review fix
 for links is implemented and deployed: normal page links are warm near-white /
 yellow instead of blue, while tabs and controls keep their interaction colors.
-The production webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+Browser review fix for the stats heatmap is implemented and deployed: the
+frontend renders all days of the current server month in seven columns and dims
+future days. The production webroot is
+`/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
 browser, and review feedback are persisted in .agent-memory/feedback.md.
@@ -30,12 +33,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: f807cd4 Use warm global link color
+- Last product commit before this snapshot: pending heatmap month-grid commit
 
 ## Working Tree
 
 ~~~text
-clean after commit/push except this handoff refresh
+heatmap month-grid changes pending commit/push
 ~~~
 
 ## Current State Summary

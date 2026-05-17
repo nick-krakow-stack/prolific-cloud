@@ -44,6 +44,7 @@ const stats = {
     { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
     { date: '2026-05-02', earned: {}, pending: {} }
   ],
+  serverTime: '2026-05-17T12:00:00+02:00',
   requesterStats: [
     {
       requester: 'ABC Research',
@@ -120,12 +121,14 @@ const events = {
 
 const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
+const statsHtml = sandbox.renderStats(stats);
 
 const checks = [
-  ['renders stats tab content', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Kalender-Heatmap')],
-  ['renders monthly comparison', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsvergleich')],
-  ['renders requester analysis', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('ABC Research')],
-  ['renders monthly report', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsbericht')],
+  ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
+  ['renders monthly comparison', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsvergleich')],
+  ['renders requester analysis', typeof sandbox.renderStats === 'function' && statsHtml.includes('ABC Research')],
+  ['renders monthly report', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsbericht')],
+  ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],

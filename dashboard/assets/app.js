@@ -1560,34 +1560,100 @@ function normalizeHeatmap(data) {
     .filter(item => item.date);
 }
 
-function renderHeatmap(days, fxRates) {
-  if (!days.length) {
+function parseDateKey(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) return null;
+
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function dateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+
+  return `${y}-${m}-${d}`;
+}
+
+function monthReferenceDate(days, serverTime) {
+  const serverDate = serverTime ? new Date(serverTime) : null;
+
+  if (serverDate && !Number.isNaN(serverDate.getTime())) {
+    return new Date(serverDate.getFullYear(), serverDate.getMonth(), serverDate.getDate());
+  }
+
+  const datedDays = days
+    .map(day => parseDateKey(day.date))
+    .filter(Boolean)
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  return datedDays[0] || new Date();
+}
+
+function buildMonthHeatmapDays(days, serverTime) {
+  const reference = monthReferenceDate(days, serverTime);
+  const today = monthReferenceDate([], serverTime);
+  const year = reference.getFullYear();
+  const month = reference.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const byDate = new Map();
+
+  days.forEach(day => {
+    if (day.date) byDate.set(String(day.date).slice(0, 10), day);
+  });
+
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const date = new Date(year, month, index + 1);
+    const key = dateKey(date);
+    const existing = byDate.get(key) || {};
+
+    return {
+      date: key,
+      earned: asObject(existing.earned),
+      pending: asObject(existing.pending),
+      isFuture: date > today
+    };
+  });
+}
+
+function renderHeatmap(days, fxRates, serverTime) {
+  if (!days.length && !serverTime) {
     return '<div class="loading">Keine Heatmap-Daten.</div>';
   }
 
-  const maxValue = Math.max(...days.map(day => chartValueMinor(day.earned, fxRates)), 0);
+  const monthDays = buildMonthHeatmapDays(days, serverTime);
+  const maxValue = Math.max(...monthDays.map(day => chartValueMinor(day.earned, fxRates)), 0);
 
   return `
-    <div class="dashboard-grid">
-      ${days.map(day => {
+    <div class="heatmap">
+      <div class="heatmap-grid">
+      ${monthDays.map(day => {
         const value = chartValueMinor(day.earned, fxRates);
-        const intensity = maxValue > 0 ? Math.max(8, Math.round((value / maxValue) * 100)) : 0;
-        const date = new Date(day.date);
-        const label = Number.isNaN(date.getTime())
-          ? String(day.date).slice(-2)
-          : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+        const level = maxValue > 0 ? Math.min(4, Math.ceil((value / maxValue) * 4)) : 0;
+        const date = parseDateKey(day.date);
+        const label = date
+          ? date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+          : String(day.date).slice(-2);
         const title = `${day.date}: ${fmtMulti(day.earned)}`;
+        const empty = !hasCurrencyAmounts(day.earned);
+        const classes = [
+          'heatmap-day',
+          `level-${level}`,
+          empty ? 'is-empty' : '',
+          day.isFuture ? 'is-future' : ''
+        ].filter(Boolean).join(' ');
 
         return `
-          <div class="metric-card" title="${escapeHtml(title)}">
-            <div class="metric-title">${escapeHtml(label)}</div>
-            <div class="metric-value">${fmtMulti(day.earned)}</div>
-            <div class="progress-bar" style="height:6px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:8px;">
-              <div class="progress-fill" style="height:100%;width:${intensity}%;background:var(--primary);"></div>
-            </div>
+          <div class="${classes}" title="${escapeHtml(title)}">
+            <span class="heatmap-date">${escapeHtml(label)}</span>
+            <span class="heatmap-value">${day.isFuture ? '–' : fmtMulti(day.earned)}</span>
           </div>
         `;
       }).join('')}
+      </div>
     </div>
   `;
 }
@@ -1635,7 +1701,7 @@ function renderStats(data) {
   return `
     <div class="status-box">
       <h3>Kalender-Heatmap</h3>
-      ${renderHeatmap(normalizeHeatmap(data), fxRates)}
+      ${renderHeatmap(normalizeHeatmap(data), fxRates, data.serverTime || data.server_time)}
     </div>
 
     <div class="status-box">

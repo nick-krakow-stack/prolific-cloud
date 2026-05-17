@@ -147,6 +147,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: normal page links use warm near-white/yellow `--link`
   tokens instead of blue; active tabs, icon buttons, focus rings, and controls
   remain on their existing interaction colors.
+- Browser review fix: stats calendar heatmap renders all days of the current
+  server month in seven columns and dims future days. Backend still provides
+  data through today; the frontend fills the rest of the month visually.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

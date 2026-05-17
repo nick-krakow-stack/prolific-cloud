@@ -689,6 +689,11 @@ a:not(.icon-btn):hover {
 .heatmap-day.level-3 { background: color-mix(in srgb, var(--success) 18%, var(--bg-card)); }
 .heatmap-day.level-4 { background: color-mix(in srgb, var(--success) 30%, var(--bg-card)); }
 
+.heatmap-day.is-future {
+  opacity: 0.38;
+  background: color-mix(in srgb, var(--bg) 82%, var(--bg-card));
+}
+
 .heatmap-date,
 .heatmap-value {
   min-width: 0;

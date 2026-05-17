@@ -4,6 +4,9 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Change calendar heatmap to a 7-column current-month grid.
+- [x] Fill future days in the current month and show them dimmed.
+- [x] Deploy heatmap review fix to production and verify runtime files.
 - [x] Change global page link color from blue to warm near-white yellow.
 - [x] Deploy link color review fix to production and verify runtime files.
 - [x] Modernize settings UI with sliders, polished number fields, and autosave.
@@ -48,5 +51,7 @@ Last updated: 2026-05-17
   autosave, and inline save status.
 - [x] Global text links now use a warm near-white/yellow link color instead of
   blue; tabs, controls, and focus rings keep their existing interaction colors.
+- [x] Calendar heatmap now renders all days of the current server month in a
+  7-column grid, with future days dimmed.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

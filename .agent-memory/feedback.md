@@ -2,6 +2,9 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Calendar heatmap idea is good, but tiles are
+  too wide. Render seven days per row, show every day of the current month, and
+  dim future days.
 - 2026-05-17 - Browser feedback: Text links across all pages should no longer
   be blue; use a very light warm yellow, almost white, for links.
 - 2026-05-17 - Browser feedback: Modernize the settings form with sliders,

@@ -1,5 +1,7 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: calendar heatmap now uses a
+  7-column current-month grid and dims future days.
 - 2026-05-17 - Browser review fix deployed: global page links now use a warm
   near-white/yellow color instead of default/primary blue.
 - 2026-05-17 - Browser review fix deployed: settings now use modern slider
