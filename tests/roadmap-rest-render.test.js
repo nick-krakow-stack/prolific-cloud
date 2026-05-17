@@ -258,6 +258,7 @@ const checks = [
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
   ['moves currency box from account to settings', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && settingsHtml.includes('W&auml;hrungen') && settingsHtml.includes('FX-Rates') && settingsHtml.includes('Teilnahmen exportieren')],
+  ['removes account tab from shell', !appShell.includes('data-tab="account"') && !appShell.includes('id="panel-account"') && !appShell.includes('accountContent')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['studies panel has date range controls', typeof sandbox.studyInDateRange === 'function' && sandbox.studyInDateRange(studies.studies[0], '2026-05-15', '2026-05-18') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-15', '2026-05-18')],
