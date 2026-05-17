@@ -36,3 +36,6 @@ Last updated: 2026-05-17
   so it is clear that clicking refresh did something.
 - 2026-05-17 - Browser feedback: Tagesziel and Monatsziel in the overview must
   reflect values saved in the settings tab, not the config defaults.
+- 2026-05-17 - Browser feedback: Move the overview `Vergleich` block into the
+  top tile grid. The main value should be the current month as a percentage of
+  the previous month, with previous month amounts shown in the small subline.

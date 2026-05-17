@@ -169,6 +169,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: overview daily and monthly goal cards now use saved
   dashboard settings from `dashboardGoals` through `load_dashboard_settings()`,
   so changing values in the settings tab updates the overview.
+- Browser review fix: overview monthly comparison is now a top
+  `comparison-tile`. It shows current month versus previous month as an
+  FX-aware percentage when `fxRates` are available and keeps the previous month
+  amounts as the subline. The old wide `Vergleich` status box is removed.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

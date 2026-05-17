@@ -1,9 +1,14 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:04:47 +02:00
+Last updated: 2026-05-17 18:16:58 +02:00
 
 ## Active Task Checklist
 
+- [x] Move monthly comparison into the top overview tile grid.
+- [x] Show comparison as current month versus previous month percentage.
+- [x] Keep previous month amounts as the comparison tile subline.
+- [x] Remove the old wide `Vergleich` status box.
+- [x] Deploy comparison tile fix and verify live overview.
 - [x] Fix overview goals to use saved dashboard settings.
 - [x] Add regression check for overview/settings goal source.
 - [x] Deploy settings-goals fix and verify live goal cards.

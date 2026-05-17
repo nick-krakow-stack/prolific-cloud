@@ -1,42 +1,45 @@
 # Handoff
 
-Last updated: 2026-05-17 18:09:00 +02:00
+Last updated: 2026-05-17 18:16:58 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Overview goal cards now use saved dashboard settings. `build_overview()` reads
-`load_dashboard_settings()['goals']` instead of `$config['goals']`, so the
-Tagesziel and Monatsziel cards match the values saved in the settings tab.
+The overview `Vergleich` block has been moved into the top earnings tile grid.
+It now renders as `comparison-tile`, shows current month versus previous month
+as a percentage using the existing FX-aware EUR conversion when rates are
+available, and keeps the previous month amounts in the subline. The old wide
+`Vergleich` status box is no longer rendered.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 466fa02 Use saved settings for overview goals
+- Last product commit: bb81620 Move monthly comparison into overview tiles
 - Last memory commit: pending this task
 
 ## Working Tree
 
 ~~~text
+ M .agent-memory/current-state.md
  M .agent-memory/current-task.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/data.php
-?? tests/settings-goals-source.test.js
+ M dashboard/assets/app.js
+ M tests/overview-render.test.js
 ~~~
 
 ## Verification Snapshot
 
-- `node tests\settings-goals-source.test.js` passed.
+- `node --check dashboard/assets/app.js` passed.
 - `node tests\overview-render.test.js` passed.
 - `node tests\roadmap-rest-render.test.js` passed.
-- Server `php74`/`php84 -l api/data.php` passed.
+- `git check-ignore -v config.php` confirmed `config.php` is ignored.
 - Deploy helper uploaded runtime files to production.
 - Production root returned `200`; unauthenticated overview API returned `401`.
-- Production setup files remain absent.
-- In-app browser verification showed `TAGESZIEL` as `£1,86 von £30,00` and
-  `MONATSZIEL` as `£127,48 von £600,00`; old `£150,00` target no longer appeared.
+- In-app browser verification showed 7 overview tiles, a live `comparison-tile`
+  with `VERGLEICH`, `1.003,9 %`, and `Vormonat: £13,92 + $0,15`; no old
+  comparison status box was present.
 
 ## Current State Summary
 

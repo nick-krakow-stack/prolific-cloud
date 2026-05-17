@@ -1,5 +1,10 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: overview `Vergleich` now renders as
+  a top earnings tile. The main value compares current month to previous month
+  as a percentage using FX-aware EUR conversion when rates are available, and
+  the subline keeps the previous month amounts. The old wide comparison box was
+  removed.
 - 2026-05-17 - Browser review fix deployed: overview daily/monthly goal cards
   now read saved `dashboardGoals` via `load_dashboard_settings()` instead of
   using config defaults. Live browser verification showed `£30,00` daily and
