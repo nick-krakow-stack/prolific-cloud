@@ -1,5 +1,16 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: `Heute`, `Aktueller Monat`,
+  settings money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
+  `Top-Studien` now render money values and effective hourly averages in Euro
+  using the stored Frankfurter/fxRates data. The top earnings tiles and
+  `Pending-Übersicht` remain in original currencies.
+- 2026-05-17 - Browser review fix deployed: overview now shows `Heute` and
+  `Aktueller Monat` as two side-by-side goal cards with circular progress
+  rings instead of bars. Rings are red below 50%, yellow below 95%, green from
+  95%, and support a blue outer overflow ring above 100%. The overview API now
+  exposes `monthStats`, and the monthly card includes `Teilnahmen`,
+  `Ø pro Teilnahme`, and `Effektiver Stundenlohn`.
 - 2026-05-17 - Browser review fix deployed: the top overview comparison tile
   is now labelled `Vormonat`, shows previous month sums without a repeated
   prefix, and color-codes the comparison percentage: red below 95%, yellow from
@@ -103,3 +114,7 @@
 - 2026-05-17 18:19:54 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 18:33:41 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 18:33:44 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 19:33:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 19:33:38 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 19:49:29 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 19:49:33 +02:00 - Stop hook ran and refreshed central memory snapshot.

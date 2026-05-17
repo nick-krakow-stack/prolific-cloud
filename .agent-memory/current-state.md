@@ -112,7 +112,7 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 
 - Reward calculation fix: `api/_rewards.php` derives effective rewards from
   base reward, adjustment, bonus, screened-out amount, and raw reward fallback.
-  Production browser verification showed `HEUTE` as `Â£1,86` plus pending
+  Production browser verification showed `HEUTE` as `£1,86` plus pending
   amounts after reload.
 - GitHub CLI is installed at `C:\Program Files\GitHub CLI\gh.exe` and authorized.
 - Local `php` was not available in PATH during initial setup.
@@ -191,6 +191,14 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   shows only the previous month sums below the percentage, and color-codes the
   percentage via `comparisonPercentClass()`: below 95 red, 95 through 105
   yellow, above 105 green.
+- Browser review fix: overview goal cards (`Heute`, `Aktueller Monat`),
+  settings money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
+  `Top-Studien` render Euro values from stored `fxRates`. Effective hourly
+  averages are one converted EUR/h value based on converted reward totals and
+  total duration. Top earnings tiles and `Pending-Übersicht` intentionally
+  remain in original currencies.
+- `/api/data.php?type=overview` now exposes `monthStats` for monthly goal-card
+  participation details, including `rewardByCurrency` for EUR hourly averages.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

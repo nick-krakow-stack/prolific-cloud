@@ -1,9 +1,23 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 19:01:53 +02:00
+Last updated: 2026-05-17 20:07:24 +02:00
 
 ## Active Task Checklist
 
+- [x] Add `monthStats` to the overview API for monthly participation details.
+- [x] Convert `Heute` and `Monatsziel` into side-by-side goal cards.
+- [x] Replace goal progress bars with circular progress rings.
+- [x] Color goal rings red below 50%, yellow below 95%, and green from 95%.
+- [x] Add blue outer overflow ring support above 100%.
+- [x] Rename `Monatsziel` to `Aktueller Monat`.
+- [x] Add `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn` to the monthly goal card.
+- [x] Convert `Heute` and `Aktueller Monat` goal-card amounts to Euro.
+- [x] Convert settings money controls to Euro while saving stored GBP values.
+- [x] Convert `Monatsprognose` values to Euro.
+- [x] Convert `Effizienz / Stundenlohn` and `Top-Studien` values to Euro.
+- [x] Keep top earnings tiles and `Pending-Übersicht` in original currencies.
+- [x] Deploy Euro analytics conversion and verify production overview.
+- [x] Deploy and verify the new goal cards on production.
 - [x] Rename the top comparison tile label from `Vergleich` to `Vormonat`.
 - [x] Remove the duplicate `Vormonat:` prefix from the comparison tile subline.
 - [x] Color-code the comparison percentage: `<95` red, `95-105` yellow, `>105` green.
@@ -104,10 +118,5 @@ Last updated: 2026-05-17 19:01:53 +02:00
 - [x] Requester analysis now renders as a responsive table with columns for
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
-- [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
-
-
-
-
-
+- [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.
 
