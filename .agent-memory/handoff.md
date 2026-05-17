@@ -30,12 +30,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: pending link color commit
+- Last product commit before this snapshot: f807cd4 Use warm global link color
 
 ## Working Tree
 
 ~~~text
-link color changes pending commit/push
+clean after commit/push except this handoff refresh
 ~~~
 
 ## Current State Summary
