@@ -160,6 +160,16 @@ const events = {
 const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
 const statsHtml = sandbox.renderStats(stats);
+const accountHtml = sandbox.renderAccount({
+  ok: true,
+  balance: {
+    approved_per_currency: { GBP: 1139 },
+    pending_per_currency: { GBP: 2465, USD: 1562 },
+    fetchedAt: '2026-05-17T11:58:00Z'
+  },
+  fxRates: settings.fxRates,
+  serverTime: '2026-05-17T12:00:00Z'
+});
 const studiesHtml = sandbox.renderStudies(studies);
 const expiredStudyHtml = sandbox.renderStudies({
   ok: true,
@@ -247,6 +257,7 @@ const checks = [
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
+  ['moves currency box from account to settings', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && settingsHtml.includes('W&auml;hrungen') && settingsHtml.includes('FX-Rates') && settingsHtml.includes('Teilnahmen exportieren')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['studies panel has date range controls', typeof sandbox.studyInDateRange === 'function' && sandbox.studyInDateRange(studies.studies[0], '2026-05-15', '2026-05-18') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-15', '2026-05-18')],

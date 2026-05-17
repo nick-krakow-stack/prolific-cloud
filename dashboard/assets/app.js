@@ -2060,11 +2060,6 @@ function renderAccount(data) {
     total[currency] = (total[currency] || 0) + value;
   }
 
-  const fx = readFxRates(fxRates);
-  const fxStatus = fxRateFor(fx.rates, 'EUR')
-    ? `aktiv (${escapeHtml(fx.base)} &rarr; EUR)`
-    : 'nicht verf&uuml;gbar';
-
   return `
     <div class="earnings-grid">
       <div class="earning-tile">
@@ -2084,7 +2079,17 @@ function renderAccount(data) {
         <div class="value">${fmtTimeAgo(balance.fetchedAt || balance.fetched_at || data.serverTime)}</div>
       </div>
     </div>
+  `;
+}
 
+function renderCurrencySettingsCard(data) {
+  const fxRates = data.fxRates || data.fx_rates;
+  const fx = readFxRates(fxRates);
+  const fxStatus = fxRateFor(fx.rates, 'EUR')
+    ? `aktiv (${escapeHtml(fx.base)} &rarr; EUR)`
+    : 'nicht verf&uuml;gbar';
+
+  return `
     <div class="status-box">
       <h3>W&auml;hrungen</h3>
       <div class="status-row">
@@ -2093,7 +2098,7 @@ function renderAccount(data) {
       </div>
       <div class="status-row">
         <span class="key">Serverzeit</span>
-        <span class="value">${fmtDateTime(data.serverTime)}</span>
+        <span class="value">${fmtDateTime(data.serverTime || data.server_time || firstDefined(asObject(data.system), ['serverTime', 'server_time']))}</span>
       </div>
       <div class="status-row">
         <span class="key">CSV Export</span>
@@ -2246,6 +2251,7 @@ function renderSettings(data) {
       </div>
     </form>
     ${renderSystemHealthCard(systemHealth)}
+    ${renderCurrencySettingsCard(data)}
     </div>
   `;
 }
