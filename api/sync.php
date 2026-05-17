@@ -52,6 +52,7 @@ $fxRates     = $body['fxRates']     ?? null;
 $meta        = $body['meta']        ?? [];
 
 $pdo = db();
+cleanup_old_logs_once_per_day($pdo);
 $pdo->beginTransaction();
 
 $counts = ['studies' => 0, 'submissions' => 0];
@@ -216,4 +217,28 @@ try {
     $pdo->rollBack();
     log_event('sync_error', $e->getMessage());
     json_error('Sync fehlgeschlagen: ' . $e->getMessage(), 500);
+}
+
+function cleanup_old_logs_once_per_day(PDO $pdo): void {
+    try {
+        $today = date('Y-m-d');
+
+        if (get_setting('lastLogCleanupDate') === $today) {
+            return;
+        }
+
+        $cutoff = (new DateTimeImmutable('now', new DateTimeZone(date_default_timezone_get())))
+            ->modify('-7 days')
+            ->format('Y-m-d H:i:s');
+
+        $stmt = $pdo->prepare("DELETE FROM events WHERE `timestamp` < ?");
+        $stmt->execute([$cutoff]);
+
+        $stmt = $pdo->prepare("DELETE FROM sync_log WHERE `timestamp` < ?");
+        $stmt->execute([$cutoff]);
+
+        set_setting('lastLogCleanupDate', $today);
+    } catch (Throwable $e) {
+        // Cleanup darf den eigentlichen Sync nicht blockieren.
+    }
 }
