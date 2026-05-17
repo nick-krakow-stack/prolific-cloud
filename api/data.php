@@ -36,7 +36,7 @@ try {
 
             json_response([
                 'ok' => true,
-                'studies' => attach_study_notes($pdo, $studies),
+                'studies' => $studies,
             ]);
 
         case 'submissions':
@@ -1263,75 +1263,6 @@ function count_table_rows(PDO $pdo, string $table): int {
     $stmt->execute();
 
     return (int)$stmt->fetchColumn();
-}
-
-function attach_study_notes(PDO $pdo, array $studies): array {
-    foreach ($studies as &$study) {
-        $study['notes'] = [];
-    }
-    unset($study);
-
-    if (empty($studies) || !table_exists($pdo, 'study_notes')) {
-        return $studies;
-    }
-
-    $studyIds = [];
-    foreach ($studies as $study) {
-        if (!empty($study['id'])) {
-            $studyIds[] = (string)$study['id'];
-        }
-    }
-
-    $studyIds = array_values(array_unique($studyIds));
-    if (empty($studyIds)) {
-        return $studies;
-    }
-
-    $placeholders = implode(',', array_fill(0, count($studyIds), '?'));
-    $stmt = $pdo->prepare("
-        SELECT id, study_id, note, created_at, updated_at
-        FROM study_notes
-        WHERE study_id IN ($placeholders)
-        ORDER BY updated_at DESC, id DESC
-    ");
-    $stmt->execute($studyIds);
-
-    $notesByStudy = [];
-    foreach ($stmt->fetchAll() as $note) {
-        $studyId = (string)$note['study_id'];
-        if (!isset($notesByStudy[$studyId])) {
-            $notesByStudy[$studyId] = [];
-        }
-        $notesByStudy[$studyId][] = $note;
-    }
-
-    foreach ($studies as &$study) {
-        $studyId = (string)($study['id'] ?? '');
-        $study['notes'] = $notesByStudy[$studyId] ?? [];
-    }
-    unset($study);
-
-    return $studies;
-}
-
-function table_exists(PDO $pdo, string $table): bool {
-    if ($table !== 'study_notes') {
-        return false;
-    }
-
-    try {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM information_schema.TABLES
-            WHERE TABLE_SCHEMA = DATABASE()
-              AND TABLE_NAME = ?
-        ");
-        $stmt->execute([$table]);
-
-        return (int)$stmt->fetchColumn() > 0;
-    } catch (Throwable $e) {
-        return false;
-    }
 }
 
 /**

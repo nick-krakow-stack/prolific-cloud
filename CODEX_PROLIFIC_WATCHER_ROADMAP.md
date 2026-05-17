@@ -540,6 +540,9 @@ Ziel: Ein automatisch generierter Monatsbericht als HTML oder später PDF.
 
 ## 16. Persönliche Notizen pro Studie
 
+Owner-Review 2026-05-17: Diese Funktion ist gestrichen. Studienkarten sollen
+keine Notizfelder, Notizbuttons oder Notiz-API mehr enthalten.
+
 Falls sinnvoll, neue Tabelle:
 
 ```sql
@@ -825,7 +828,7 @@ Das Projekt gilt je Phase als sauber umgesetzt, wenn:
 11. Kalender-Heatmap.
 12. Export CSV.
 13. Monatsbericht.
-14. Studien-Notizen.
+14. Studien-Notizen. (gestrichen nach Owner-Review)
 15. Requester-Analyse.
 16. Settings-Seite.
 
@@ -859,4 +862,3 @@ Starte mit **Phase 1 + Phase 2**:
 3. Erweitere `dashboard/assets/style.css` um moderne Cards, Progressbars und Status-Pills.
 4. Bestehende Tabs und Funktionen dürfen nicht kaputtgehen.
 5. Gib am Ende alle geänderten Dateien vollständig aus oder als Patch, je nachdem was in der Entwicklungsumgebung besser passt.
-

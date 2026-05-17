@@ -4,7 +4,6 @@
 // ============================================================
 
 const API_BASE = '/api/data.php';
-const NOTES_API = '/api/notes.php';
 const DASH = '–';
 const WATCHER_ONLINE_MAX_AGE_MIN = 10;
 
@@ -2110,58 +2109,6 @@ function renderStudyQualityTag(study) {
   return '<span class="tag tag-inactive">Niedrig</span>';
 }
 
-function renderStudyNotes(study) {
-  const notes = Array.isArray(study.notes) ? study.notes : [];
-  const latest = notes.length ? asObject(notes[0]) : {};
-  const note = firstDefined(latest, ['note', 'text', 'body']) || '';
-  const noteId = firstDefined(latest, ['id', 'note_id']);
-  const updatedAt = firstDefined(latest, ['updated_at', 'updatedAt']);
-  const studyId = study.id || study.study_id || '';
-
-  return `
-    <div class="study-notes">
-      ${note ? `<div class="study-time">Notiz: ${escapeHtml(note)}${updatedAt ? ` &middot; ${fmtTimestamp(updatedAt)}` : ''}</div>` : ''}
-      <textarea data-study-note="${escapeHtml(studyId)}" data-note-id="${escapeHtml(noteId || '')}" rows="2">${escapeHtml(note)}</textarea>
-      <button type="button" data-save-study-note="${escapeHtml(studyId)}">Notiz speichern</button>
-    </div>
-  `;
-}
-
-function bindStudyNoteControls() {
-  document.querySelectorAll('[data-save-study-note]').forEach(button => {
-    button.addEventListener('click', async () => {
-      const studyId = button.getAttribute('data-save-study-note');
-      let textarea = null;
-
-      document.querySelectorAll('[data-study-note]').forEach(candidate => {
-        if (candidate.getAttribute('data-study-note') === studyId) {
-          textarea = candidate;
-        }
-      });
-
-      if (!textarea) return;
-
-      const original = button.textContent;
-      button.textContent = 'Speichere...';
-
-      try {
-        await postJson(NOTES_API, {
-          study_id: studyId,
-          note_id: textarea.getAttribute('data-note-id') || null,
-          note: textarea.value
-        });
-        button.textContent = 'Gespeichert';
-      } catch (e) {
-        button.textContent = 'Nicht gespeichert';
-      }
-
-      setTimeout(() => {
-        button.textContent = original;
-      }, 1800);
-    });
-  });
-}
-
 // ---- Renderer: Studien ----
 
 function renderStudies(data) {
@@ -2253,7 +2200,6 @@ function renderStudies(data) {
         <div class="meta">${meta.join(' · ')}</div>
         <div class="study-time">🕒 ${fmtTimestamp(s.first_seen)}</div>
         <div class="tags">${tags.join('')}</div>
-        ${renderStudyNotes(s)}
       </div>
     `;
   }).join('');
@@ -2466,8 +2412,6 @@ async function loadTab(tab) {
 
     if (tab === 'settings') {
       bindSettingsForm();
-    } else if (tab === 'studies') {
-      bindStudyNoteControls();
     }
   } catch (e) {
     container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
@@ -2518,7 +2462,6 @@ if (refreshBtn) {
 
       if (studiesContent) {
         studiesContent.innerHTML = renderStudies(cachedData.studies);
-        bindStudyNoteControls();
       }
     }
   });

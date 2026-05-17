@@ -16,7 +16,6 @@ $runtimeFiles = @(
   "api/_common.php",
   "api/data.php",
   "api/export.php",
-  "api/notes.php",
   "api/sync.php",
   "dashboard/app.php",
   "dashboard/favicon.ico",

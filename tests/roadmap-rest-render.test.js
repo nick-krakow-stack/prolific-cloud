@@ -87,8 +87,7 @@ const studies = {
       estimated_minutes: 10,
       reward_per_hour: 3000,
       first_seen: '2026-05-17 10:00:00',
-      is_active: 1,
-      notes: [{ id: 7, note: 'Good requester', updated_at: '2026-05-17 12:00:00' }]
+      is_active: 1
     }
   ]
 };
@@ -134,7 +133,7 @@ const checks = [
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
-  ['renders note control', sandbox.renderStudies(studies).includes('data-study-note')],
+  ['does not render study note controls', !sandbox.renderStudies(studies).includes('data-study-note') && !sandbox.renderStudies(studies).includes('Notiz speichern')],
   ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],

@@ -130,16 +130,6 @@ $statements = [
     `user_agent`   VARCHAR(255),
     INDEX `idx_timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-
-// === study_notes: persoenliche Notizen pro Studie ===
-"CREATE TABLE IF NOT EXISTS `study_notes` (
-    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `study_id` VARCHAR(64) NOT NULL,
-    `note` TEXT NOT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_study_id` (`study_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 ];
 
 $created = [];
@@ -191,7 +181,7 @@ while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
 <div class="box">
   <h2>📦 Tabellen</h2>
   <ul>
-    <?php foreach (['studies','submissions','settings','events','sync_log','study_notes'] as $t): ?>
+    <?php foreach (['studies','submissions','settings','events','sync_log'] as $t): ?>
       <li>
         <code><?= htmlspecialchars($t) ?></code>:
         <?php if (in_array($t, $existing, true)): ?>
