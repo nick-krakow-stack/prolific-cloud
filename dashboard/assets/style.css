@@ -1344,6 +1344,9 @@ a:not(.icon-btn):hover {
 .tag-expired  { background: var(--warn-bg); color: var(--warn); }
 .tag-inactive { background: var(--border); color: var(--text-muted); }
 .tag-times    { background: var(--border); color: var(--text-muted); }
+.tag-paid     { background: color-mix(in srgb, var(--success-bg) 82%, white); color: #22c55e; }
+.tag-danger   { background: var(--danger-bg); color: var(--danger); }
+.tag-danger-soft { background: color-mix(in srgb, var(--danger-bg) 60%, var(--bg-card)); color: #fca5a5; }
 .tag-good     { background: var(--success-bg); color: var(--success); }
 .tag-ok       { background: var(--info-bg); color: var(--info); }
 .tag-low      { background: var(--danger-bg); color: var(--danger); }
@@ -1356,10 +1359,10 @@ a:not(.icon-btn):hover {
                             font-size: 11px; font-weight: 600; }
 .status-APPROVED { background: var(--success-bg); color: var(--success); }
 .status-AWAITING { background: var(--warn-bg); color: var(--warn); }
-.status-SCREENED { background: #e0e7ff; color: #3730a3; }
-.status-RETURNED { background: var(--border); color: var(--text-muted); }
+.status-SCREENED { background: color-mix(in srgb, var(--success-bg) 82%, white); color: #22c55e; }
+.status-RETURNED { background: var(--danger-bg); color: var(--danger); }
 .status-REJECTED { background: var(--danger-bg); color: var(--danger); }
-.status-TIMEDOUT { background: var(--danger-bg); color: var(--danger); }
+.status-TIMEDOUT { background: color-mix(in srgb, var(--danger-bg) 60%, var(--bg-card)); color: #fca5a5; }
 
 .event-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .event-card .type { font-size: 11px; font-weight: 600; color: var(--text-muted);

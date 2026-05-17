@@ -82,7 +82,16 @@ const sampleOverview = {
       secondsTotal: 30000
     }
   },
-  statusStats: {},
+  statusStats: {
+    counts: {
+      APPROVED: 47,
+      'AWAITING REVIEW': 13,
+      'SCREENED OUT': 11,
+      RETURNED: 5,
+      'TIMED-OUT': 3,
+      REJECTED: 2
+    }
+  },
   efficiency: {
     today: { byCurrency: { GBP: 1200 }, sampleCount: 2, secondsTotal: 1800 },
     week: { byCurrency: { GBP: 1350 }, sampleCount: 6, secondsTotal: 6400 },
@@ -153,6 +162,8 @@ const checks = [
   ['renders efficiency hourly rates in EUR', html.includes('€14,16/h') && html.includes('€15,93/h')],
   ['renders top studies in EUR', html.includes('€10,03') && html.includes('€40,12/h') && !html.includes('£34,00/h')],
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
+  ['orders screened out second in status distribution', html.indexOf('>APPROVED<') < html.indexOf('>SCREENED OUT<') && html.indexOf('>SCREENED OUT<') < html.indexOf('>AWAITING REVIEW<')],
+  ['colors paid and negative status tags', html.includes('class="tag tag-paid">SCREENED OUT</span>') && html.includes('class="tag tag-danger">RETURNED</span>') && html.includes('class="tag tag-danger-soft">TIMED-OUT</span>')],
   ['renders monthly comparison as development tile', html.includes('class="earning-tile comparison-tile"') && html.includes('<div class="label">Entwicklung zum Vormonat</div>') && !html.includes('<div class="label">Vormonat</div>') && !html.includes('<div class="label">Vergleich</div>')],
   ['renders monthly comparison percentage with sign and threshold color class', html.includes('class="value comparison-value is-good"') && html.includes('+ 286,5 %')],
   ['renders previous month amounts without duplicate label', html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat: £25,00 + $1,50')],

@@ -1128,10 +1128,14 @@ function renderStatusTag(status) {
 
   if (normalized === 'APPROVED') {
     className = 'tag tag-active';
+  } else if (['SCREENED OUT', 'SCREENED-OUT'].includes(normalized)) {
+    className = 'tag tag-paid';
   } else if (normalized === 'AWAITING REVIEW') {
     className = 'tag tag-expired';
-  } else if (['RETURNED', 'SCREENED OUT', 'SCREENED-OUT'].includes(normalized)) {
-    className = 'tag tag-inactive';
+  } else if (normalized === 'RETURNED') {
+    className = 'tag tag-danger';
+  } else if (['TIMED OUT', 'TIMED-OUT', 'TIMEDOUT'].includes(normalized)) {
+    className = 'tag tag-danger-soft';
   } else if (normalized === 'REJECTED') {
     inline = ' style="background:var(--danger-bg);color:var(--danger);"';
   }
@@ -1140,7 +1144,17 @@ function renderStatusTag(status) {
 }
 
 function statusSortKey(status) {
-  const order = ['APPROVED', 'AWAITING REVIEW', 'REJECTED', 'RETURNED', 'SCREENED OUT', 'SCREENED-OUT'];
+  const order = [
+    'APPROVED',
+    'SCREENED OUT',
+    'SCREENED-OUT',
+    'AWAITING REVIEW',
+    'REJECTED',
+    'RETURNED',
+    'TIMED OUT',
+    'TIMED-OUT',
+    'TIMEDOUT'
+  ];
   const index = order.indexOf(String(status || '').toUpperCase());
 
   return index === -1 ? order.length : index;
