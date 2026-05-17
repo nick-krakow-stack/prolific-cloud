@@ -193,6 +193,29 @@ const submissionsHtml = sandbox.renderSubmissions({
     }
   ]
 });
+const submissionsFilterHtml = sandbox.renderSubmissions({
+  ok: true,
+  submissions: [
+    {
+      study_name: 'Recent approved',
+      status: 'APPROVED',
+      effective_reward_amount_minor: 500,
+      reward_currency: 'GBP',
+      time_taken_seconds: 600,
+      started_at: '2026-05-17 12:00:00',
+      completed_at: '2026-05-17 12:10:00'
+    },
+    {
+      study_name: 'Older returned',
+      status: 'RETURNED',
+      effective_reward_amount_minor: 200,
+      reward_currency: 'GBP',
+      time_taken_seconds: 480,
+      started_at: '2026-05-10 11:00:00',
+      completed_at: '2026-05-10 11:08:00'
+    }
+  ]
+});
 
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
@@ -217,6 +240,9 @@ const checks = [
   ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
   ['renders study quality tag next to title', expiredStudyHtml.includes('class="study-title"') && /<div class="name">Expired low study<\/div>[\s\S]*<span class="tag tag-inactive">Niedrig<\/span>/.test(expiredStudyHtml)],
   ['does not render study availability status tags', !expiredStudyHtml.includes('Voll/Abgelaufen') && !expiredStudyHtml.includes('Aktiv') && !expiredStudyHtml.includes('Beendet')],
+  ['submissions panel has matching filter controls and csv icon', appShell.includes('id="submissionsSort"') && appShell.includes('id="submissionsFilter"') && appShell.includes('id="submissionsPageSize"') && appShell.includes('id="submissionsDateFrom"') && appShell.includes('id="submissionsDateTo"') && appShell.includes('class="filter-icon export-icon"')],
+  ['submissions date range handles swapped bounds', typeof sandbox.submissionInDateRange === 'function' && sandbox.submissionInDateRange({ completed_at: '2026-05-17 12:10:00' }, '2026-05-18', '2026-05-15') && !sandbox.submissionInDateRange({ completed_at: '2026-05-10 11:08:00' }, '2026-05-18', '2026-05-15')],
+  ['submissions render without export status box', !submissionsFilterHtml.includes('<h3>Export</h3>') && !submissionsFilterHtml.includes('CSV Export') && submissionsFilterHtml.includes('Recent approved')],
   ['submissions render effective reward amount when present', submissionsHtml.includes('1,86') && !submissionsHtml.includes('0,36')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],

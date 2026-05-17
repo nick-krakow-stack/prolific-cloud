@@ -2579,27 +2579,140 @@ function renderStudies(data) {
 
 // ---- Renderer: Submissions ----
 
+const SUBMISSIONS_PAGE_SIZE = 50;
+let submissionsVisibleLimit = SUBMISSIONS_PAGE_SIZE;
+
+function submissionDatePart(submission) {
+  return studyDatePart(
+    submission?.completed_at ||
+    submission?.completedAt ||
+    submission?.started_at ||
+    submission?.startedAt ||
+    submission?.created_at ||
+    submission?.createdAt
+  );
+}
+
+function submissionInDateRange(submission, from, to) {
+  const { start, end } = normalizedStudyDateRange(from, to);
+
+  if (!start && !end) return true;
+
+  const date = submissionDatePart(submission);
+
+  if (!date) return false;
+  if (start && date < start) return false;
+  if (end && date > end) return false;
+
+  return true;
+}
+
+function normalizedSubmissionStatus(status) {
+  return String(status || '')
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+}
+
+function submissionRewardMinor(submission) {
+  return firstNumber(submission, [
+    'effective_reward_amount_minor',
+    'effectiveRewardAmountMinor',
+    'reward_amount_minor',
+    'rewardAmountMinor'
+  ]) || 0;
+}
+
+function submissionsPageSizeValue() {
+  const el = $('submissionsPageSize');
+
+  return el ? el.value : String(SUBMISSIONS_PAGE_SIZE);
+}
+
+function currentSubmissionsVisibleLimit(total) {
+  const value = submissionsPageSizeValue();
+  const pageSize = resolveStudiesPageSize(value, total);
+
+  if (value === 'all') {
+    return total;
+  }
+
+  return Math.min(total, Math.max(pageSize, submissionsVisibleLimit || pageSize));
+}
+
+function resetSubmissionsPagination() {
+  submissionsVisibleLimit = SUBMISSIONS_PAGE_SIZE;
+}
+
+function renderSubmissionsPagination(visible, total) {
+  if (total <= visible) {
+    return `
+      <div class="study-pagination">
+        <span>${fmtCount(total)} von ${fmtCount(total)} Teilnahmen</span>
+      </div>
+    `;
+  }
+
+  const remaining = total - visible;
+  const next = Math.min(SUBMISSIONS_PAGE_SIZE, remaining);
+
+  return `
+    <div class="study-pagination">
+      <span>${fmtCount(visible)} von ${fmtCount(total)} Teilnahmen</span>
+      <button id="submissionsLoadMore" class="filter-reset" type="button">Weitere ${fmtCount(next)} laden</button>
+    </div>
+  `;
+}
+
 function renderSubmissions(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
   }
 
-  const subs = data.submissions || [];
+  let subs = [...(data.submissions || [])];
 
-  if (subs.length === 0) {
-    return `
-      <div class="status-box">
-        <h3>Export</h3>
-        <div class="status-row">
-          <span class="key">CSV Export</span>
-          <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
-        </div>
-      </div>
-      <div class="loading">Keine Teilnahmen.</div>
-    `;
+  const filterEl = $('submissionsFilter');
+  const sortEl = $('submissionsSort');
+  const dateFromEl = $('submissionsDateFrom');
+  const dateToEl = $('submissionsDateTo');
+  const filter = filterEl ? filterEl.value : 'all';
+
+  if (filter !== 'all') {
+    const wantedStatus = normalizedSubmissionStatus(filter);
+    subs = subs.filter(submission => normalizedSubmissionStatus(submission.status) === wantedStatus);
   }
 
-  const rows = subs.map(s => {
+  const dateFrom = dateFromEl ? dateFromEl.value : '';
+  const dateTo = dateToEl ? dateToEl.value : '';
+
+  if (dateFrom || dateTo) {
+    subs = subs.filter(submission => submissionInDateRange(submission, dateFrom, dateTo));
+  }
+
+  const sort = sortEl ? sortEl.value : 'completedDesc';
+
+  subs.sort((a, b) => {
+    if (sort === 'completedAsc') {
+      return new Date(a.completed_at || a.started_at || 0) - new Date(b.completed_at || b.started_at || 0);
+    }
+
+    if (sort === 'rewardDesc') {
+      return submissionRewardMinor(b) - submissionRewardMinor(a);
+    }
+
+    return new Date(b.completed_at || b.started_at || 0) - new Date(a.completed_at || a.started_at || 0);
+  });
+
+  if (subs.length === 0) {
+    return '<div class="loading">Keine Teilnahmen.</div>';
+  }
+
+  const totalCount = subs.length;
+  const visibleLimit = currentSubmissionsVisibleLimit(totalCount);
+  const visibleSubs = subs.slice(0, visibleLimit);
+
+  const rows = visibleSubs.map(s => {
     const statusKey = (s.status || '')
       .replace(/[\s-]/g, '')
       .substring(0, 8)
@@ -2632,16 +2745,7 @@ function renderSubmissions(data) {
     `;
   }).join('');
 
-  return `
-    <div class="status-box">
-      <h3>Export</h3>
-      <div class="status-row">
-        <span class="key">CSV Export</span>
-        <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
-      </div>
-    </div>
-    ${rows}
-  `;
+  return rows + renderSubmissionsPagination(visibleSubs.length, totalCount);
 }
 
 // ---- Renderer: Events ----
@@ -2908,6 +3012,56 @@ if (studiesContent) {
 
     studiesVisibleLimit += STUDIES_PAGE_SIZE;
     refreshStudiesList();
+  });
+}
+
+function refreshSubmissionsList(options = {}) {
+  if (options.resetPage) {
+    resetSubmissionsPagination();
+  }
+
+  if (cachedData.submissions) {
+    const submissionsContent = $('submissionsContent');
+
+    if (submissionsContent) {
+      submissionsContent.innerHTML = renderSubmissions(cachedData.submissions);
+    }
+  }
+}
+
+['submissionsSort', 'submissionsFilter', 'submissionsPageSize', 'submissionsDateFrom', 'submissionsDateTo'].forEach(id => {
+  const el = $(id);
+
+  if (!el) return;
+
+  el.addEventListener('change', () => refreshSubmissionsList({ resetPage: true }));
+  el.addEventListener('input', () => refreshSubmissionsList({ resetPage: true }));
+});
+
+const submissionsDateReset = $('submissionsDateReset');
+
+if (submissionsDateReset) {
+  submissionsDateReset.addEventListener('click', () => {
+    const from = $('submissionsDateFrom');
+    const to = $('submissionsDateTo');
+
+    if (from) from.value = '';
+    if (to) to.value = '';
+
+    refreshSubmissionsList({ resetPage: true });
+  });
+}
+
+const submissionsContent = $('submissionsContent');
+
+if (submissionsContent) {
+  submissionsContent.addEventListener('click', event => {
+    const target = event.target;
+
+    if (!target || target.id !== 'submissionsLoadMore') return;
+
+    submissionsVisibleLimit += SUBMISSIONS_PAGE_SIZE;
+    refreshSubmissionsList();
   });
 }
 

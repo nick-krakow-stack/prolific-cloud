@@ -1374,6 +1374,24 @@ a:not(.icon-btn):hover {
   border-color: var(--primary);
   color: var(--text);
 }
+.filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--link);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+}
+.filter-icon:hover {
+  border-color: var(--primary);
+  color: var(--link-hover);
+}
 .study-pagination {
   display: flex;
   align-items: center;

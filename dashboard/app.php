@@ -93,6 +93,49 @@ require_login();
 
   <!-- TEILNAHMEN -->
   <section class="tab-panel" id="panel-submissions">
+    <div class="filter-bar">
+      <label>Sortierung:
+        <select id="submissionsSort">
+          <option value="completedDesc">Neueste zuerst</option>
+          <option value="completedAsc">Ã„lteste zuerst</option>
+          <option value="rewardDesc">HÃ¶chste VergÃ¼tung</option>
+        </select>
+      </label>
+
+      <label>Filter:
+        <select id="submissionsFilter">
+          <option value="all">Alle</option>
+          <option value="APPROVED">Approved</option>
+          <option value="AWAITING REVIEW">Awaiting Review</option>
+          <option value="SCREENED OUT">Screened Out</option>
+          <option value="RETURNED">Returned</option>
+          <option value="TIMED-OUT">Timed-Out</option>
+        </select>
+      </label>
+
+      <label>Anzeige:
+        <select id="submissionsPageSize">
+          <option value="50" selected>50</option>
+          <option value="all">Alle</option>
+        </select>
+      </label>
+
+      <fieldset class="date-filter" aria-label="Zeitraum">
+        <legend>Zeitraum:</legend>
+        <label>Von
+          <input id="submissionsDateFrom" type="date">
+        </label>
+        <label>Bis
+          <input id="submissionsDateTo" type="date">
+        </label>
+        <button id="submissionsDateReset" class="filter-reset" type="button">ZurÃ¼cksetzen</button>
+      </fieldset>
+
+      <a class="filter-icon export-icon"
+         href="/api/export.php?type=submissions&amp;format=csv"
+         title="Teilnahmen als CSV exportieren"
+         aria-label="Teilnahmen als CSV exportieren">&#8681;</a>
+    </div>
     <div id="submissionsContent" class="loading">Lade…</div>
   </section>
 
