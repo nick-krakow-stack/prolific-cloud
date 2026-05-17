@@ -81,6 +81,13 @@ implementation target is Phase 1 + Phase 2:
 - add modern cards, progress bars, and status pills in `dashboard/assets/style.css`
 - preserve all existing tabs and root routing
 
+Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
+
+- `api/data.php` adds `goals`, `forecast`, `pendingStats`, `statusStats`, and `todayStats`.
+- `dashboard/assets/app.js` renders account, goals, forecast, today, pending, and status cards.
+- `dashboard/assets/style.css` adds overview card/progress/status UI components.
+- `config.example.php` documents optional `goals` defaults; live `config.php` was not changed.
+
 ## Operating Model
 
 - Codex acts as Orchestrator only.
@@ -96,6 +103,8 @@ implementation target is Phase 1 + Phase 2:
 - GitHub CLI is installed at `C:\Program Files\GitHub CLI\gh.exe` and authorized.
 - Local `php` was not available in PATH during initial setup.
 - `node` availability should be checked before JS syntax verification.
+- Server PHP lint passed after Phase 1 + Phase 2 deploy.
+- Live HTTP checks after deploy: `/` returns login page, unauthenticated `/api/data.php?type=overview` returns `401`.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

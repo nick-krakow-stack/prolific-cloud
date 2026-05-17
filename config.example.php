@@ -55,6 +55,12 @@ return [
     'session_lifetime'   => 30 * 24 * 60 * 60,  // 30 Tage „angemeldet bleiben"
     'log_failed_logins'  => true,                // Failed Logins in DB loggen
 
+    // ---- Ziele fürs Dashboard (Minor Units: 500 = GBP 5.00) ----
+    'goals' => [
+        'daily_gbp_minor'   => 500,
+        'monthly_gbp_minor' => 15000,
+    ],
+
     // ---- Debug ----
     // Im Produktivbetrieb auf false stellen!
     'debug' => false,

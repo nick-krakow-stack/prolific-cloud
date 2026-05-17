@@ -9,5 +9,8 @@
 - 2026-05-17 - Runtime-only deploy helper added at `scripts/deploy-webspace.ps1`.
 - 2026-05-17 - Deploy helper updated to support explicit `-IncludeConfig` config uploads.
 - 2026-05-17 - Deployment rule clarified: setup files stay in GitHub but are excluded from live webspace updates.
+- 2026-05-17 - Roadmap Phase 1 + Phase 2 overview metrics implemented.
+- 2026-05-17 - Runtime files deployed to All-Inkl webspace.
+- 2026-05-17 - Server PHP lint and live unauthenticated HTTP checks passed after deploy.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

@@ -4,8 +4,8 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
-- [ ] Commit SSH/deployment setup separately from product changes.
-- [ ] Begin roadmap Phase 1 + Phase 2 after workflow setup is confirmed.
+- [ ] Commit and push roadmap Phase 1 + Phase 2 product changes.
+- [ ] Ask owner to visually verify dashboard after login.
 
 ## Completed Task Steps
 
@@ -20,3 +20,9 @@ Last updated: 2026-05-17
 - [x] SSH key-based login to All-Inkl webspace verified.
 - [x] Remote webroot identified.
 - [x] Runtime-only deploy helper added.
+- [x] Backend overview extended with Phase 1 + Phase 2 metrics.
+- [x] Overview frontend rendering extended.
+- [x] Overview CSS components added.
+- [x] Runtime files deployed to production webspace.
+- [x] Server PHP lint passed after deploy.
+- [x] Live unauthenticated HTTP checks passed.

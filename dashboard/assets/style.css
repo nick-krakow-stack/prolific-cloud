@@ -17,6 +17,10 @@
   --warn-bg: #fef9c3;
   --danger: #991b1b;
   --danger-bg: #fee2e2;
+  --neutral: #374151;
+  --neutral-bg: #f3f4f6;
+  --info: #075985;
+  --info-bg: #e0f2fe;
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -37,6 +41,10 @@
     --warn-bg: #422006;
     --danger: #f87171;
     --danger-bg: #450a0a;
+    --neutral: #d1d5db;
+    --neutral-bg: #272b33;
+    --info: #7dd3fc;
+    --info-bg: #082f49;
   }
 }
 
@@ -136,6 +144,311 @@ body { font-size: 14px; line-height: 1.5; }
 .status-row:last-child { border-bottom: none; }
 .status-row .key { color: var(--text-muted); }
 .status-row .value { font-weight: 600; }
+
+/* ---- Overview-Komponenten ---- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 640px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  min-width: 0;
+}
+
+.metric-card.highlight {
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-card));
+}
+
+.metric-card.wide {
+  grid-column: span 1;
+}
+
+@media (min-width: 640px) {
+  .metric-card.wide {
+    grid-column: span 2;
+  }
+}
+
+.metric-card.full {
+  grid-column: 1 / -1;
+}
+
+.metric-head,
+.overview-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.metric-title,
+.overview-card-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 24px;
+  line-height: 1.15;
+  font-weight: 750;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.metric-card.highlight .metric-value {
+  color: var(--primary);
+}
+
+.metric-subline {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.metric-subline.positive { color: var(--success); }
+.metric-subline.warning { color: var(--warn); }
+.metric-subline.negative { color: var(--danger); }
+
+.metric-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-list li,
+.metric-row,
+.compact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.metric-list .key,
+.metric-row .key,
+.compact-row .key {
+  color: var(--text-muted);
+  min-width: 0;
+}
+
+.metric-list .value,
+.metric-row .value,
+.compact-row .value {
+  color: var(--text);
+  font-weight: 650;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.compact-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.compact-rows .status-row {
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (min-width: 520px) {
+  .account-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.account-item,
+.mini-metric {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 48%, var(--bg-card));
+}
+
+.account-item .label,
+.mini-metric .label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.account-item .amount,
+.mini-metric .value {
+  display: block;
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.overview-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 760px) {
+  .overview-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.overview-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.progress-fill {
+  display: block;
+  width: 0;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.progress-fill.good { background: var(--success); }
+.progress-fill.warn { background: #f59e0b; }
+.progress-fill.danger { background: #ef4444; }
+.progress-fill.neutral { background: var(--text-muted); }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--neutral);
+  background: var(--neutral-bg);
+  white-space: nowrap;
+}
+
+.status-pill.good {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.status-pill.warn {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.status-pill.danger {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.status-pill.neutral {
+  color: var(--neutral);
+  background: var(--neutral-bg);
+}
+
+.status-pill.info {
+  color: var(--info);
+  background: var(--info-bg);
+}
+
+.status-pill.wrap {
+  white-space: normal;
+  text-align: center;
+}
+
+.status-distribution {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-distribution-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.status-distribution-row .label {
+  min-width: 0;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-distribution-row .count {
+  font-weight: 700;
+}
+
+.goal-card .progress-bar,
+.forecast-card .progress-bar {
+  margin-bottom: 8px;
+}
+
+.overview-empty {
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  text-align: center;
+  background: color-mix(in srgb, var(--bg) 55%, var(--bg-card));
+}
 
 /* ---- Studien-Liste ---- */
 .filter-bar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }

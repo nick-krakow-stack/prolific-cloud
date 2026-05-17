@@ -4,6 +4,7 @@
 // ============================================================
 
 const API_BASE = '/api/data.php';
+const DASH = '–';
 
 let cachedData = {
   overview: null,
@@ -19,7 +20,7 @@ function $(id) {
 }
 
 function fmtAmount(minor, currency) {
-  if (minor == null) return '–';
+  if (minor == null) return DASH;
 
   const sym =
     currency === 'USD' ? '$' :
@@ -31,7 +32,7 @@ function fmtAmount(minor, currency) {
 }
 
 function fmtMulti(byCurrency) {
-  if (!byCurrency || Object.keys(byCurrency).length === 0) return '–';
+  if (!byCurrency || Object.keys(byCurrency).length === 0) return DASH;
 
   const parts = [];
   const order = ['GBP', 'USD', 'EUR'];
@@ -53,15 +54,156 @@ function fmtMulti(byCurrency) {
     }
   }
 
-  return parts.length ? parts.join(' + ') : '–';
+  return parts.length ? parts.join(' + ') : DASH;
+}
+
+function fmtCount(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  return Math.round(numeric).toLocaleString('de-DE');
+}
+
+function fmtPercent(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  const percent = Math.abs(numeric) <= 1 && numeric !== 0 ? numeric * 100 : numeric;
+  const rounded = Math.round(percent * 10) / 10;
+
+  return rounded.toLocaleString('de-DE', {
+    minimumFractionDigits: Number.isInteger(rounded) ? 0 : 1,
+    maximumFractionDigits: 1
+  }) + ' %';
+}
+
+function clampPercent(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return null;
+
+  return Math.max(0, Math.min(100, numeric));
+}
+
+function progressPercent(currentMinor, targetMinor) {
+  const current = Number(currentMinor);
+  const target = Number(targetMinor);
+
+  if (!Number.isFinite(current) || !Number.isFinite(target) || target <= 0) {
+    return null;
+  }
+
+  return (current / target) * 100;
+}
+
+function renderProgressBar(percent) {
+  const clamped = clampPercent(percent);
+
+  if (clamped == null) {
+    return `
+      <div class="progress-bar" aria-label="Fortschritt ${DASH}"
+           style="height:8px;background:var(--border);border-radius:999px;overflow:hidden;margin:8px 0 4px;">
+        <div class="progress-fill" style="height:100%;width:0%;background:var(--primary);border-radius:999px;"></div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+         aria-valuenow="${Math.round(clamped)}"
+         style="height:8px;background:var(--border);border-radius:999px;overflow:hidden;margin:8px 0 4px;">
+      <div class="progress-fill"
+           style="height:100%;width:${clamped.toFixed(2)}%;background:var(--primary);border-radius:999px;"></div>
+    </div>
+  `;
+}
+
+function asObject(value) {
+  value = parseJsonMaybe(value);
+
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function firstDefined(source, keys) {
+  const obj = asObject(source);
+
+  for (const key of keys) {
+    if (obj[key] != null) return obj[key];
+  }
+
+  return null;
+}
+
+function firstNumber(source, keys) {
+  const value = firstDefined(source, keys);
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
+function firstNumeric(source, keys) {
+  const value = firstDefined(source, keys);
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function firstBoolean(source, keys) {
+  const value = firstDefined(source, keys);
+
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.toLowerCase().trim();
+
+    if (['1', 'true', 'yes', 'ja'].includes(normalized)) return true;
+    if (['0', 'false', 'no', 'nein'].includes(normalized)) return false;
+  }
+
+  return null;
+}
+
+function currencyMinor(byCurrency, currency = 'GBP') {
+  const map = asObject(byCurrency);
+  const value = map[currency] ?? map[currency.toLowerCase()];
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
+function hasCurrencyAmounts(byCurrency) {
+  return Object.values(asObject(byCurrency)).some(value => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0;
+  });
+}
+
+function combineCurrencyMaps(...maps) {
+  const result = {};
+
+  for (const mapRaw of maps) {
+    const map = asObject(mapRaw);
+
+    for (const [currency, value] of Object.entries(map)) {
+      const numeric = Number(value);
+
+      if (!Number.isFinite(numeric)) continue;
+
+      result[currency.toUpperCase()] = (result[currency.toUpperCase()] || 0) + Math.round(numeric);
+    }
+  }
+
+  return result;
 }
 
 function fmtDateTime(iso) {
-  if (!iso) return '–';
+  if (!iso) return DASH;
 
   const d = new Date(iso);
 
-  if (Number.isNaN(d.getTime())) return '–';
+  if (Number.isNaN(d.getTime())) return DASH;
 
   return d.toLocaleString('de-DE', {
     dateStyle: 'short',
@@ -70,11 +212,11 @@ function fmtDateTime(iso) {
 }
 
 function fmtTimestamp(iso) {
-  if (!iso) return '–';
+  if (!iso) return DASH;
 
   const then = new Date(iso);
 
-  if (Number.isNaN(then.getTime())) return '–';
+  if (Number.isNaN(then.getTime())) return DASH;
 
   const now = new Date();
   const isToday = then.toDateString() === now.toDateString();
@@ -100,11 +242,11 @@ function fmtTimestamp(iso) {
 }
 
 function fmtTimeAgo(iso) {
-  if (!iso) return '–';
+  if (!iso) return DASH;
 
   const then = new Date(iso);
 
-  if (Number.isNaN(then.getTime())) return '–';
+  if (Number.isNaN(then.getTime())) return DASH;
 
   const diff = Math.floor((new Date() - then) / 1000);
 
@@ -185,7 +327,7 @@ function addCurrencyAmount(target, currency, value, forceMinor = false) {
   target[cur] = (target[cur] || 0) + minor;
 }
 
-function extractCurrencyMap(source) {
+function extractCurrencyMap(source, forceMinor = false) {
   const result = {};
 
   source = parseJsonMaybe(source);
@@ -233,7 +375,7 @@ function extractCurrencyMap(source) {
         item.available ??
         item.pending;
 
-      addCurrencyAmount(result, currency, value, false);
+      addCurrencyAmount(result, currency, value, forceMinor);
     }
 
     return result;
@@ -248,7 +390,7 @@ function extractCurrencyMap(source) {
       if (value == null) continue;
 
       if (typeof value === 'number' || typeof value === 'string') {
-        addCurrencyAmount(result, currency, value, false);
+        addCurrencyAmount(result, currency, value, forceMinor);
         continue;
       }
 
@@ -282,7 +424,7 @@ function extractCurrencyMap(source) {
           value.available ??
           value.pending;
 
-        addCurrencyAmount(result, nestedCurrency, nestedValue, false);
+        addCurrencyAmount(result, nestedCurrency, nestedValue, forceMinor);
       }
     }
   }
@@ -290,8 +432,8 @@ function extractCurrencyMap(source) {
   return result;
 }
 
-function mergeCurrencyMap(target, source) {
-  const extracted = extractCurrencyMap(source);
+function mergeCurrencyMap(target, source, forceMinor = false) {
+  const extracted = extractCurrencyMap(source, forceMinor);
 
   for (const [currency, amount] of Object.entries(extracted)) {
     target[currency] = (target[currency] || 0) + amount;
@@ -308,10 +450,10 @@ function extractProlificBalance(balance) {
     return { availableByCurrency, pendingByCurrency };
   }
 
+  mergeCurrencyMap(availableByCurrency, balance.approved_per_currency, true);
+
   const availableCandidates = [
     // Deine echte aktuelle Struktur
-    balance.approved_per_currency,
-
     // Weitere mögliche Strukturen
     balance.balance_by_currency,
     balance.available_balance_by_currency,
@@ -334,10 +476,10 @@ function extractProlificBalance(balance) {
     mergeCurrencyMap(availableByCurrency, candidate);
   }
 
+  mergeCurrencyMap(pendingByCurrency, balance.pending_per_currency, true);
+
   const pendingCandidates = [
     // Deine echte aktuelle Struktur
-    balance.pending_per_currency,
-
     // Weitere mögliche Strukturen
     balance.pending_balance_by_currency,
     balance.pending_by_currency,
@@ -420,20 +562,393 @@ function updateSyncIndicator(lastSyncAt) {
   }
 }
 
+// ---- Overview Helpers ----
+
+function readGoalMinor(goals, period) {
+  const keys = period === 'daily'
+    ? ['daily_gbp_minor', 'dailyGoalGbpMinor', 'dailyGoalMinor', 'daily_minor', 'daily']
+    : ['monthly_gbp_minor', 'monthlyGoalGbpMinor', 'monthlyGoalMinor', 'monthly_minor', 'monthly'];
+
+  const value = firstDefined(goals, keys);
+
+  if (value && typeof value === 'object') {
+    return currencyMinor(value, 'GBP');
+  }
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
+function readCurrencyMetric(source, mapKeys, gbpKeys = []) {
+  const obj = asObject(source);
+  let result = {};
+
+  for (const key of mapKeys) {
+    if (obj[key] == null) continue;
+
+    result = extractCurrencyMap(obj[key], true);
+
+    if (Object.keys(result).length > 0) return result;
+  }
+
+  const gbpMinor = firstNumber(obj, gbpKeys);
+
+  if (gbpMinor != null) {
+    result.GBP = gbpMinor;
+  }
+
+  return result;
+}
+
+function readTodayStats(data, today) {
+  const todayStats = asObject(data.todayStats);
+  const earned = readCurrencyMetric(
+    todayStats,
+    ['earned', 'earnedByCurrency', 'earned_by_currency'],
+    ['earned_gbp_minor', 'earnedGbpMinor', 'earnedMinor']
+  );
+  const pending = readCurrencyMetric(
+    todayStats,
+    ['pending', 'pendingByCurrency', 'pending_by_currency'],
+    ['pending_gbp_minor', 'pendingGbpMinor', 'pendingMinor']
+  );
+
+  const fallbackEarned = asObject(today.earned);
+  const fallbackPending = asObject(today.pending);
+  const finalEarned = Object.keys(earned).length ? earned : fallbackEarned;
+  const finalPending = Object.keys(pending).length ? pending : fallbackPending;
+  const count = firstNumber(todayStats, [
+    'submission_count',
+    'submissionCount',
+    'submissions_count',
+    'submissionsCount',
+    'participations',
+    'count'
+  ]);
+  const averageMap = readCurrencyMetric(
+    asObject(todayStats.averageReward),
+    ['byCurrency', 'by_currency', 'average', 'averageByCurrency', 'average_by_currency'],
+    ['gbp_minor', 'gbpMinor', 'average_gbp_minor', 'averageGbpMinor']
+  );
+  const hourlyMap = readCurrencyMetric(
+    asObject(todayStats.effectiveHourlyRate),
+    ['byCurrency', 'by_currency', 'hourly', 'hourlyByCurrency', 'hourly_by_currency'],
+    ['gbp_minor', 'gbpMinor', 'hourly_gbp_minor', 'hourlyGbpMinor']
+  );
+  const average = Object.keys(averageMap).length ? averageMap : firstNumber(todayStats, [
+    'average_reward_gbp_minor',
+    'averageRewardGbpMinor',
+    'average_reward_minor',
+    'averageRewardMinor',
+    'avg_gbp_minor',
+    'avgMinor'
+  ]);
+  const hourly = Object.keys(hourlyMap).length ? hourlyMap : firstNumber(todayStats, [
+    'hourly_rate_gbp_minor',
+    'hourlyRateGbpMinor',
+    'effective_hourly_gbp_minor',
+    'effectiveHourlyGbpMinor'
+  ]);
+  const earnedGbp = currencyMinor(finalEarned, 'GBP');
+  const calculatedAverage =
+    average != null ? average :
+    count && earnedGbp != null ? Math.round(earnedGbp / count) :
+    null;
+
+  return {
+    earned: finalEarned,
+    pending: finalPending,
+    count,
+    average: calculatedAverage,
+    hourly
+  };
+}
+
+function readPendingStats(data, allTimePending, pendingByCurrency) {
+  const pendingStats = asObject(data.pendingStats);
+  const total = readCurrencyMetric(
+    pendingStats,
+    ['total', 'totalPending', 'total_pending', 'totalByCurrency', 'total_by_currency', 'byCurrency', 'by_currency'],
+    ['total_pending_gbp_minor', 'totalPendingGbpMinor', 'total_pending_minor', 'totalPendingMinor']
+  );
+  const finalTotal =
+    Object.keys(total).length ? total :
+    hasCurrencyAmounts(allTimePending) ? asObject(allTimePending) :
+    asObject(pendingByCurrency);
+
+  return {
+    count: firstNumber(pendingStats, [
+      'count_pending',
+      'countPending',
+      'pending_count',
+      'pendingCount',
+      'count'
+    ]),
+    total: finalTotal,
+    oldestAt: firstDefined(pendingStats, [
+      'oldest_pending_completed_at',
+      'oldestPendingCompletedAt',
+      'oldest_completed_at',
+      'oldestCompletedAt',
+      'oldestPendingAt'
+    ]),
+    olderThan7: firstNumber(pendingStats, [
+      'older_than_7_days',
+      'olderThan7Days',
+      'older7',
+      'count_older_than_7_days',
+      'countOlderThan7Days'
+    ]),
+    olderThan14: firstNumber(pendingStats, [
+      'older_than_14_days',
+      'olderThan14Days',
+      'older14',
+      'count_older_than_14_days',
+      'countOlderThan14Days'
+    ])
+  };
+}
+
+function normalizeStatusCounts(statusStats, fallbackCounts) {
+  const stats = asObject(statusStats);
+  const candidate =
+    firstDefined(stats, ['counts', 'byStatus', 'by_status', 'distribution', 'statuses']) ??
+    (Object.keys(stats).length ? stats : fallbackCounts);
+  const rawCounts = asObject(candidate);
+  const counts = {};
+
+  for (const [status, value] of Object.entries(rawCounts)) {
+    if (/rate|total/i.test(status)) continue;
+
+    const numeric = Number(value);
+
+    if (!Number.isFinite(numeric)) continue;
+
+    counts[status] = Math.round(numeric);
+  }
+
+  return counts;
+}
+
+function statusCount(counts, aliases) {
+  for (const alias of aliases) {
+    if (counts[alias] != null) return counts[alias];
+  }
+
+  return 0;
+}
+
+function readStatusRate(statusStats, keys, fallback) {
+  const explicit = firstNumeric(statusStats, keys);
+
+  if (explicit != null) return explicit;
+
+  return fallback;
+}
+
+function renderStatusTag(status) {
+  const normalized = String(status || '').toUpperCase();
+  let className = 'tag tag-times';
+  let inline = '';
+
+  if (normalized === 'APPROVED') {
+    className = 'tag tag-active';
+  } else if (normalized === 'AWAITING REVIEW') {
+    className = 'tag tag-expired';
+  } else if (['RETURNED', 'SCREENED OUT', 'SCREENED-OUT'].includes(normalized)) {
+    className = 'tag tag-inactive';
+  } else if (normalized === 'REJECTED') {
+    inline = ' style="background:var(--danger-bg);color:var(--danger);"';
+  }
+
+  return `<span class="${className}"${inline}>${escapeHtml(status)}</span>`;
+}
+
+function statusSortKey(status) {
+  const order = ['APPROVED', 'AWAITING REVIEW', 'REJECTED', 'RETURNED', 'SCREENED OUT', 'SCREENED-OUT'];
+  const index = order.indexOf(String(status || '').toUpperCase());
+
+  return index === -1 ? order.length : index;
+}
+
+function inferMonthlyForecast(forecast, monthEarnedMinor, monthlyGoalMinor, serverTime) {
+  const current = firstNumber(forecast, [
+    'current_month_gbp_minor',
+    'currentMonthGbpMinor',
+    'currentMonthMinor',
+    'current_gbp_minor',
+    'currentMinor'
+  ]) ?? monthEarnedMinor;
+  let average = firstNumber(forecast, [
+    'average_day_gbp_minor',
+    'averagePerDayGbpMinor',
+    'averagePerDayMinor',
+    'daily_average_gbp_minor',
+    'dailyAverageGbpMinor'
+  ]);
+  let projected = firstNumber(forecast, [
+    'projected_month_gbp_minor',
+    'projectedMonthGbpMinor',
+    'projectedMonthMinor',
+    'forecast_gbp_minor',
+    'forecastGbpMinor',
+    'forecastMinor'
+  ]);
+  let delta = firstNumber(forecast, [
+    'target_delta_gbp_minor',
+    'targetDeltaGbpMinor',
+    'goal_delta_gbp_minor',
+    'goalDeltaGbpMinor',
+    'difference_to_goal_gbp_minor',
+    'differenceToGoalGbpMinor'
+  ]);
+  let willReach = firstBoolean(forecast, [
+    'will_reach_goal',
+    'willReachGoal',
+    'targetWillBeReached',
+    'goalWillBeReached'
+  ]);
+
+  if ((average == null || projected == null || delta == null || willReach == null) && current != null) {
+    const now = serverTime ? new Date(serverTime) : new Date();
+
+    if (!Number.isNaN(now.getTime())) {
+      const elapsedDays = Math.max(1, now.getDate());
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+      if (average == null) {
+        average = Math.round(current / elapsedDays);
+      }
+
+      if (projected == null) {
+        projected = Math.round((current / elapsedDays) * daysInMonth);
+      }
+    }
+  }
+
+  if (delta == null && projected != null && monthlyGoalMinor != null) {
+    delta = projected - monthlyGoalMinor;
+  }
+
+  if (willReach == null && delta != null) {
+    willReach = delta >= 0;
+  }
+
+  return { current, average, projected, delta, willReach };
+}
+
+function fmtSignedAmount(minor, currency) {
+  const numeric = Number(minor);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  const sign = numeric > 0 ? '+' : numeric < 0 ? '-' : '';
+
+  return sign + fmtAmount(Math.abs(Math.round(numeric)), currency);
+}
+
+function fmtMetricAmount(value, currency = 'GBP') {
+  if (value && typeof value === 'object') {
+    return fmtMulti(value);
+  }
+
+  return fmtAmount(value, currency);
+}
+
+function fmtMetricHourly(value, currency = 'GBP') {
+  if (value && typeof value === 'object') {
+    const formatted = fmtMulti(value);
+
+    return formatted === DASH ? DASH : formatted + '/h';
+  }
+
+  return value == null ? DASH : fmtAmount(value, currency) + '/h';
+}
+
+function renderGoalCard(label, currentMinor, targetMinor) {
+  const percent = progressPercent(currentMinor, targetMinor);
+  const remaining =
+    Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
+      ? Math.max(0, Number(targetMinor) - Number(currentMinor))
+      : null;
+
+  return `
+    <div class="status-box">
+      <h3>${label}</h3>
+      <div class="status-row">
+        <span class="key">Fortschritt</span>
+        <span class="value">${fmtAmount(currentMinor, 'GBP')} von ${fmtAmount(targetMinor, 'GBP')}</span>
+      </div>
+      ${renderProgressBar(percent)}
+      <div class="status-row">
+        <span class="key">Erreicht</span>
+        <span class="value">${fmtPercent(percent)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Noch offen</span>
+        <span class="value">${fmtAmount(remaining, 'GBP')}</span>
+      </div>
+    </div>
+  `;
+}
+
 // ---- Renderer: Übersicht ----
 
-function renderOverview(data) {
+function renderExpandedOverview(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
   }
 
   const e = data.earnings || {};
-
   const today = e.today || {};
   const week = e.week || {};
   const month = e.month || {};
   const lastMonth = e.lastMonth || {};
   const allTime = e.allTime || {};
+  const goals = asObject(data.goals);
+  const dailyGoalMinor = readGoalMinor(goals, 'daily');
+  const monthlyGoalMinor = readGoalMinor(goals, 'monthly');
+  const todayEarnedGbp = currencyMinor(today.earned, 'GBP');
+  const monthEarnedGbp = currencyMinor(month.earned, 'GBP');
+  const balance = asObject(data.balance);
+  const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
+  const totalOpenByCurrency = combineCurrencyMaps(availableByCurrency, pendingByCurrency);
+  const balanceFetchedAt =
+    balance.fetchedAt ??
+    balance.fetched_at ??
+    balance.updatedAt ??
+    balance.updated_at ??
+    data.balanceFetchedAt;
+  const todayStats = readTodayStats(data, today);
+  const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
+  const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
+  const statusTotal = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
+  const approvedCount = statusCount(statusCounts, ['APPROVED']);
+  const rejectedCount = statusCount(statusCounts, ['REJECTED']);
+  const pendingCount = statusCount(statusCounts, ['AWAITING REVIEW']);
+  const statusStats = asObject(data.statusStats);
+  const approvalRate = readStatusRate(
+    statusStats,
+    ['approval_rate', 'approvalRate', 'approved_rate', 'approvedRate'],
+    statusTotal > 0 ? (approvedCount / statusTotal) * 100 : null
+  );
+  const rejectionRate = readStatusRate(
+    statusStats,
+    ['rejection_rate', 'rejectionRate', 'reject_rate', 'rejectRate'],
+    statusTotal > 0 ? (rejectedCount / statusTotal) * 100 : null
+  );
+  const pendingRate = readStatusRate(
+    statusStats,
+    ['pending_rate', 'pendingRate'],
+    statusTotal > 0 ? (pendingCount / statusTotal) * 100 : null
+  );
+  const forecast = inferMonthlyForecast(
+    asObject(data.forecast),
+    monthEarnedGbp,
+    monthlyGoalMinor,
+    data.serverTime
+  );
 
   const tile = (label, earned, pending) => `
     <div class="earning-tile">
@@ -453,7 +968,6 @@ function renderOverview(data) {
   html += tile('Diese Woche', week.earned, week.pending);
   html += tile('Dieser Monat', month.earned, month.pending);
   html += tile('Gesamt', allTime.earned, allTime.pending);
-
   html += '</div>';
 
   if (Object.keys(lastMonth.earned || {}).length) {
@@ -468,25 +982,178 @@ function renderOverview(data) {
     `;
   }
 
-  if (data.balance) {
-    const { availableByCurrency, pendingByCurrency } = extractProlificBalance(data.balance);
+  html += `
+    <div class="status-box">
+      <h3>Prolific-Konto</h3>
 
-    html += `
-      <div class="status-box">
-        <h3>Prolific-Konto</h3>
-
-        <div class="status-row">
-          <span class="key">Auszahlbar</span>
-          <span class="value">${fmtMulti(availableByCurrency)}</span>
-        </div>
-
-        <div class="status-row">
-          <span class="key">In Prüfung</span>
-          <span class="value">${fmtMulti(pendingByCurrency)}</span>
-        </div>
+      <div class="status-row">
+        <span class="key">Auszahlbar</span>
+        <span class="value">${fmtMulti(availableByCurrency)}</span>
       </div>
-    `;
-  }
+
+      <div class="status-row">
+        <span class="key">In Prüfung</span>
+        <span class="value">${fmtMulti(pendingByCurrency)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Gesamt offen</span>
+        <span class="value">${fmtMulti(totalOpenByCurrency)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Letztes Balance-Update</span>
+        <span class="value">${balanceFetchedAt ? fmtTimeAgo(balanceFetchedAt) : DASH}</span>
+      </div>
+    </div>
+  `;
+
+  html += renderGoalCard('Tagesziel', todayEarnedGbp, dailyGoalMinor);
+  html += renderGoalCard('Monatsziel', monthEarnedGbp, monthlyGoalMinor);
+
+  html += `
+    <div class="status-box">
+      <h3>Monatsprognose</h3>
+
+      <div class="status-row">
+        <span class="key">Aktuell</span>
+        <span class="value">${fmtAmount(forecast.current, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Ø pro Tag</span>
+        <span class="value">${fmtAmount(forecast.average, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Prognose Monatsende</span>
+        <span class="value">${fmtAmount(forecast.projected, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Abweichung zum Ziel</span>
+        <span class="value">${fmtSignedAmount(forecast.delta, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Einschätzung</span>
+        <span class="value">${
+          forecast.willReach == null
+            ? DASH
+            : forecast.willReach
+              ? 'Ziel wird voraussichtlich erreicht'
+              : 'Ziel wird voraussichtlich verfehlt'
+        }</span>
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="status-box">
+      <h3>Heute</h3>
+
+      <div class="status-row">
+        <span class="key">Verdient</span>
+        <span class="value">${fmtMulti(todayStats.earned)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Ausstehend</span>
+        <span class="value">${fmtMulti(todayStats.pending)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Teilnahmen</span>
+        <span class="value">${fmtCount(todayStats.count)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Ø pro Teilnahme</span>
+        <span class="value">${fmtMetricAmount(todayStats.average, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Effektiver Stundenlohn</span>
+        <span class="value">${fmtMetricHourly(todayStats.hourly, 'GBP')}</span>
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="status-box">
+      <h3>Pending-Übersicht</h3>
+
+      <div class="status-row">
+        <span class="key">Offene Teilnahmen</span>
+        <span class="value">${fmtCount(pendingStats.count ?? (statusTotal > 0 ? pendingCount : null))}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Gesamt pending</span>
+        <span class="value">${fmtMulti(pendingStats.total)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älteste offene Teilnahme</span>
+        <span class="value">${pendingStats.oldestAt ? fmtTimeAgo(pendingStats.oldestAt) : DASH}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älter als 7 Tage</span>
+        <span class="value">${fmtCount(pendingStats.olderThan7)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älter als 14 Tage</span>
+        <span class="value">${fmtCount(pendingStats.olderThan14)}</span>
+      </div>
+    </div>
+  `;
+
+  const statusRows = Object.entries(statusCounts)
+    .sort(([a], [b]) => {
+      const ai = statusSortKey(a);
+      const bi = statusSortKey(b);
+
+      if (ai !== bi) return ai - bi;
+
+      return a.localeCompare(b);
+    })
+    .map(([status, count]) => `
+      <div class="status-row">
+        <span class="key">${renderStatusTag(status)}</span>
+        <span class="value">${fmtCount(count)}</span>
+      </div>
+    `)
+    .join('');
+
+  html += `
+    <div class="status-box">
+      <h3>Status-Verteilung</h3>
+
+      ${statusRows || `
+        <div class="status-row">
+          <span class="key">Status</span>
+          <span class="value">${DASH}</span>
+        </div>
+      `}
+
+      <div class="status-row">
+        <span class="key">Approval-Rate</span>
+        <span class="value">${fmtPercent(approvalRate)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Reject-Rate</span>
+        <span class="value">${fmtPercent(rejectionRate)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Pending-Rate</span>
+        <span class="value">${fmtPercent(pendingRate)}</span>
+      </div>
+    </div>
+  `;
 
   html += `
     <div class="status-box">
@@ -494,12 +1161,12 @@ function renderOverview(data) {
 
       <div class="status-row">
         <span class="key">Aktive Studien</span>
-        <span class="value">${data.activeCount ?? 0}</span>
+        <span class="value">${data.activeCount ?? DASH}</span>
       </div>
 
       <div class="status-row">
         <span class="key">Letzter Sync</span>
-        <span class="value">${data.lastSyncAt ? fmtTimeAgo(data.lastSyncAt) : '–'}</span>
+        <span class="value">${data.lastSyncAt ? fmtTimeAgo(data.lastSyncAt) : DASH}</span>
       </div>
   `;
 
@@ -510,7 +1177,7 @@ function renderOverview(data) {
     html += `
       <div class="status-row">
         <span class="key">Teilnahmen gesamt</span>
-        <span class="value">${total}</span>
+        <span class="value">${fmtCount(total)}</span>
       </div>
     `;
   }
@@ -518,6 +1185,10 @@ function renderOverview(data) {
   html += '</div>';
 
   return html;
+}
+
+function renderOverview(data) {
+  return renderExpandedOverview(data);
 }
 
 // ---- Renderer: Studien ----

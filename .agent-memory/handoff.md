@@ -5,9 +5,8 @@ Update mode: Stop
 
 ## Latest Notes
 
-SSH key-based access to the All-Inkl webspace is configured and verified through
-the local SSH alias `prolific-cloud`. The production webroot is
-`/www/htdocs/w021974e/prolific.nickkrakow.de`.
+Roadmap Phase 1 + Phase 2 has been implemented and deployed to the All-Inkl
+webspace. The production webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
 browser, and review feedback are persisted in .agent-memory/feedback.md.
@@ -15,19 +14,20 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 5cdde93 Add Codex workflow protocol
+- Last commit: 5484681 Clarify setup file deployment policy
 
 ## Working Tree
 
 ~~~text
  M .agent-memory/current-state.md
  M .agent-memory/current-task.md
- M .agent-memory/decisions.md
  M .agent-memory/handoff.md
  M .agent-memory/next-steps.md
  M .agent-memory/progress.md
- M AGENTS.md
-?? scripts/
+ M api/data.php
+ M config.example.php
+ M dashboard/assets/app.js
+ M dashboard/assets/style.css
 ~~~
 
 ## Current State Summary

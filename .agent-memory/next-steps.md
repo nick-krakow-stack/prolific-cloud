@@ -4,8 +4,9 @@ Last updated: 2026-05-17
 
 ## Immediate
 
-- Commit SSH/deployment setup separately from product changes.
-- Start `CODEX_PROLIFIC_WATCHER_ROADMAP.md` Phase 1 + Phase 2.
+- Commit and push roadmap Phase 1 + Phase 2 product changes.
+- Owner should log in at `https://prolific.nickkrakow.de/` and visually verify the overview cards with real data.
+- After visual verification, continue with Phase 3/4 candidates: efficiency, top studies, and daily chart data.
 
 ## Phase 1 + Phase 2 Work Split
 
