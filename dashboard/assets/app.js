@@ -136,6 +136,16 @@ function monthComparisonPercent(currentEarned, previousEarned, fxRates) {
   return (currentValue / previousValue) * 100;
 }
 
+function comparisonPercentClass(percent) {
+  const numeric = Number(percent);
+
+  if (!Number.isFinite(numeric)) return 'is-neutral';
+  if (numeric < 95) return 'is-danger';
+  if (numeric <= 105) return 'is-warn';
+
+  return 'is-good';
+}
+
 function renderProgressBar(percent) {
   const clamped = clampPercent(percent);
 
@@ -1411,13 +1421,17 @@ function renderExpandedOverview(data) {
       ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
     </div>
   `;
-  const comparisonTile = () => `
-    <div class="earning-tile comparison-tile">
-      <div class="label">Vergleich</div>
-      <div class="value">${fmtPercent(monthComparisonPercent(month.earned, lastMonth.earned, fxRates))}</div>
-      <div class="secondary">Vormonat: ${fmtMulti(lastMonth.earned)}</div>
-    </div>
-  `;
+  const comparisonTile = () => {
+    const percent = monthComparisonPercent(month.earned, lastMonth.earned, fxRates);
+
+    return `
+      <div class="earning-tile comparison-tile">
+        <div class="label">Vormonat</div>
+        <div class="value comparison-value ${comparisonPercentClass(percent)}">${fmtPercent(percent)}</div>
+        <div class="secondary">${fmtMulti(lastMonth.earned)}</div>
+      </div>
+    `;
+  };
 
   let html = '<div class="earnings-grid">';
 

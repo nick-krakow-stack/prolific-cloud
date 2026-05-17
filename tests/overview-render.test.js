@@ -123,7 +123,10 @@ const checks = [
   ['monthly goal includes pending rewards', html.includes('£87,50 von £100,00') && html.includes('87,5 %')],
   ['merges today stats into the daily goal card', html.includes('<span class="key">Teilnahmen</span>') && html.includes('<span class="value">5</span>') && html.includes('<span class="key">Ø pro Teilnahme</span>') && html.includes('<span class="value">£1,86</span>') && html.includes('<span class="key">Effektiver Stundenlohn</span>') && html.includes('<span class="value">£11,60/h</span>')],
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
-  ['renders monthly comparison as top tile', html.includes('class="earning-tile comparison-tile"') && html.includes('Vergleich') && html.includes('286,5 %') && html.includes('Vormonat: £25,00 + $1,50')],
+  ['renders monthly comparison as previous-month tile', html.includes('class="earning-tile comparison-tile"') && html.includes('<div class="label">Vormonat</div>') && !html.includes('<div class="label">Vergleich</div>')],
+  ['renders monthly comparison percentage with threshold color class', html.includes('class="value comparison-value is-good"') && html.includes('286,5 %')],
+  ['renders previous month amounts without duplicate label', html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat: £25,00 + $1,50')],
+  ['classifies monthly comparison percentage thresholds', typeof sandbox.comparisonPercentClass === 'function' && sandbox.comparisonPercentClass(94.9) === 'is-danger' && sandbox.comparisonPercentClass(95) === 'is-warn' && sandbox.comparisonPercentClass(105) === 'is-warn' && sandbox.comparisonPercentClass(105.1) === 'is-good'],
   ['does not render old comparison status box', !html.includes('<h3>Vergleich</h3>') && !html.includes('<span class="key">Vormonat</span>')],
   ['does not restore old account box', !html.includes('Prolific-Konto') && !html.includes('Gesamt offen')],
   ['sanitizes unknown currency codes', !sandbox.fmtAmount(123, '<img src=x onerror=alert(1)>').includes('<')]

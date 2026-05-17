@@ -196,6 +196,10 @@ a:not(.icon-btn):hover {
   margin-top: 2px;
   overflow-wrap: anywhere;
 }
+.earning-tile .comparison-value.is-danger { color: var(--danger); }
+.earning-tile .comparison-value.is-warn { color: var(--warn); }
+.earning-tile .comparison-value.is-good { color: var(--success); }
+.earning-tile .comparison-value.is-neutral { color: var(--text); }
 .earning-tile .pending { font-size: 11px; color: var(--warn); margin-top: 2px; }
 
 /* ---- Status-Box ---- */
