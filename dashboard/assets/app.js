@@ -2906,7 +2906,7 @@ function renderEventCards(events) {
     return '<div class="loading">Keine Ereignisse.</div>';
   }
 
-  return events.map(e => `
+  return events.slice(0, 10).map(e => `
     <div class="event-card">
       <div>
         <div class="type">${escapeHtml(e.type)}</div>
