@@ -1528,7 +1528,7 @@ function renderSystemHealthCard(systemHealth) {
     studies: 'Studies',
     submissions: 'Submissions',
     events: 'Events',
-    syncLog: 'SyncLog'
+    syncLog: 'Sync-Log'
   };
   const countRows = ['studies', 'submissions', 'events', 'syncLog'].map(key => `
     <div class="health-item">
