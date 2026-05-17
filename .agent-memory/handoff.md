@@ -9,7 +9,10 @@ Roadmap Phase 1 + Phase 2 has been implemented and deployed to the All-Inkl
 webspace. The topbar sync lamp now shows green only for a fresh Watcher sync and
 red when the Watcher appears inactive. The overview no longer shows the old
 `Prolific-Konto` status box; `Auszahlbar` and `In Prüfung` now render as tiles
-below the first four earnings tiles. The production webroot is
+below the first four earnings tiles. The remaining overview roadmap block is
+implemented and deployed: efficiency, top studies, daily chart, system health,
+and EUR equivalents from the `prolific-watcher` Frankfurter.app `fxRates`
+structure. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -28,7 +31,10 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/data.php
  M dashboard/assets/app.js
+ M dashboard/assets/style.css
+?? tests/
 ~~~
 
 ## Current State Summary

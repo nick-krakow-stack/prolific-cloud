@@ -15,5 +15,12 @@
 - 2026-05-17 - Topbar sync lamp changed to green for fresh Watcher sync and red otherwise.
 - 2026-05-17 - Prolific account overview simplified: `Auszahlbar` and
   `In Prüfung` now render as overview tiles; the old account status box was removed.
+- 2026-05-17 - Remaining overview roadmap block implemented locally:
+  efficiency, top studies, daily earnings chart, system health, and EUR
+  equivalents based on the `prolific-watcher` Frankfurter.app `fxRates` structure.
+- 2026-05-17 - Final review finding fixed: unknown currency codes are sanitized
+  before being rendered in dashboard HTML.
+- 2026-05-17 - Remaining overview roadmap block deployed to All-Inkl webspace
+  and verified with server lints, asset checks, HTTP checks, and DB query smoke test.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

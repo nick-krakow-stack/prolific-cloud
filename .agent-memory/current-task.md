@@ -7,6 +7,12 @@ Last updated: 2026-05-17
 - [x] Move Prolific account values into overview tiles.
 - [x] Deploy account tile adjustment to production.
 - [x] Verify production after deployment.
+- [x] Add render contract test for remaining overview roadmap block.
+- [x] Extend overview backend with efficiency, top studies, daily stats, and system health.
+- [x] Extend overview frontend with EUR equivalents, efficiency, top studies, daily chart, and system health.
+- [x] Add styling for top studies, daily bars, health grid, and EUR sublines.
+- [x] Deploy remaining overview roadmap block to production.
+- [x] Verify production after full overview deployment.
 - [ ] Ask owner to visually verify dashboard after login.
 
 ## Completed Task Steps

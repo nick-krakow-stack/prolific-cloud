@@ -4,9 +4,9 @@ Last updated: 2026-05-17
 
 ## Immediate
 
-- Commit and push roadmap Phase 1 + Phase 2 product changes.
 - Owner should log in at `https://prolific.nickkrakow.de/` and visually verify the overview cards with real data.
-- After visual verification, continue with Phase 3/4 candidates: efficiency, top studies, and daily chart data.
+- After visual verification, collect review notes as a batch before starting the
+  next implementation block.
 
 ## Phase 1 + Phase 2 Work Split
 
@@ -40,14 +40,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps
 
 ## Backlog
 
-- Dashboard account card with native balance structure support.
-- Daily/monthly goals and forecast.
-- Today statistics.
-- Pending overview.
-- Status distribution.
-- Effective hourly-rate metrics.
-- Top studies.
-- Daily earnings bars and later heatmap.
-- EUR conversion when `fxRates` are available.
-- System health card.
+- Calendar heatmap.
+- Monthly comparison.
 - CSV export and monthly report after the dashboard foundation is stable.
+- Personal study notes.
+- Requester analysis.
+- Settings page for goals and thresholds.

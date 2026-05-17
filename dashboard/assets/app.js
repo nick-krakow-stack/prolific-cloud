@@ -23,11 +23,15 @@ function $(id) {
 function fmtAmount(minor, currency) {
   if (minor == null) return DASH;
 
+  const safeCurrency = String(currency || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, '')
+    .slice(0, 12);
   const sym =
     currency === 'USD' ? '$' :
     currency === 'EUR' ? '€' :
     currency === 'GBP' ? '£' :
-    currency + ' ';
+    (safeCurrency || 'CUR') + ' ';
 
   return sym + (minor / 100).toFixed(2).replace('.', ',');
 }
@@ -56,6 +60,14 @@ function fmtMulti(byCurrency) {
   }
 
   return parts.length ? parts.join(' + ') : DASH;
+}
+
+function fmtEur(minor) {
+  const numeric = Number(minor);
+
+  if (!Number.isFinite(numeric)) return '';
+
+  return '≈ €' + (numeric / 100).toFixed(2).replace('.', ',');
 }
 
 function fmtCount(value) {
@@ -172,6 +184,68 @@ function currencyMinor(byCurrency, currency = 'GBP') {
   const numeric = Number(value);
 
   return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
+function positiveCurrencyEntries(byCurrency) {
+  return Object.entries(asObject(byCurrency))
+    .map(([currency, value]) => [String(currency).toUpperCase(), Number(value)])
+    .filter(([, value]) => Number.isFinite(value) && value > 0);
+}
+
+function readFxRates(fxRates) {
+  const parsed = asObject(fxRates);
+  const rates = asObject(parsed.rates || parsed);
+  const base = String(parsed.base || 'GBP').toUpperCase();
+
+  return { base, rates };
+}
+
+function fxRateFor(rates, currency) {
+  const cur = String(currency || '').toUpperCase();
+  const direct = rates[cur] ?? rates[cur.toLowerCase()];
+  const numeric = Number(direct);
+
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function convertToEur(byCurrency, fxRates) {
+  const entries = positiveCurrencyEntries(byCurrency);
+
+  if (entries.length === 0) return null;
+
+  const fx = readFxRates(fxRates);
+  const eurRate = fxRateFor(fx.rates, 'EUR');
+
+  if (fx.base !== 'GBP' || !eurRate) {
+    const onlyEur = entries.every(([currency]) => currency === 'EUR');
+
+    if (!onlyEur) return null;
+  }
+
+  let eurMinor = 0;
+
+  for (const [currency, minor] of entries) {
+    if (currency === 'EUR') {
+      eurMinor += Math.round(minor);
+      continue;
+    }
+
+    if (currency === 'GBP') {
+      if (!eurRate) return null;
+
+      eurMinor += Math.round(minor * eurRate);
+      continue;
+    }
+
+    const currencyRate = fxRateFor(fx.rates, currency);
+
+    if (!currencyRate || !eurRate) return null;
+
+    const gbpMinor = minor / currencyRate;
+    eurMinor += Math.round(gbpMinor * eurRate);
+  }
+
+  return eurMinor > 0 ? eurMinor : null;
 }
 
 function hasCurrencyAmounts(byCurrency) {
@@ -652,6 +726,110 @@ function readTodayStats(data, today) {
   };
 }
 
+function readEfficiencyPeriod(source) {
+  const period = asObject(source);
+  const byCurrency = readCurrencyMetric(
+    period,
+    ['byCurrency', 'by_currency', 'hourly', 'hourlyByCurrency', 'hourly_by_currency'],
+    ['gbp_minor', 'gbpMinor', 'hourly_gbp_minor', 'hourlyGbpMinor']
+  );
+
+  return {
+    byCurrency,
+    sampleCount: firstNumber(period, ['sampleCount', 'sample_count', 'count', 'samples']),
+    secondsTotal: firstNumber(period, ['secondsTotal', 'seconds_total', 'timeTakenSeconds', 'time_taken_seconds'])
+  };
+}
+
+function readEfficiencyStats(data) {
+  const efficiency = asObject(data.efficiency);
+
+  return {
+    today: readEfficiencyPeriod(efficiency.today),
+    week: readEfficiencyPeriod(efficiency.week),
+    month: readEfficiencyPeriod(efficiency.month),
+    allTime: readEfficiencyPeriod(efficiency.allTime || efficiency.all_time || efficiency.total)
+  };
+}
+
+function normalizeTopStudy(itemRaw) {
+  const item = asObject(itemRaw);
+
+  return {
+    studyId: firstDefined(item, ['studyId', 'study_id', 'id']),
+    name: firstDefined(item, ['name', 'studyName', 'study_name', 'title']) || '(ohne Namen)',
+    status: firstDefined(item, ['status', 'submissionStatus', 'submission_status']),
+    rewardMinor: firstNumber(item, ['rewardMinor', 'reward_minor', 'rewardAmountMinor', 'reward_amount_minor']),
+    rewardCurrency: firstDefined(item, ['rewardCurrency', 'reward_currency', 'currency']) || 'GBP',
+    timeTakenSeconds: firstNumber(item, ['timeTakenSeconds', 'time_taken_seconds', 'seconds']),
+    hourlyRateMinor: firstNumber(item, ['hourlyRateMinor', 'hourly_rate_minor', 'rewardPerHourMinor', 'reward_per_hour_minor']),
+    completedAt: firstDefined(item, ['completedAt', 'completed_at', 'finishedAt', 'finished_at'])
+  };
+}
+
+function normalizeTopStudyList(value) {
+  const list = parseJsonMaybe(value);
+
+  if (!Array.isArray(list)) return [];
+
+  return list.map(normalizeTopStudy);
+}
+
+function readTopStudies(data) {
+  const topStudies = asObject(data.topStudies);
+
+  return {
+    byReward: normalizeTopStudyList(firstDefined(topStudies, ['byReward', 'by_reward', 'reward'])),
+    byHourly: normalizeTopStudyList(firstDefined(topStudies, ['byHourly', 'by_hourly', 'hourly']))
+  };
+}
+
+function readDailyStats(data) {
+  const raw = parseJsonMaybe(data.dailyStats || data.daily_stats || data.daily);
+
+  if (!Array.isArray(raw)) return [];
+
+  return raw
+    .map(itemRaw => {
+      const item = asObject(itemRaw);
+
+      return {
+        date: firstDefined(item, ['date', 'day']),
+        earned: readCurrencyMetric(item, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']),
+        pending: readCurrencyMetric(item, ['pending', 'pendingByCurrency', 'pending_by_currency'], ['pending_gbp_minor', 'pendingGbpMinor'])
+      };
+    })
+    .filter(item => item.date)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+    .slice(-30);
+}
+
+function readSystemHealth(data) {
+  const system = asObject(data.system);
+  const lastSyncLog = asObject(system.lastSyncLog || system.last_sync_log);
+  const submissionCounts = asObject(data.submissionCounts);
+  const submissionTotal = Object.values(submissionCounts).reduce((sum, value) => {
+    const numeric = Number(value);
+
+    return Number.isFinite(numeric) ? sum + numeric : sum;
+  }, 0);
+  const rawError =
+    firstDefined(system, ['lastError', 'last_error', 'error']) ||
+    firstDefined(lastSyncLog, ['error', 'lastError', 'last_error', 'message']);
+  const errorObject = asObject(rawError);
+
+  return {
+    api: firstDefined(system, ['api', 'status']) || (data.ok ? 'ok' : null),
+    lastSyncAt: firstDefined(system, ['lastSyncAt', 'last_sync_at']) || data.lastSyncAt,
+    lastSyncLog: lastSyncLog,
+    lastError: firstDefined(errorObject, ['message', 'error', 'detail']) || rawError,
+    dbCounts: asObject(system.dbCounts || system.db_counts),
+    activeCount: firstNumber(data, ['activeCount', 'active_count']),
+    submissionTotal: submissionTotal > 0 ? submissionTotal : null,
+    serverTime: firstDefined(system, ['serverTime', 'server_time']) || data.serverTime
+  };
+}
+
 function readPendingStats(data, allTimePending, pendingByCurrency) {
   const pendingStats = asObject(data.pendingStats);
   const total = readCurrencyMetric(
@@ -853,6 +1031,30 @@ function fmtMetricHourly(value, currency = 'GBP') {
   return value == null ? DASH : fmtAmount(value, currency) + '/h';
 }
 
+function fmtDuration(seconds) {
+  const numeric = Number(seconds);
+
+  if (!Number.isFinite(numeric) || numeric <= 0) return DASH;
+
+  const minutes = Math.round(numeric / 60);
+
+  if (minutes < 60) return minutes + ' Min';
+
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+
+  return rest ? `${hours} Std ${rest} Min` : `${hours} Std`;
+}
+
+function totalPositiveMinor(byCurrency) {
+  return positiveCurrencyEntries(byCurrency)
+    .reduce((sum, [, value]) => sum + value, 0);
+}
+
+function chartValueMinor(byCurrency, fxRates) {
+  return convertToEur(byCurrency, fxRates) ?? currencyMinor(byCurrency, 'GBP') ?? totalPositiveMinor(byCurrency);
+}
+
 function renderGoalCard(label, currentMinor, targetMinor) {
   const percent = progressPercent(currentMinor, targetMinor);
   const remaining =
@@ -880,6 +1082,180 @@ function renderGoalCard(label, currentMinor, targetMinor) {
   `;
 }
 
+function renderEfficiencyCard(efficiency) {
+  const periods = [
+    ['Heute', efficiency.today],
+    ['Woche', efficiency.week],
+    ['Monat', efficiency.month],
+    ['Gesamt', efficiency.allTime]
+  ];
+
+  const rows = periods.map(([label, period]) => `
+    <div class="status-row">
+      <span class="key">${label}</span>
+      <span class="value">${fmtMetricHourly(period.byCurrency, 'GBP')}</span>
+    </div>
+    <div class="status-row">
+      <span class="key">Basis</span>
+      <span class="value">${fmtCount(period.sampleCount)} Samples &middot; ${fmtDuration(period.secondsTotal)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="status-box">
+      <h3>Effizienz / Stundenlohn</h3>
+      ${rows}
+    </div>
+  `;
+}
+
+function renderTopStudyList(items, mode) {
+  const list = items.slice(0, 5);
+
+  if (list.length === 0) {
+    return '<div class="loading">Keine Daten.</div>';
+  }
+
+  const rows = list.map((study, index) => {
+    const reward = fmtAmount(study.rewardMinor, study.rewardCurrency);
+    const hourly = study.hourlyRateMinor == null
+      ? DASH
+      : fmtAmount(study.hourlyRateMinor, study.rewardCurrency) + '/h';
+    const primary = mode === 'hourly' ? hourly : reward;
+    const secondary = mode === 'hourly' ? reward : hourly;
+    const url = study.studyId
+      ? `https://app.prolific.com/studies/${encodeURIComponent(study.studyId)}`
+      : null;
+
+    return `
+      <li class="top-study-item">
+        <div class="top-study-name">
+          ${index + 1}. ${
+            url
+              ? `<a href="${url}" target="_blank" rel="noopener">${escapeHtml(study.name)}</a>`
+              : escapeHtml(study.name)
+          }
+        </div>
+        <div class="top-study-meta">
+          <span>${primary}</span>
+          <span>${secondary}</span>
+          <span>${fmtDuration(study.timeTakenSeconds)}</span>
+          <span>${study.completedAt ? fmtTimestamp(study.completedAt) : DASH}</span>
+          ${study.status ? renderStatusTag(study.status) : ''}
+        </div>
+      </li>
+    `;
+  }).join('');
+
+  return `<ul class="top-study-list">${rows}</ul>`;
+}
+
+function renderTopStudiesCard(topStudies) {
+  return `
+    <div class="status-box">
+      <h3>Top-Studien</h3>
+      <div class="status-row">
+        <span class="key">Top nach Verg&uuml;tung</span>
+        <span class="value"></span>
+      </div>
+      ${renderTopStudyList(topStudies.byReward, 'reward')}
+      <div class="status-row">
+        <span class="key">Top nach Stundenlohn</span>
+        <span class="value"></span>
+      </div>
+      ${renderTopStudyList(topStudies.byHourly, 'hourly')}
+    </div>
+  `;
+}
+
+function renderDailyStatsCard(dailyStats, fxRates) {
+  if (dailyStats.length === 0) {
+    return `
+      <div class="status-box">
+        <h3>Einnahmen-Verlauf</h3>
+        <div class="loading">Keine Tagesdaten.</div>
+      </div>
+    `;
+  }
+
+  const maxValue = Math.max(...dailyStats.map(day => chartValueMinor(day.earned, fxRates)), 0);
+  const bars = dailyStats.map(day => {
+    const value = chartValueMinor(day.earned, fxRates);
+    const width = maxValue > 0 ? Math.max(2, (value / maxValue) * 100) : 0;
+    const labelDate = new Date(day.date);
+    const label = Number.isNaN(labelDate.getTime())
+      ? String(day.date).slice(5)
+      : labelDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    const title = `${day.date}: verdient ${fmtMulti(day.earned)}, pending ${fmtMulti(day.pending)}`;
+
+    return `
+      <div class="daily-bar" title="${escapeHtml(title)}">
+        <div class="daily-bar-label">${escapeHtml(label)}</div>
+        <div class="daily-bar-fill" style="width:${width.toFixed(2)}%;"></div>
+        <div class="daily-bar-value">${fmtMulti(day.earned)}</div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="status-box">
+      <h3>Einnahmen-Verlauf</h3>
+      <div class="daily-chart">${bars}</div>
+    </div>
+  `;
+}
+
+function renderSystemHealthCard(systemHealth) {
+  const dbCounts = asObject(systemHealth.dbCounts);
+  const countRows = ['studies', 'submissions', 'events', 'syncLog'].map(key => `
+    <div class="health-item">
+      <span>${escapeHtml(key)}</span>
+      <span>${fmtCount(dbCounts[key])}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="status-box">
+      <h3>System-Health</h3>
+      <div class="health-grid">
+        <div class="health-item">
+          <span>API</span>
+          <span>${escapeHtml(String(systemHealth.api || DASH).toUpperCase())}</span>
+        </div>
+        <div class="health-item">
+          <span>Letzter Sync</span>
+          <span>${systemHealth.lastSyncAt ? fmtTimeAgo(systemHealth.lastSyncAt) : DASH}</span>
+        </div>
+        ${
+          systemHealth.activeCount != null
+            ? `<div class="health-item">
+                <span>Aktive Studien</span>
+                <span>${fmtCount(systemHealth.activeCount)}</span>
+              </div>`
+            : ''
+        }
+        ${
+          systemHealth.submissionTotal != null
+            ? `<div class="health-item">
+                <span>Teilnahmen gesamt</span>
+                <span>${fmtCount(systemHealth.submissionTotal)}</span>
+              </div>`
+            : ''
+        }
+        <div class="health-item">
+          <span>Letzter Fehler</span>
+          <span>${systemHealth.lastError ? escapeHtml(systemHealth.lastError) : 'keiner'}</span>
+        </div>
+        ${countRows}
+        <div class="health-item">
+          <span>Serverzeit</span>
+          <span>${fmtDateTime(systemHealth.serverTime)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // ---- Renderer: Übersicht ----
 
 function renderExpandedOverview(data) {
@@ -902,6 +1278,10 @@ function renderExpandedOverview(data) {
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
   const todayStats = readTodayStats(data, today);
   const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
+  const efficiencyStats = readEfficiencyStats(data);
+  const topStudies = readTopStudies(data);
+  const dailyStats = readDailyStats(data);
+  const systemHealth = readSystemHealth(data);
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
   const statusTotal = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
   const approvedCount = statusCount(statusCounts, ['APPROVED']);
@@ -929,8 +1309,9 @@ function renderExpandedOverview(data) {
     monthlyGoalMinor,
     data.serverTime
   );
+  const fxRates = data.fxRates || data.fx_rates;
 
-  const tile = (label, earned, pending) => `
+  const tile = (label, earned, pending, subline) => `
     <div class="earning-tile">
       <div class="label">${label}</div>
       <div class="value">${fmtMulti(earned)}</div>
@@ -939,6 +1320,7 @@ function renderExpandedOverview(data) {
           ? `<div class="pending">+ ${fmtMulti(pending)} ausstehend</div>`
           : ''
       }
+      ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
     </div>
   `;
 
@@ -948,8 +1330,8 @@ function renderExpandedOverview(data) {
   html += tile('Diese Woche', week.earned, week.pending);
   html += tile('Dieser Monat', month.earned, month.pending);
   html += tile('Gesamt', allTime.earned, allTime.pending);
-  html += tile('Auszahlbar', availableByCurrency);
-  html += tile('In Prüfung', pendingByCurrency);
+  html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
+  html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
   html += '</div>';
 
   if (Object.keys(lastMonth.earned || {}).length) {
@@ -1111,34 +1493,10 @@ function renderExpandedOverview(data) {
     </div>
   `;
 
-  html += `
-    <div class="status-box">
-      <h3>System-Status</h3>
-
-      <div class="status-row">
-        <span class="key">Aktive Studien</span>
-        <span class="value">${data.activeCount ?? DASH}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Letzter Sync</span>
-        <span class="value">${data.lastSyncAt ? fmtTimeAgo(data.lastSyncAt) : DASH}</span>
-      </div>
-  `;
-
-  if (data.submissionCounts) {
-    const sc = data.submissionCounts;
-    const total = Object.values(sc).reduce((a, b) => Number(a) + Number(b), 0);
-
-    html += `
-      <div class="status-row">
-        <span class="key">Teilnahmen gesamt</span>
-        <span class="value">${fmtCount(total)}</span>
-      </div>
-    `;
-  }
-
-  html += '</div>';
+  html += renderEfficiencyCard(efficiencyStats);
+  html += renderTopStudiesCard(topStudies);
+  html += renderDailyStatsCard(dailyStats, fxRates);
+  html += renderSystemHealthCard(systemHealth);
 
   return html;
 }

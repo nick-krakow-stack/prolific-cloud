@@ -92,6 +92,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   (10 minutes or newer) and red when no fresh sync is available.
 - The old `Prolific-Konto` status box, `Gesamt offen`, and balance update row
   are no longer shown in the overview.
+- The remaining overview roadmap block is implemented and deployed: overview now has
+  `efficiency`, `topStudies`, `dailyStats`, and `system` data; the frontend renders
+  efficiency/hourly rates, top studies, a 30-day daily earnings chart, system
+  health, and EUR equivalents from the `prolific-watcher` Frankfurter.app
+  `fxRates` structure (`base: GBP`, `rates.EUR`, `rates.USD`).
 
 ## Operating Model
 
@@ -114,6 +119,15 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   PHP lint, and live unauthenticated HTTP checks.
 - Account tile adjustment verified with `node --check`, a JS render-state test,
   deploy, server PHP lint, and live unauthenticated HTTP checks.
+- Remaining overview block currently has a dedicated Node render contract test at
+  `tests/overview-render.test.js`.
+- Deployment verification for the remaining overview block passed: `node --check`,
+  `tests/overview-render.test.js`, `php74`/`php84` lint on `api/data.php`,
+  server-side PHP lints for runtime files, live root `200`, unauthenticated
+  overview API `401`, asset delivery checks, and direct server DB query smoke test.
+- A final read-only review found one P2 hardening issue; `fmtAmount()` now
+  sanitizes unknown currency codes before rendering, covered by the overview
+  render contract test.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

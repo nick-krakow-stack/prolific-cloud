@@ -168,6 +168,9 @@ function build_overview(PDO $pdo): array {
     $pendingStats = build_pending_stats($pdo, $pendingStatuses, $now);
     $statusStats = build_status_stats($subCounts);
     $todayStats = build_today_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
+    $efficiency = build_efficiency_stats($pdo, $earnedStatuses, $today, $weekStart, $monthStart);
+    $topStudies = build_top_studies($pdo, $earnedStatuses);
+    $dailyStats = build_daily_stats($pdo, $earnedStatuses, $pendingStatuses, $today);
 
     $balanceRaw   = get_setting('balance');
     $fxRatesRaw   = get_setting('fxRates');
@@ -179,6 +182,7 @@ function build_overview(PDO $pdo): array {
     $lastSyncRow = $pdo
         ->query("SELECT * FROM sync_log ORDER BY id DESC LIMIT 1")
         ->fetch();
+    $system = build_system_stats($pdo, $lastSyncAt, $lastSyncRow ?: null);
 
     return [
         'ok' => true,
@@ -212,6 +216,10 @@ function build_overview(PDO $pdo): array {
         'pendingStats'     => $pendingStats,
         'statusStats'      => $statusStats,
         'todayStats'       => $todayStats,
+        'efficiency'       => $efficiency,
+        'topStudies'       => $topStudies,
+        'dailyStats'       => $dailyStats,
+        'system'           => $system,
         'balance'          => $balance,
         'fxRates'          => $fxRates,
         'lastSyncAt'       => $lastSyncAt,
@@ -449,6 +457,7 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
 
     $byCurrency = [];
     $sampleCount = 0;
+    $secondsGrandTotal = 0;
 
     foreach ($stmt->fetchAll() as $row) {
         if (empty($row['reward_currency'])) {
@@ -461,13 +470,236 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
         }
 
         $sampleCount += (int)$row['sample_count'];
+        $secondsGrandTotal += $secondsTotal;
         $byCurrency[$row['reward_currency']] = (int)round(((int)$row['reward_total'] * 3600) / $secondsTotal);
     }
 
     return [
         'byCurrency' => $byCurrency,
         'sampleCount' => $sampleCount,
+        'secondsTotal' => $secondsGrandTotal,
     ];
+}
+
+function build_efficiency_stats(
+    PDO $pdo,
+    array $earnedStatuses,
+    DateTime $today,
+    DateTime $weekStart,
+    DateTime $monthStart
+): array {
+    return [
+        'today' => build_efficiency_period($pdo, $earnedStatuses, $today),
+        'week' => build_efficiency_period($pdo, $earnedStatuses, $weekStart),
+        'month' => build_efficiency_period($pdo, $earnedStatuses, $monthStart),
+        'allTime' => build_efficiency_period($pdo, $earnedStatuses, null),
+    ];
+}
+
+function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $from): array {
+    $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+
+    $sql = "
+        SELECT reward_currency,
+               COUNT(*) sample_count,
+               SUM(reward_amount_minor) reward_total,
+               SUM(time_taken_seconds) seconds_total
+        FROM submissions
+        WHERE status IN ($placeholders)
+          AND reward_amount_minor > 0
+          AND time_taken_seconds > 0
+    ";
+
+    $params = $earnedStatuses;
+
+    if ($from) {
+        $sql .= " AND completed_at >= ?";
+        $params[] = $from->format('Y-m-d H:i:s');
+    }
+
+    $sql .= " GROUP BY reward_currency";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $byCurrency = [];
+    $sampleCount = 0;
+    $secondsGrandTotal = 0;
+
+    foreach ($stmt->fetchAll() as $row) {
+        if (empty($row['reward_currency'])) {
+            continue;
+        }
+
+        $secondsTotal = (int)$row['seconds_total'];
+        if ($secondsTotal <= 0) {
+            continue;
+        }
+
+        $sampleCount += (int)$row['sample_count'];
+        $secondsGrandTotal += $secondsTotal;
+        $byCurrency[$row['reward_currency']] = (int)round(((int)$row['reward_total'] * 3600) / $secondsTotal);
+    }
+
+    return [
+        'byCurrency' => $byCurrency,
+        'sampleCount' => $sampleCount,
+        'secondsTotal' => $secondsGrandTotal,
+    ];
+}
+
+function build_top_studies(PDO $pdo, array $earnedStatuses): array {
+    return [
+        'byReward' => fetch_top_study_rows($pdo, $earnedStatuses, 'reward'),
+        'byHourly' => fetch_top_study_rows($pdo, $earnedStatuses, 'hourly'),
+    ];
+}
+
+function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode): array {
+    $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $timeFilter = $sortMode === 'hourly' ? 'AND s.time_taken_seconds > 0' : '';
+    $orderBy = $sortMode === 'hourly'
+        ? '(s.reward_amount_minor * 3600 / s.time_taken_seconds) DESC, s.reward_amount_minor DESC'
+        : 's.reward_amount_minor DESC, s.completed_at DESC';
+
+    $stmt = $pdo->prepare("
+        SELECT s.study_id,
+               COALESCE(NULLIF(s.study_name, ''), NULLIF(st.name, ''), s.study_id) AS display_name,
+               s.status,
+               s.reward_amount_minor,
+               s.reward_currency,
+               s.time_taken_seconds,
+               s.completed_at
+        FROM submissions s
+        LEFT JOIN studies st ON st.id = s.study_id
+        WHERE s.status IN ($placeholders)
+          AND s.reward_amount_minor > 0
+          $timeFilter
+        ORDER BY $orderBy
+        LIMIT 5
+    ");
+    $stmt->execute($earnedStatuses);
+
+    $items = [];
+
+    foreach ($stmt->fetchAll() as $row) {
+        $rewardMinor = (int)$row['reward_amount_minor'];
+        $seconds = (int)$row['time_taken_seconds'];
+
+        $items[] = [
+            'studyId' => $row['study_id'],
+            'name' => $row['display_name'],
+            'status' => $row['status'],
+            'rewardMinor' => $rewardMinor,
+            'rewardCurrency' => $row['reward_currency'],
+            'timeTakenSeconds' => $seconds,
+            'hourlyRateMinor' => $seconds > 0 ? (int)round(($rewardMinor * 3600) / $seconds) : null,
+            'completedAt' => $row['completed_at'],
+        ];
+    }
+
+    return $items;
+}
+
+function build_daily_stats(PDO $pdo, array $earnedStatuses, array $pendingStatuses, DateTime $today): array {
+    $start = (clone $today)->modify('-29 days')->setTime(0, 0, 0);
+    $end = (clone $today)->modify('+1 day')->setTime(0, 0, 0);
+    $allStatuses = array_merge($earnedStatuses, $pendingStatuses);
+    $placeholders = implode(',', array_fill(0, count($allStatuses), '?'));
+
+    $params = $allStatuses;
+    $params[] = $start->format('Y-m-d H:i:s');
+    $params[] = $end->format('Y-m-d H:i:s');
+
+    $stmt = $pdo->prepare("
+        SELECT DATE(completed_at) stat_date,
+               status,
+               reward_currency,
+               SUM(reward_amount_minor) total
+        FROM submissions
+        WHERE status IN ($placeholders)
+          AND completed_at >= ?
+          AND completed_at < ?
+          AND reward_amount_minor > 0
+        GROUP BY DATE(completed_at), status, reward_currency
+    ");
+    $stmt->execute($params);
+
+    $byDate = [];
+    for ($day = clone $start; $day < $end; $day->modify('+1 day')) {
+        $dateKey = $day->format('Y-m-d');
+        $byDate[$dateKey] = [
+            'date' => $dateKey,
+            'earned' => [],
+            'pending' => [],
+        ];
+    }
+
+    foreach ($stmt->fetchAll() as $row) {
+        $dateKey = $row['stat_date'];
+        $currency = $row['reward_currency'];
+
+        if (!isset($byDate[$dateKey]) || empty($currency)) {
+            continue;
+        }
+
+        $bucket = in_array($row['status'], $pendingStatuses, true) ? 'pending' : 'earned';
+        if (!isset($byDate[$dateKey][$bucket][$currency])) {
+            $byDate[$dateKey][$bucket][$currency] = 0;
+        }
+
+        $byDate[$dateKey][$bucket][$currency] += (int)$row['total'];
+    }
+
+    return array_values($byDate);
+}
+
+function build_system_stats(PDO $pdo, $lastSyncAt, ?array $lastSyncLog): array {
+    return [
+        'api' => 'ok',
+        'lastSyncAt' => $lastSyncAt,
+        'lastSyncLog' => $lastSyncLog,
+        'lastError' => fetch_last_error_event($pdo),
+        'dbCounts' => [
+            'studies' => count_table_rows($pdo, 'studies'),
+            'submissions' => count_table_rows($pdo, 'submissions'),
+            'events' => count_table_rows($pdo, 'events'),
+            'syncLog' => count_table_rows($pdo, 'sync_log'),
+        ],
+        'serverTime' => date('c'),
+    ];
+}
+
+function fetch_last_error_event(PDO $pdo): ?array {
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM events
+        WHERE type LIKE ?
+        ORDER BY id DESC
+        LIMIT 1
+    ");
+    $stmt->execute(['%error%']);
+    $row = $stmt->fetch();
+
+    return $row ?: null;
+}
+
+function count_table_rows(PDO $pdo, string $table): int {
+    $allowedTables = [
+        'studies' => true,
+        'submissions' => true,
+        'events' => true,
+        'sync_log' => true,
+    ];
+
+    if (!isset($allowedTables[$table])) {
+        return 0;
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM `$table`");
+    $stmt->execute();
+
+    return (int)$stmt->fetchColumn();
 }
 
 /**
