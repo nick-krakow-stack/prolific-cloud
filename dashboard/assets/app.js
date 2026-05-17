@@ -1133,7 +1133,7 @@ function chartValueMinor(byCurrency, fxRates) {
   return convertToEur(byCurrency, fxRates) ?? currencyMinor(byCurrency, 'GBP') ?? totalPositiveMinor(byCurrency);
 }
 
-function renderGoalCard(label, currentMinor, targetMinor) {
+function renderGoalCard(label, currentMinor, targetMinor, extraRows = '') {
   const percent = progressPercent(currentMinor, targetMinor);
   const remaining =
     Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
@@ -1156,6 +1156,7 @@ function renderGoalCard(label, currentMinor, targetMinor) {
         <span class="key">Noch offen</span>
         <span class="value">${fmtAmount(remaining, 'GBP')}</span>
       </div>
+      ${extraRows}
     </div>
   `;
 }
@@ -1422,7 +1423,24 @@ function renderExpandedOverview(data) {
   }
   html += '</div>';
 
-  html += renderGoalCard('Tagesziel', todayGoalGbp, dailyGoalMinor);
+  const todayDetailRows = `
+      <div class="status-row">
+        <span class="key">Teilnahmen</span>
+        <span class="value">${fmtCount(todayStats.count)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Ø pro Teilnahme</span>
+        <span class="value">${fmtMetricAmount(todayStats.average, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Effektiver Stundenlohn</span>
+        <span class="value">${fmtMetricHourly(todayStats.hourly, 'GBP')}</span>
+      </div>
+  `;
+
+  html += renderGoalCard('Heute', todayGoalGbp, dailyGoalMinor, todayDetailRows);
   html += renderGoalCard('Monatsziel', monthGoalGbp, monthlyGoalMinor);
 
   html += `
@@ -1458,37 +1476,6 @@ function renderExpandedOverview(data) {
               ? 'Ziel wird voraussichtlich erreicht'
               : 'Ziel wird voraussichtlich verfehlt'
         }</span>
-      </div>
-    </div>
-  `;
-
-  html += `
-    <div class="status-box">
-      <h3>Heute</h3>
-
-      <div class="status-row">
-        <span class="key">Verdient</span>
-        <span class="value">${fmtMulti(todayStats.earned)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Ausstehend</span>
-        <span class="value">${fmtMulti(todayStats.pending)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Teilnahmen</span>
-        <span class="value">${fmtCount(todayStats.count)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Ø pro Teilnahme</span>
-        <span class="value">${fmtMetricAmount(todayStats.average, 'GBP')}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Effektiver Stundenlohn</span>
-        <span class="value">${fmtMetricHourly(todayStats.hourly, 'GBP')}</span>
       </div>
     </div>
   `;

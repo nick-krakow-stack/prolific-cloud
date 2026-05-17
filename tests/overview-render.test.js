@@ -56,6 +56,11 @@ const sampleOverview = {
   },
   forecast: {},
   pendingStats: {},
+  todayStats: {
+    submissionsCount: 5,
+    averageReward: { byCurrency: { GBP: 186 }, sampleCount: 1 },
+    effectiveHourlyRate: { byCurrency: { GBP: 1160 }, sampleCount: 1, secondsTotal: 600 }
+  },
   statusStats: {},
   efficiency: {
     today: { byCurrency: { GBP: 1200 }, sampleCount: 2, secondsTotal: 1800 },
@@ -111,8 +116,11 @@ const checks = [
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders system health grid', html.includes('health-grid') && html.includes('API')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
+  ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
   ['daily goal includes pending rewards', html.includes('£8,00 von £10,00') && html.includes('80 %')],
   ['monthly goal includes pending rewards', html.includes('£87,50 von £100,00') && html.includes('87,5 %')],
+  ['merges today stats into the daily goal card', html.includes('<span class="key">Teilnahmen</span>') && html.includes('<span class="value">5</span>') && html.includes('<span class="key">Ø pro Teilnahme</span>') && html.includes('<span class="value">£1,86</span>') && html.includes('<span class="key">Effektiver Stundenlohn</span>') && html.includes('<span class="value">£11,60/h</span>')],
+  ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
   ['renders monthly comparison as top tile', html.includes('class="earning-tile comparison-tile"') && html.includes('Vergleich') && html.includes('286,5 %') && html.includes('Vormonat: £25,00 + $1,50')],
   ['does not render old comparison status box', !html.includes('<h3>Vergleich</h3>') && !html.includes('<span class="key">Vormonat</span>')],
   ['does not restore old account box', !html.includes('Prolific-Konto') && !html.includes('Gesamt offen')],
