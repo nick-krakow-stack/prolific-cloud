@@ -4,6 +4,9 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Remove study note fields and save buttons from study cards.
+- [x] Remove notes API from runtime deploy and production webspace.
+- [x] Deploy study-notes removal and verify runtime files.
 - [x] Format monthly report month labels in German, e.g. `Mai 2026`.
 - [x] Deploy monthly report month-label review fix to production and verify runtime files.
 - [x] Convert requester analysis to a column table.
@@ -21,10 +24,10 @@ Last updated: 2026-05-17
 - [x] Deploy Sync-Status review fix to production and verify runtime files.
 - [x] Add failing render contract for remaining roadmap UI.
 - [x] Add backend stats, account, system, and settings endpoints.
-- [x] Add CSV export and study notes API.
-- [x] Add study notes schema to install backup and live migration.
+- [x] Add CSV export.
+- [x] Remove study notes again after owner review.
 - [x] Add stats/account/system/settings tabs and renderers.
-- [x] Add heatmap/monthly report/requester/settings/note styling.
+- [x] Add heatmap/monthly report/requester/settings styling.
 - [x] Deploy completed roadmap block to production.
 - [x] Verify production after completed roadmap deployment.
 - [ ] Ask owner to visually verify full roadmap implementation after login.

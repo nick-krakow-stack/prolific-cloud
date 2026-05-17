@@ -14,7 +14,7 @@ implemented and deployed: efficiency, top studies, daily chart, system health,
 and EUR equivalents from the `prolific-watcher` Frankfurter.app `fxRates`
 structure. The rest of the roadmap is also implemented and deployed: stats,
 account, system, settings, heatmap, monthly comparison, CSV export, monthly
-report, study notes, requester analysis, and quality tags. Browser review fix
+report, requester analysis, and quality tags. Browser review fix
 for the former `Log` tab is implemented and deployed: the tab now reads
 `Sync-Status`, shows last sync status, last successful sync, and last failure,
 and keeps the detailed event log collapsed behind `Log`. Browser review fix for
@@ -28,7 +28,10 @@ future days. Browser review fix for requester analysis is implemented and
 deployed: it now renders as a responsive table with columns for requester,
 count, earnings, hourly rate, and Approval-Rate. Browser review fix for the
 monthly report is implemented and deployed: month labels render in German
-format such as `Mai 2026` while API values stay machine-readable. The production webroot is
+format such as `Mai 2026` while API values stay machine-readable. Browser
+review fix for study notes is implemented and deployed: study cards no longer
+render notes, `api/notes.php` is removed from runtime deploys and the server,
+and the existing DB table was left untouched. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -37,7 +40,7 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: 9b89d3f Format monthly report month labels
+- Last product commit before this snapshot: a60056f Remove study notes feature
 
 ## Working Tree
 

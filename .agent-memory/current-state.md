@@ -130,12 +130,12 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   render contract test.
 - The remaining roadmap items are implemented and deployed: stats/account/system/settings
   tabs, calendar heatmap, monthly comparison, CSV export, monthly report,
-  study notes, requester analysis, settings for goals/quality thresholds, and
-  study quality tags.
-- `study_notes` was migrated on production with
-  `migrations/2026-05-17-create-study-notes.sql`; `install.php` includes the
-  table for future reinstall backup, but setup and migration files are still not
-  uploaded by normal deploys.
+  requester analysis, settings for goals/quality thresholds, and study quality tags.
+- Study notes were removed again after owner review. Study cards no longer
+  render note fields/buttons, `/api/notes.php` is removed from runtime deploys
+  and the production webspace, and reinstall setup no longer creates
+  `study_notes`. The existing production table was left untouched to avoid
+  destructive data loss.
 - New session write endpoints are hardened with `X-Requested-With`/same-origin
   checks, and CSV export neutralizes spreadsheet formula prefixes.
 - Browser review fix: the former `Log` tab is now labelled `Sync-Status`.
@@ -155,6 +155,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   (`APPROVED / (APPROVED + REJECTED)`, pending excluded).
 - Browser review fix: the monthly report keeps API month values as `YYYY-MM`,
   but renders them in German display format such as `Mai 2026`.
+- Browser review fix: study notes are no longer part of the dashboard UI or
+  runtime API.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

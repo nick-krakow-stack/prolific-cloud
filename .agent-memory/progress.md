@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: study notes were removed from the
+  dashboard runtime. Study cards no longer render note fields/buttons, the
+  notes API is no longer deployed, and the old server `api/notes.php` was
+  removed. Existing production DB table was left untouched to avoid data loss.
 - 2026-05-17 - Browser review fix deployed: monthly report month labels now
   render in German format, e.g. `Mai 2026`, while the API keeps `YYYY-MM`.
 - 2026-05-17 - Browser review fix deployed: requester analysis now renders as a

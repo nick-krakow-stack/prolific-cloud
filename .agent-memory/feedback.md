@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Study notes are not needed; remove note
+  fields/buttons from study cards and remove the notes runtime path.
 - 2026-05-17 - Browser feedback: Month values in the monthly report should be
   displayed in German label format, e.g. `Mai 2026` instead of `2026-05`.
 - 2026-05-17 - Browser feedback: Requester analysis should have column
