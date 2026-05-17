@@ -215,6 +215,110 @@ a:not(.icon-btn):hover {
 .status-row .key { color: var(--text-muted); }
 .status-row .value { font-weight: 600; }
 
+.goal-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.goal-card {
+  min-width: 0;
+  margin-bottom: 0;
+}
+.goal-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.goal-card-head h3 { margin: 0; }
+.goal-ring-wrap {
+  --goal-progress: 0%;
+  --goal-overflow: 0%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+}
+.goal-ring-overflow,
+.goal-ring {
+  grid-area: 1 / 1;
+  border-radius: 999px;
+}
+.goal-ring-overflow {
+  width: 88px;
+  height: 88px;
+  background: conic-gradient(var(--primary) var(--goal-overflow), transparent 0);
+  opacity: 0;
+}
+.goal-ring-wrap.has-overflow .goal-ring-overflow { opacity: 1; }
+.goal-ring {
+  --goal-ring-color: var(--text-muted);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  background: conic-gradient(var(--goal-ring-color) var(--goal-progress), var(--border) 0);
+}
+.goal-ring::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: inherit;
+  background: var(--bg-card);
+}
+.goal-ring span {
+  position: relative;
+  z-index: 1;
+  max-width: 54px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+.goal-ring.is-danger { --goal-ring-color: var(--danger); }
+.goal-ring.is-warn { --goal-ring-color: var(--warn); }
+.goal-ring.is-good { --goal-ring-color: var(--success); }
+.goal-ring.is-neutral { --goal-ring-color: var(--text-muted); }
+
+@media (max-width: 520px) {
+  .goal-card-grid { gap: 8px; }
+  .goal-card { padding: 12px 10px; }
+  .goal-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .goal-ring-wrap {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+  .goal-ring-overflow {
+    width: 78px;
+    height: 78px;
+  }
+  .goal-ring {
+    width: 66px;
+    height: 66px;
+  }
+  .goal-ring::after { inset: 7px; }
+  .goal-ring span {
+    max-width: 48px;
+    font-size: 12px;
+  }
+  .goal-card .status-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1px;
+  }
+}
+
 /* ---- Overview-Komponenten ---- */
 .dashboard-grid {
   display: grid;

@@ -54,12 +54,33 @@ const sampleOverview = {
     daily_gbp_minor: 1000,
     monthly_gbp_minor: 10000
   },
-  forecast: {},
+  forecast: {
+    current_gbp_minor: 8750,
+    averageDayGbpMinor: 515,
+    projectedMonthGbpMinor: 15960,
+    targetDifferenceGbpMinor: 5960,
+    willReachGoal: true
+  },
   pendingStats: {},
   todayStats: {
     submissionsCount: 5,
     averageReward: { byCurrency: { GBP: 186 }, sampleCount: 1 },
-    effectiveHourlyRate: { byCurrency: { GBP: 1160 }, sampleCount: 1, secondsTotal: 600 }
+    effectiveHourlyRate: {
+      byCurrency: { GBP: 1160 },
+      rewardByCurrency: { GBP: 193 },
+      sampleCount: 1,
+      secondsTotal: 600
+    }
+  },
+  monthStats: {
+    submissionsCount: 14,
+    averageReward: { byCurrency: { GBP: 625 }, sampleCount: 14 },
+    effectiveHourlyRate: {
+      byCurrency: { GBP: 1137, USD: 1344 },
+      rewardByCurrency: { GBP: 9475, USD: 11200 },
+      sampleCount: 14,
+      secondsTotal: 30000
+    }
   },
   statusStats: {},
   efficiency: {
@@ -119,9 +140,18 @@ const checks = [
   ['does not render system health in overview', !html.includes('System-Health') && !html.includes('health-grid')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
-  ['daily goal includes pending rewards', html.includes('£8,00 von £10,00') && html.includes('80 %')],
-  ['monthly goal includes pending rewards', html.includes('£87,50 von £100,00') && html.includes('87,5 %')],
-  ['merges today stats into the daily goal card', html.includes('<span class="key">Teilnahmen</span>') && html.includes('<span class="value">5</span>') && html.includes('<span class="key">Ø pro Teilnahme</span>') && html.includes('<span class="value">£1,86</span>') && html.includes('<span class="key">Effektiver Stundenlohn</span>') && html.includes('<span class="value">£11,60/h</span>')],
+  ['daily goal includes pending rewards', html.includes('€9,44 von €11,80') && html.includes('80 %')],
+  ['monthly goal includes pending rewards', html.includes('€103,25 von €118,00') && html.includes('87,5 %')],
+  ['renders daily and monthly goals as paired ring cards', html.includes('class="goal-card-grid"') && html.includes('class="status-box goal-card"') && html.includes('class="goal-ring-wrap"') && html.includes('class="goal-ring')],
+  ['renames monthly goal card to current month', html.includes('<h3>Aktueller Monat</h3>') && !html.includes('<h3>Monatsziel</h3>')],
+  ['colors goal rings by threshold', typeof sandbox.goalProgressClass === 'function' && sandbox.goalProgressClass(49.9) === 'is-danger' && sandbox.goalProgressClass(50) === 'is-warn' && sandbox.goalProgressClass(94.9) === 'is-warn' && sandbox.goalProgressClass(95) === 'is-good'],
+  ['supports outer progress ring above 100 percent', typeof sandbox.goalOverflowPercent === 'function' && sandbox.goalOverflowPercent(110) === 10 && sandbox.goalOverflowPercent(250) === 100],
+  ['merges today stats into the daily goal card', html.includes('<span class="key">Teilnahmen</span>') && html.includes('<span class="value">5</span>') && html.includes('<span class="key">Ø pro Teilnahme</span>') && html.includes('<span class="value">€2,19</span>') && html.includes('<span class="key">Effektiver Stundenlohn</span>') && html.includes('<span class="value">€13,68/h</span>')],
+  ['adds monthly participation stats to the current month card', html.includes('<span class="value">14</span>') && html.includes('<span class="value">€7,38</span>')],
+  ['renders effective hourly as one combined EUR rate', html.includes('<span class="value">€25,90/h</span>') && !html.includes('$13,44/h')],
+  ['renders monthly forecast in EUR', html.includes('<span class="value">€103,25</span>') && html.includes('<span class="value">€188,33</span>')],
+  ['renders efficiency hourly rates in EUR', html.includes('€14,16/h') && html.includes('€15,93/h')],
+  ['renders top studies in EUR', html.includes('€10,03') && html.includes('€40,12/h') && !html.includes('£34,00/h')],
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
   ['renders monthly comparison as previous-month tile', html.includes('class="earning-tile comparison-tile"') && html.includes('<div class="label">Vormonat</div>') && !html.includes('<div class="label">Vergleich</div>')],
   ['renders monthly comparison percentage with threshold color class', html.includes('class="value comparison-value is-good"') && html.includes('286,5 %')],

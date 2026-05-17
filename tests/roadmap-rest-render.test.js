@@ -70,6 +70,11 @@ const stats = {
 
 const settings = {
   ok: true,
+  fxRates: {
+    base: 'GBP',
+    rates: { EUR: 1.18, USD: 1.27 },
+    fetchedAt: '2026-05-17T10:00:00Z'
+  },
   settings: {
     goals: { daily_gbp_minor: 500, monthly_gbp_minor: 15000 },
     thresholds: { great_hourly_gbp_minor: 1200, ok_hourly_gbp_minor: 800 }
@@ -156,6 +161,7 @@ const checks = [
   ['renders monthly report basis as studies not samples', statsHtml.includes('14 Studien') && !statsHtml.includes('Samples')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
+  ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],

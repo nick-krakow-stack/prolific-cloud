@@ -196,6 +196,7 @@ function build_overview(PDO $pdo): array {
     $pendingStats = build_pending_stats($pdo, $pendingStatuses, $now);
     $statusStats = build_status_stats($subCounts);
     $todayStats = build_today_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
+    $monthStats = build_period_stats($pdo, $earnedStatuses, $monthStart, $earnedMonth, $pendingMonth);
     $efficiency = build_efficiency_stats($pdo, $earnedStatuses, $today, $weekStart, $monthStart);
     $topStudies = build_top_studies($pdo, $earnedStatuses);
     $dailyStats = build_daily_stats($pdo, $earnedStatuses, $pendingStatuses, $today);
@@ -244,6 +245,7 @@ function build_overview(PDO $pdo): array {
         'pendingStats'     => $pendingStats,
         'statusStats'      => $statusStats,
         'todayStats'       => $todayStats,
+        'monthStats'       => $monthStats,
         'efficiency'       => $efficiency,
         'topStudies'       => $topStudies,
         'dailyStats'       => $dailyStats,
@@ -428,7 +430,17 @@ function build_today_stats(
     array $earnedToday,
     array $pendingToday
 ): array {
-    $todayStart = $today->format('Y-m-d H:i:s');
+    return build_period_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
+}
+
+function build_period_stats(
+    PDO $pdo,
+    array $earnedStatuses,
+    DateTime $periodStart,
+    array $earned,
+    array $pending
+): array {
+    $periodStartSql = $periodStart->format('Y-m-d H:i:s');
 
     $stmt = $pdo->prepare("
         SELECT COUNT(*)
@@ -436,23 +448,27 @@ function build_today_stats(
         WHERE started_at >= ?
            OR completed_at >= ?
     ");
-    $stmt->execute([$todayStart, $todayStart]);
+    $stmt->execute([$periodStartSql, $periodStartSql]);
     $submissionsCount = (int)$stmt->fetchColumn();
 
     return [
-        'earned' => $earnedToday,
-        'pending' => $pendingToday,
+        'earned' => $earned,
+        'pending' => $pending,
         'submissionsCount' => $submissionsCount,
-        'averageReward' => build_today_average_reward($pdo, $earnedStatuses, $todayStart),
-        'effectiveHourlyRate' => build_today_effective_hourly_rate($pdo, $earnedStatuses, $todayStart),
+        'averageReward' => build_period_average_reward($pdo, $earnedStatuses, $periodStartSql),
+        'effectiveHourlyRate' => build_period_effective_hourly_rate($pdo, $earnedStatuses, $periodStartSql),
     ];
 }
 
 function build_today_average_reward(PDO $pdo, array $earnedStatuses, string $todayStart): array {
+    return build_period_average_reward($pdo, $earnedStatuses, $todayStart);
+}
+
+function build_period_average_reward(PDO $pdo, array $earnedStatuses, string $periodStartSql): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
     $rewardExpr = effective_reward_amount_sql();
     $params = $earnedStatuses;
-    $params[] = $todayStart;
+    $params[] = $periodStartSql;
 
     $stmt = $pdo->prepare("
         SELECT reward_currency,
@@ -490,11 +506,15 @@ function build_today_average_reward(PDO $pdo, array $earnedStatuses, string $tod
 }
 
 function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $todayStart): array {
+    return build_period_effective_hourly_rate($pdo, $earnedStatuses, $todayStart);
+}
+
+function build_period_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $periodStartSql): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
     $rewardExpr = effective_reward_amount_sql();
     $params = $earnedStatuses;
-    $params[] = $todayStart;
-    $params[] = $todayStart;
+    $params[] = $periodStartSql;
+    $params[] = $periodStartSql;
 
     $stmt = $pdo->prepare("
         SELECT reward_currency,
@@ -511,6 +531,7 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
     $stmt->execute($params);
 
     $byCurrency = [];
+    $rewardByCurrency = [];
     $sampleCount = 0;
     $secondsGrandTotal = 0;
 
@@ -526,11 +547,15 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
 
         $sampleCount += (int)$row['sample_count'];
         $secondsGrandTotal += $secondsTotal;
-        $byCurrency[$row['reward_currency']] = (int)round(((int)$row['reward_total'] * 3600) / $secondsTotal);
+        $currency = $row['reward_currency'];
+        $rewardTotal = (int)$row['reward_total'];
+        $rewardByCurrency[$currency] = $rewardTotal;
+        $byCurrency[$currency] = (int)round(($rewardTotal * 3600) / $secondsTotal);
     }
 
     return [
         'byCurrency' => $byCurrency,
+        'rewardByCurrency' => $rewardByCurrency,
         'sampleCount' => $sampleCount,
         'secondsTotal' => $secondsGrandTotal,
     ];
@@ -579,6 +604,7 @@ function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $fro
     $stmt->execute($params);
 
     $byCurrency = [];
+    $rewardByCurrency = [];
     $sampleCount = 0;
     $secondsGrandTotal = 0;
 
@@ -594,11 +620,15 @@ function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $fro
 
         $sampleCount += (int)$row['sample_count'];
         $secondsGrandTotal += $secondsTotal;
-        $byCurrency[$row['reward_currency']] = (int)round(((int)$row['reward_total'] * 3600) / $secondsTotal);
+        $currency = $row['reward_currency'];
+        $rewardTotal = (int)$row['reward_total'];
+        $rewardByCurrency[$currency] = $rewardTotal;
+        $byCurrency[$currency] = (int)round(($rewardTotal * 3600) / $secondsTotal);
     }
 
     return [
         'byCurrency' => $byCurrency,
+        'rewardByCurrency' => $rewardByCurrency,
         'sampleCount' => $sampleCount,
         'secondsTotal' => $secondsGrandTotal,
     ];
@@ -779,6 +809,7 @@ function build_settings_response(PDO $pdo): array {
     return [
         'ok' => true,
         'settings' => load_dashboard_settings(),
+        'fxRates' => decode_setting_value(get_setting('fxRates')),
         'system' => build_system_response($pdo)['system'],
         'serverTime' => date('c'),
     ];

@@ -125,6 +125,24 @@ function progressPercent(currentMinor, targetMinor) {
   return (current / target) * 100;
 }
 
+function goalProgressClass(percent) {
+  const numeric = Number(percent);
+
+  if (!Number.isFinite(numeric)) return 'is-neutral';
+  if (numeric < 50) return 'is-danger';
+  if (numeric < 95) return 'is-warn';
+
+  return 'is-good';
+}
+
+function goalOverflowPercent(percent) {
+  const numeric = Number(percent);
+
+  if (!Number.isFinite(numeric) || numeric <= 100) return 0;
+
+  return Math.max(0, Math.min(100, Math.round((numeric - 100) * 10) / 10));
+}
+
 function monthComparisonPercent(currentEarned, previousEarned, fxRates) {
   const currentValue = convertToEur(currentEarned, fxRates) ?? currencyMinor(currentEarned, 'GBP');
   const previousValue = convertToEur(previousEarned, fxRates) ?? currencyMinor(previousEarned, 'GBP');
@@ -297,6 +315,55 @@ function convertToEur(byCurrency, fxRates) {
   }
 
   return eurMinor > 0 ? eurMinor : null;
+}
+
+function convertGbpToEurMinor(minor, fxRates) {
+  const numeric = Number(minor);
+
+  if (!Number.isFinite(numeric)) return null;
+  if (numeric === 0) return 0;
+
+  return convertToEur({ GBP: Math.round(numeric) }, fxRates);
+}
+
+function convertEurToGbpMinor(minor, fxRates) {
+  const numeric = Number(minor);
+  const fx = readFxRates(fxRates);
+  const eurRate = fxRateFor(fx.rates, 'EUR');
+
+  if (!Number.isFinite(numeric) || fx.base !== 'GBP' || !eurRate) {
+    return null;
+  }
+
+  return Math.round(numeric / eurRate);
+}
+
+function canConvertGbpEur(fxRates) {
+  return convertGbpToEurMinor(100, fxRates) != null;
+}
+
+function fmtGbpAsEur(minor, fxRates) {
+  const eurMinor = convertGbpToEurMinor(minor, fxRates);
+
+  return eurMinor == null ? fmtAmount(minor, 'GBP') : fmtAmount(eurMinor, 'EUR');
+}
+
+function fmtSignedGbpAsEur(minor, fxRates) {
+  const numeric = Number(minor);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  const sign = numeric > 0 ? '+' : numeric < 0 ? '-' : '';
+
+  return sign + fmtGbpAsEur(Math.abs(Math.round(numeric)), fxRates);
+}
+
+function fmtMetricAmountEur(value, fxRates, currency = 'GBP') {
+  const eurMinor = value && typeof value === 'object'
+    ? convertToEur(value, fxRates)
+    : convertToEur({ [currency]: value }, fxRates);
+
+  return eurMinor == null ? fmtMetricAmount(value, currency) : fmtAmount(eurMinor, 'EUR');
 }
 
 function hasCurrencyAmounts(byCurrency) {
@@ -760,24 +827,24 @@ function readCurrencyMetric(source, mapKeys, gbpKeys = []) {
   return result;
 }
 
-function readTodayStats(data, today) {
-  const todayStats = asObject(data.todayStats);
+function readPeriodStats(periodStatsRaw, fallbackPeriod) {
+  const periodStats = asObject(periodStatsRaw);
   const earned = readCurrencyMetric(
-    todayStats,
+    periodStats,
     ['earned', 'earnedByCurrency', 'earned_by_currency'],
     ['earned_gbp_minor', 'earnedGbpMinor', 'earnedMinor']
   );
   const pending = readCurrencyMetric(
-    todayStats,
+    periodStats,
     ['pending', 'pendingByCurrency', 'pending_by_currency'],
     ['pending_gbp_minor', 'pendingGbpMinor', 'pendingMinor']
   );
 
-  const fallbackEarned = asObject(today.earned);
-  const fallbackPending = asObject(today.pending);
+  const fallbackEarned = asObject(fallbackPeriod.earned);
+  const fallbackPending = asObject(fallbackPeriod.pending);
   const finalEarned = Object.keys(earned).length ? earned : fallbackEarned;
   const finalPending = Object.keys(pending).length ? pending : fallbackPending;
-  const count = firstNumber(todayStats, [
+  const count = firstNumber(periodStats, [
     'submission_count',
     'submissionCount',
     'submissions_count',
@@ -786,16 +853,28 @@ function readTodayStats(data, today) {
     'count'
   ]);
   const averageMap = readCurrencyMetric(
-    asObject(todayStats.averageReward),
+    asObject(periodStats.averageReward),
     ['byCurrency', 'by_currency', 'average', 'averageByCurrency', 'average_by_currency'],
     ['gbp_minor', 'gbpMinor', 'average_gbp_minor', 'averageGbpMinor']
   );
   const hourlyMap = readCurrencyMetric(
-    asObject(todayStats.effectiveHourlyRate),
+    asObject(periodStats.effectiveHourlyRate),
     ['byCurrency', 'by_currency', 'hourly', 'hourlyByCurrency', 'hourly_by_currency'],
     ['gbp_minor', 'gbpMinor', 'hourly_gbp_minor', 'hourlyGbpMinor']
   );
-  const average = Object.keys(averageMap).length ? averageMap : firstNumber(todayStats, [
+  const hourlySource = asObject(periodStats.effectiveHourlyRate);
+  const hourlyRewardMap = readCurrencyMetric(
+    hourlySource,
+    ['rewardByCurrency', 'reward_by_currency', 'rewardTotal', 'reward_total', 'rewards'],
+    ['reward_gbp_minor', 'rewardGbpMinor', 'reward_total_gbp_minor', 'rewardTotalGbpMinor']
+  );
+  const hourlySeconds = firstNumber(hourlySource, [
+    'secondsTotal',
+    'seconds_total',
+    'timeTakenSeconds',
+    'time_taken_seconds'
+  ]);
+  const average = Object.keys(averageMap).length ? averageMap : firstNumber(periodStats, [
     'average_reward_gbp_minor',
     'averageRewardGbpMinor',
     'average_reward_minor',
@@ -803,7 +882,7 @@ function readTodayStats(data, today) {
     'avg_gbp_minor',
     'avgMinor'
   ]);
-  const hourly = Object.keys(hourlyMap).length ? hourlyMap : firstNumber(todayStats, [
+  const hourly = Object.keys(hourlyMap).length ? hourlyMap : firstNumber(periodStats, [
     'hourly_rate_gbp_minor',
     'hourlyRateGbpMinor',
     'effective_hourly_gbp_minor',
@@ -820,8 +899,18 @@ function readTodayStats(data, today) {
     pending: finalPending,
     count,
     average: calculatedAverage,
-    hourly
+    hourly,
+    hourlyReward: hourlyRewardMap,
+    hourlySeconds
   };
+}
+
+function readTodayStats(data, today) {
+  return readPeriodStats(data.todayStats, today);
+}
+
+function readMonthStats(data, month) {
+  return readPeriodStats(data.monthStats || data.month_stats, month);
 }
 
 function readEfficiencyPeriod(source) {
@@ -831,9 +920,15 @@ function readEfficiencyPeriod(source) {
     ['byCurrency', 'by_currency', 'hourly', 'hourlyByCurrency', 'hourly_by_currency'],
     ['gbp_minor', 'gbpMinor', 'hourly_gbp_minor', 'hourlyGbpMinor']
   );
+  const rewardByCurrency = readCurrencyMetric(
+    period,
+    ['rewardByCurrency', 'reward_by_currency', 'rewardTotal', 'reward_total', 'rewards'],
+    ['reward_gbp_minor', 'rewardGbpMinor', 'reward_total_gbp_minor', 'rewardTotalGbpMinor']
+  );
 
   return {
     byCurrency,
+    rewardByCurrency,
     sampleCount: firstNumber(period, ['sampleCount', 'sample_count', 'count', 'samples']),
     secondsTotal: firstNumber(period, ['secondsTotal', 'seconds_total', 'timeTakenSeconds', 'time_taken_seconds'])
   };
@@ -1129,6 +1224,51 @@ function fmtMetricHourly(value, currency = 'GBP') {
   return value == null ? DASH : fmtAmount(value, currency) + '/h';
 }
 
+function singleCurrencyMap(byCurrency) {
+  const entries = positiveCurrencyEntries(byCurrency);
+
+  return entries.length === 1 ? { [entries[0][0]]: entries[0][1] } : null;
+}
+
+function effectiveHourlyEurMinor(stats, fxRates) {
+  const seconds = Number(stats?.hourlySeconds);
+  const reward = asObject(stats?.hourlyReward);
+
+  if (Number.isFinite(seconds) && seconds > 0 && Object.keys(reward).length > 0) {
+    const rewardEur = convertToEur(reward, fxRates);
+
+    if (rewardEur != null) {
+      return Math.round((rewardEur * 3600) / seconds);
+    }
+  }
+
+  if (stats?.hourly && typeof stats.hourly === 'object') {
+    const singleHourly = singleCurrencyMap(stats.hourly);
+
+    return singleHourly ? convertToEur(singleHourly, fxRates) : null;
+  }
+
+  if (stats?.hourly != null) {
+    return convertToEur({ GBP: stats.hourly }, fxRates);
+  }
+
+  return null;
+}
+
+function fmtEffectiveHourlyEur(stats, fxRates) {
+  const eurMinor = effectiveHourlyEurMinor(stats, fxRates);
+
+  return eurMinor == null ? DASH : fmtAmount(eurMinor, 'EUR') + '/h';
+}
+
+function fmtEfficiencyHourlyEur(period, fxRates) {
+  return fmtEffectiveHourlyEur({
+    hourly: period.byCurrency,
+    hourlyReward: period.rewardByCurrency,
+    hourlySeconds: period.secondsTotal
+  }, fxRates);
+}
+
 function fmtDuration(seconds) {
   const numeric = Number(seconds);
 
@@ -1153,35 +1293,69 @@ function chartValueMinor(byCurrency, fxRates) {
   return convertToEur(byCurrency, fxRates) ?? currencyMinor(byCurrency, 'GBP') ?? totalPositiveMinor(byCurrency);
 }
 
-function renderGoalCard(label, currentMinor, targetMinor, extraRows = '') {
+function renderGoalDetailRows(stats, fxRates) {
+  return `
+      <div class="status-row">
+        <span class="key">Teilnahmen</span>
+        <span class="value">${fmtCount(stats.count)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Ø pro Teilnahme</span>
+        <span class="value">${fmtMetricAmountEur(stats.average, fxRates, 'GBP')}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Effektiver Stundenlohn</span>
+        <span class="value">${fmtEffectiveHourlyEur(stats, fxRates)}</span>
+      </div>
+  `;
+}
+
+function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '') {
   const percent = progressPercent(currentMinor, targetMinor);
+  const innerPercent = clampPercent(percent) ?? 0;
+  const overflowPercent = goalOverflowPercent(percent);
   const remaining =
     Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
       ? Math.max(0, Number(targetMinor) - Number(currentMinor))
       : null;
 
   return `
-    <div class="status-box">
-      <h3>${label}</h3>
+    <div class="status-box goal-card">
+      <div class="goal-card-head">
+        <h3>${label}</h3>
+        <div
+          class="goal-ring-wrap${overflowPercent > 0 ? ' has-overflow' : ''}"
+          style="--goal-progress: ${innerPercent}%; --goal-overflow: ${overflowPercent}%;"
+          aria-label="${escapeHtml(label)}: ${escapeHtml(fmtPercent(percent))} erreicht"
+        >
+          <div class="goal-ring-overflow"></div>
+          <div class="goal-ring ${goalProgressClass(percent)}">
+            <span>${fmtPercent(percent)}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="status-row">
         <span class="key">Fortschritt</span>
-        <span class="value">${fmtAmount(currentMinor, 'GBP')} von ${fmtAmount(targetMinor, 'GBP')}</span>
+        <span class="value">${fmtGbpAsEur(currentMinor, fxRates)} von ${fmtGbpAsEur(targetMinor, fxRates)}</span>
       </div>
-      ${renderProgressBar(percent)}
+
       <div class="status-row">
         <span class="key">Erreicht</span>
         <span class="value">${fmtPercent(percent)}</span>
       </div>
       <div class="status-row">
         <span class="key">Noch offen</span>
-        <span class="value">${fmtAmount(remaining, 'GBP')}</span>
+        <span class="value">${fmtGbpAsEur(remaining, fxRates)}</span>
       </div>
       ${extraRows}
     </div>
   `;
 }
 
-function renderEfficiencyCard(efficiency) {
+function renderEfficiencyCard(efficiency, fxRates) {
   const periods = [
     ['Heute', efficiency.today],
     ['Woche', efficiency.week],
@@ -1192,7 +1366,7 @@ function renderEfficiencyCard(efficiency) {
   const rows = periods.map(([label, period]) => `
     <div class="status-row">
       <span class="key">${label}</span>
-      <span class="value">${fmtMetricHourly(period.byCurrency, 'GBP')}</span>
+      <span class="value">${fmtEfficiencyHourlyEur(period, fxRates)}</span>
     </div>
     <div class="status-row">
       <span class="key">Basis</span>
@@ -1208,7 +1382,21 @@ function renderEfficiencyCard(efficiency) {
   `;
 }
 
-function renderTopStudyList(items, mode) {
+function fmtStudyRewardEur(study, fxRates) {
+  const eurMinor = convertToEur({ [study.rewardCurrency || 'GBP']: study.rewardMinor }, fxRates);
+
+  return eurMinor == null ? fmtAmount(study.rewardMinor, study.rewardCurrency) : fmtAmount(eurMinor, 'EUR');
+}
+
+function fmtStudyHourlyEur(study, fxRates) {
+  if (study.hourlyRateMinor == null) return DASH;
+
+  const eurMinor = convertToEur({ [study.rewardCurrency || 'GBP']: study.hourlyRateMinor }, fxRates);
+
+  return (eurMinor == null ? fmtAmount(study.hourlyRateMinor, study.rewardCurrency) : fmtAmount(eurMinor, 'EUR')) + '/h';
+}
+
+function renderTopStudyList(items, mode, fxRates) {
   const list = items.slice(0, 5);
 
   if (list.length === 0) {
@@ -1216,10 +1404,8 @@ function renderTopStudyList(items, mode) {
   }
 
   const rows = list.map((study, index) => {
-    const reward = fmtAmount(study.rewardMinor, study.rewardCurrency);
-    const hourly = study.hourlyRateMinor == null
-      ? DASH
-      : fmtAmount(study.hourlyRateMinor, study.rewardCurrency) + '/h';
+    const reward = fmtStudyRewardEur(study, fxRates);
+    const hourly = fmtStudyHourlyEur(study, fxRates);
     const primary = mode === 'hourly' ? hourly : reward;
     const secondary = mode === 'hourly' ? reward : hourly;
     const url = study.studyId
@@ -1249,7 +1435,7 @@ function renderTopStudyList(items, mode) {
   return `<ul class="top-study-list">${rows}</ul>`;
 }
 
-function renderTopStudiesCard(topStudies) {
+function renderTopStudiesCard(topStudies, fxRates) {
   return `
     <div class="status-box">
       <h3>Top-Studien</h3>
@@ -1257,12 +1443,12 @@ function renderTopStudiesCard(topStudies) {
         <span class="key">Top nach Verg&uuml;tung</span>
         <span class="value"></span>
       </div>
-      ${renderTopStudyList(topStudies.byReward, 'reward')}
+      ${renderTopStudyList(topStudies.byReward, 'reward', fxRates)}
       <div class="status-row">
         <span class="key">Top nach Stundenlohn</span>
         <span class="value"></span>
       </div>
-      ${renderTopStudyList(topStudies.byHourly, 'hourly')}
+      ${renderTopStudyList(topStudies.byHourly, 'hourly', fxRates)}
     </div>
   `;
 }
@@ -1376,6 +1562,7 @@ function renderExpandedOverview(data) {
   const balance = asObject(data.balance);
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
   const todayStats = readTodayStats(data, today);
+  const monthStats = readMonthStats(data, month);
   const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
   const efficiencyStats = readEfficiencyStats(data);
   const topStudies = readTopStudies(data);
@@ -1446,25 +1633,15 @@ function renderExpandedOverview(data) {
   }
   html += '</div>';
 
-  const todayDetailRows = `
-      <div class="status-row">
-        <span class="key">Teilnahmen</span>
-        <span class="value">${fmtCount(todayStats.count)}</span>
-      </div>
+  const todayDetailRows = renderGoalDetailRows(todayStats, fxRates);
+  const monthDetailRows = renderGoalDetailRows(monthStats, fxRates);
 
-      <div class="status-row">
-        <span class="key">Ø pro Teilnahme</span>
-        <span class="value">${fmtMetricAmount(todayStats.average, 'GBP')}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Effektiver Stundenlohn</span>
-        <span class="value">${fmtMetricHourly(todayStats.hourly, 'GBP')}</span>
-      </div>
+  html += `
+    <div class="goal-card-grid">
+      ${renderGoalCard('Heute', todayGoalGbp, dailyGoalMinor, fxRates, todayDetailRows)}
+      ${renderGoalCard('Aktueller Monat', monthGoalGbp, monthlyGoalMinor, fxRates, monthDetailRows)}
+    </div>
   `;
-
-  html += renderGoalCard('Heute', todayGoalGbp, dailyGoalMinor, todayDetailRows);
-  html += renderGoalCard('Monatsziel', monthGoalGbp, monthlyGoalMinor);
 
   html += `
     <div class="status-box">
@@ -1472,22 +1649,22 @@ function renderExpandedOverview(data) {
 
       <div class="status-row">
         <span class="key">Aktuell</span>
-        <span class="value">${fmtAmount(forecast.current, 'GBP')}</span>
+        <span class="value">${fmtGbpAsEur(forecast.current, fxRates)}</span>
       </div>
 
       <div class="status-row">
         <span class="key">Ø pro Tag</span>
-        <span class="value">${fmtAmount(forecast.average, 'GBP')}</span>
+        <span class="value">${fmtGbpAsEur(forecast.average, fxRates)}</span>
       </div>
 
       <div class="status-row">
         <span class="key">Prognose Monatsende</span>
-        <span class="value">${fmtAmount(forecast.projected, 'GBP')}</span>
+        <span class="value">${fmtGbpAsEur(forecast.projected, fxRates)}</span>
       </div>
 
       <div class="status-row">
         <span class="key">Abweichung zum Ziel</span>
-        <span class="value">${fmtSignedAmount(forecast.delta, 'GBP')}</span>
+        <span class="value">${fmtSignedGbpAsEur(forecast.delta, fxRates)}</span>
       </div>
 
       <div class="status-row">
@@ -1579,8 +1756,8 @@ function renderExpandedOverview(data) {
     </div>
   `;
 
-  html += renderEfficiencyCard(efficiencyStats);
-  html += renderTopStudiesCard(topStudies);
+  html += renderEfficiencyCard(efficiencyStats, fxRates);
+  html += renderTopStudiesCard(topStudies, fxRates);
   html += renderDailyStatsCard(dailyStats, fxRates);
 
   return html;
@@ -1946,6 +2123,7 @@ function renderSettingsControl(options) {
   const value = moneyMinorToInput(options.valueMinor);
   const numeric = Number(value || 0);
   const max = Math.max(options.max, Math.ceil(Math.max(numeric, 1) * 1.25));
+  const prefix = options.prefix || '£';
 
   return `
     <label class="setting-control" for="${escapeHtml(options.id)}">
@@ -1955,7 +2133,7 @@ function renderSettingsControl(options) {
           <span class="setting-hint">${escapeHtml(options.hint)}</span>
         </span>
         <span class="setting-value-field">
-          <span class="setting-prefix">£</span>
+          <span class="setting-prefix">${escapeHtml(prefix)}</span>
           <input id="${escapeHtml(options.id)}" data-settings-input="${escapeHtml(options.field)}"
                  type="number" min="0" max="${escapeHtml(max)}" step="0.01"
                  value="${escapeHtml(value)}" inputmode="decimal">
@@ -1977,10 +2155,14 @@ function renderSettings(data) {
   const goals = asObject(settings.goals);
   const thresholds = asObject(settings.thresholds);
   const systemHealth = readSystemHealth(data);
+  const fxRates = data.fxRates || data.fx_rates;
+  const useEurSettings = canConvertGbpEur(fxRates);
+  const settingsPrefix = useEurSettings ? '€' : '£';
+  const settingsMinor = value => useEurSettings ? convertGbpToEurMinor(value, fxRates) : value;
 
   return `
     <div class="settings-stack">
-    <form id="settingsForm" class="settings-form" novalidate>
+    <form id="settingsForm" class="settings-form" data-settings-currency="${useEurSettings ? 'EUR' : 'GBP'}" novalidate>
       <div class="settings-header">
         <div>
           <h3>Einstellungen</h3>
@@ -1994,8 +2176,9 @@ function renderSettings(data) {
           field: 'daily_gbp',
           label: 'Tagesziel',
           hint: 'Zielwert für die Tagesübersicht',
-          valueMinor: goals.daily_gbp_minor,
-          max: 50,
+          valueMinor: settingsMinor(goals.daily_gbp_minor),
+          prefix: settingsPrefix,
+          max: useEurSettings ? 60 : 50,
           step: 0.25
         })}
         ${renderSettingsControl({
@@ -2003,8 +2186,9 @@ function renderSettings(data) {
           field: 'monthly_gbp',
           label: 'Monatsziel',
           hint: 'Zielwert für Prognose und Fortschritt',
-          valueMinor: goals.monthly_gbp_minor,
-          max: 1000,
+          valueMinor: settingsMinor(goals.monthly_gbp_minor),
+          prefix: settingsPrefix,
+          max: useEurSettings ? 1200 : 1000,
           step: 1
         })}
         ${renderSettingsControl({
@@ -2012,8 +2196,9 @@ function renderSettings(data) {
           field: 'great_hourly_gbp',
           label: 'Sehr guter Stundenlohn',
           hint: 'Ab hier bekommen Studien das Tag Sehr gut',
-          valueMinor: thresholds.great_hourly_gbp_minor,
-          max: 80,
+          valueMinor: settingsMinor(thresholds.great_hourly_gbp_minor),
+          prefix: settingsPrefix,
+          max: useEurSettings ? 100 : 80,
           step: 0.5
         })}
         ${renderSettingsControl({
@@ -2021,8 +2206,9 @@ function renderSettings(data) {
           field: 'ok_hourly_gbp',
           label: 'Okay-Stundenlohn',
           hint: 'Unter diesem Wert gilt eine Studie als niedrig',
-          valueMinor: thresholds.ok_hourly_gbp_minor,
-          max: 50,
+          valueMinor: settingsMinor(thresholds.ok_hourly_gbp_minor),
+          prefix: settingsPrefix,
+          max: useEurSettings ? 60 : 50,
           step: 0.5
         })}
       </div>
@@ -2045,17 +2231,26 @@ function bindSettingsForm() {
   const rangeFor = field => form.querySelector(`[data-settings-range="${field}"]`);
   const settingInputs = Array.from(form.querySelectorAll('[data-settings-input]'));
   const settingRanges = Array.from(form.querySelectorAll('[data-settings-range]'));
+  const settingsFxRates = cachedData.settings?.fxRates || cachedData.settings?.fx_rates;
+  const settingsUseEur = form.dataset.settingsCurrency === 'EUR';
+  const inputToStoredMinor = value => {
+    const minor = inputToMinor(value);
+
+    if (!settingsUseEur) return minor;
+
+    return convertEurToGbpMinor(minor, settingsFxRates) ?? minor;
+  };
 
   const collectPayload = () => {
     const payload = {
       settings: {
         goals: {
-          daily_gbp_minor: inputToMinor(inputFor('daily_gbp')?.value),
-          monthly_gbp_minor: inputToMinor(inputFor('monthly_gbp')?.value)
+          daily_gbp_minor: inputToStoredMinor(inputFor('daily_gbp')?.value),
+          monthly_gbp_minor: inputToStoredMinor(inputFor('monthly_gbp')?.value)
         },
         thresholds: {
-          great_hourly_gbp_minor: inputToMinor(inputFor('great_hourly_gbp')?.value),
-          ok_hourly_gbp_minor: inputToMinor(inputFor('ok_hourly_gbp')?.value)
+          great_hourly_gbp_minor: inputToStoredMinor(inputFor('great_hourly_gbp')?.value),
+          ok_hourly_gbp_minor: inputToStoredMinor(inputFor('ok_hourly_gbp')?.value)
         }
       }
     };
