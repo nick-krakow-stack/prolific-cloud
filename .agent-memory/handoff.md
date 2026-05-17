@@ -28,12 +28,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: pending settings autosave commit
+- Last product commit before this snapshot: 9ba1f02 Modernize settings autosave UI
 
 ## Working Tree
 
 ~~~text
-settings autosave changes pending commit/push
+clean after commit/push except this handoff refresh
 ~~~
 
 ## Current State Summary
