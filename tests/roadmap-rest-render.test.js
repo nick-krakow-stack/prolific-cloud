@@ -123,6 +123,21 @@ const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
 const statsHtml = sandbox.renderStats(stats);
 const studiesHtml = sandbox.renderStudies(studies);
+const submissionsHtml = sandbox.renderSubmissions({
+  ok: true,
+  submissions: [
+    {
+      study_name: 'Adjusted reward study',
+      status: 'APPROVED',
+      effective_reward_amount_minor: 186,
+      reward_amount_minor: 36,
+      reward_currency: 'GBP',
+      time_taken_seconds: 600,
+      started_at: '2026-05-17 12:00:00',
+      completed_at: '2026-05-17 12:10:00'
+    }
+  ]
+});
 
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
@@ -138,6 +153,7 @@ const checks = [
   ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],
   ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
   ['renders quality tag', studiesHtml.includes('Sehr gut')],
+  ['submissions render effective reward amount when present', submissionsHtml.includes('1,86') && !submissionsHtml.includes('0,36')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],
   ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')],

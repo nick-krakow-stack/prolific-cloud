@@ -14,6 +14,7 @@ Set-Location $repoRoot
 $runtimeFiles = @(
   ".htaccess",
   "api/_common.php",
+  "api/_rewards.php",
   "api/data.php",
   "api/export.php",
   "api/sync.php",

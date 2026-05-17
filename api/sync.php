@@ -23,6 +23,7 @@
 
 declare(strict_types=1);
 require_once __DIR__ . '/_common.php';
+require_once __DIR__ . '/_rewards.php';
 
 // Nur POST erlauben (CORS-Preflight separat behandeln)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -151,6 +152,14 @@ try {
 
         foreach ($submissions as $id => $sub) {
             if (empty($sub['id'])) $sub['id'] = $id;
+            $effectiveRewardMinor = effective_reward_amount_minor(
+                $sub['base_reward_minor'] ?? 0,
+                $sub['adjustment_amount_minor'] ?? 0,
+                $sub['bonus_amount_minor'] ?? 0,
+                $sub['screened_out_amount_minor'] ?? 0,
+                $sub['reward_amount_minor'] ?? 0
+            );
+
             $stmt->execute([
                 ':id'                => $sub['id'],
                 ':study_id'          => $sub['study_id']            ?? null,
@@ -164,7 +173,7 @@ try {
                 ':adjustment_type'          => $sub['adjustment_type']          ?? null,
                 ':bonus_amount_minor'       => $sub['bonus_amount_minor']       ?? 0,
                 ':screened_out_amount_minor'=> $sub['screened_out_amount_minor']?? 0,
-                ':reward_amount_minor'      => $sub['reward_amount_minor']      ?? 0,
+                ':reward_amount_minor'      => $effectiveRewardMinor,
                 ':reward_currency'   => $sub['reward_currency']     ?? 'GBP',
                 ':started_at'        => iso_to_datetime($sub['started_at']   ?? null),
                 ':completed_at'      => iso_to_datetime($sub['completed_at'] ?? null),

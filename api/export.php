@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_common.php';
+require_once __DIR__ . '/_rewards.php';
 require_once __DIR__ . '/../dashboard/session.php';
 
 require_login();
@@ -24,11 +25,12 @@ try {
 }
 
 function export_submissions_csv(PDO $pdo): void {
+    $rewardExpr = effective_reward_amount_sql('s');
     $stmt = $pdo->prepare("
         SELECT
             s.study_name,
             s.status,
-            s.reward_amount_minor,
+            {$rewardExpr} AS effective_reward_amount_minor,
             s.reward_currency,
             s.started_at,
             s.completed_at,
@@ -72,7 +74,7 @@ function export_submissions_csv(PDO $pdo): void {
     ], ';');
 
     foreach ($stmt->fetchAll() as $row) {
-        $rewardMinor = nullable_int($row['reward_amount_minor'] ?? null);
+        $rewardMinor = nullable_int($row['effective_reward_amount_minor'] ?? null);
         $seconds = nullable_int($row['time_taken_seconds'] ?? null);
 
         safe_fputcsv($out, [

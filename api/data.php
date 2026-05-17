@@ -13,6 +13,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_common.php';
+require_once __DIR__ . '/_rewards.php';
 require_once __DIR__ . '/../dashboard/session.php';
 
 require_login();
@@ -43,7 +44,13 @@ try {
             $limit = (int)($_GET['limit'] ?? 200);
             $limit = max(1, min(1000, $limit));
 
-            $stmt = $pdo->prepare("SELECT * FROM submissions ORDER BY started_at DESC LIMIT ?");
+            $rewardExpr = effective_reward_amount_sql();
+            $stmt = $pdo->prepare("
+                SELECT submissions.*, {$rewardExpr} AS effective_reward_amount_minor
+                FROM submissions
+                ORDER BY started_at DESC
+                LIMIT ?
+            ");
             $stmt->bindValue(1, $limit, PDO::PARAM_INT);
             $stmt->execute();
 
@@ -300,10 +307,11 @@ function build_month_forecast(DateTime $now, int $earnedMonthGbpMinor, int $mont
 
 function build_pending_stats(PDO $pdo, array $pendingStatuses, DateTime $now): array {
     $placeholders = implode(',', array_fill(0, count($pendingStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
     $stmt = $pdo->prepare("
         SELECT reward_currency,
                COUNT(*) count_pending,
-               SUM(reward_amount_minor) total_pending_minor,
+               SUM({$rewardExpr}) total_pending_minor,
                MIN(completed_at) oldest_completed_at
         FROM submissions
         WHERE status IN ($placeholders)
@@ -416,17 +424,18 @@ function build_today_stats(
 
 function build_today_average_reward(PDO $pdo, array $earnedStatuses, string $todayStart): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
     $params = $earnedStatuses;
     $params[] = $todayStart;
 
     $stmt = $pdo->prepare("
         SELECT reward_currency,
                COUNT(*) reward_count,
-               SUM(reward_amount_minor) reward_total
+               SUM({$rewardExpr}) reward_total
         FROM submissions
         WHERE status IN ($placeholders)
           AND completed_at >= ?
-          AND reward_amount_minor > 0
+          AND {$rewardExpr} > 0
         GROUP BY reward_currency
     ");
     $stmt->execute($params);
@@ -456,6 +465,7 @@ function build_today_average_reward(PDO $pdo, array $earnedStatuses, string $tod
 
 function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $todayStart): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
     $params = $earnedStatuses;
     $params[] = $todayStart;
     $params[] = $todayStart;
@@ -463,11 +473,11 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
     $stmt = $pdo->prepare("
         SELECT reward_currency,
                COUNT(*) sample_count,
-               SUM(reward_amount_minor) reward_total,
+               SUM({$rewardExpr}) reward_total,
                SUM(time_taken_seconds) seconds_total
         FROM submissions
         WHERE status IN ($placeholders)
-          AND reward_amount_minor > 0
+          AND {$rewardExpr} > 0
           AND time_taken_seconds > 0
           AND (completed_at >= ? OR started_at >= ?)
         GROUP BY reward_currency
@@ -517,15 +527,16 @@ function build_efficiency_stats(
 
 function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $from): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
 
     $sql = "
         SELECT reward_currency,
                COUNT(*) sample_count,
-               SUM(reward_amount_minor) reward_total,
+               SUM({$rewardExpr}) reward_total,
                SUM(time_taken_seconds) seconds_total
         FROM submissions
         WHERE status IN ($placeholders)
-          AND reward_amount_minor > 0
+          AND {$rewardExpr} > 0
           AND time_taken_seconds > 0
     ";
 
@@ -576,23 +587,24 @@ function build_top_studies(PDO $pdo, array $earnedStatuses): array {
 
 function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql('s');
     $timeFilter = $sortMode === 'hourly' ? 'AND s.time_taken_seconds > 0' : '';
     $orderBy = $sortMode === 'hourly'
-        ? '(s.reward_amount_minor * 3600 / s.time_taken_seconds) DESC, s.reward_amount_minor DESC'
-        : 's.reward_amount_minor DESC, s.completed_at DESC';
+        ? "({$rewardExpr} * 3600 / s.time_taken_seconds) DESC, {$rewardExpr} DESC"
+        : "{$rewardExpr} DESC, s.completed_at DESC";
 
     $stmt = $pdo->prepare("
         SELECT s.study_id,
                COALESCE(NULLIF(s.study_name, ''), NULLIF(st.name, ''), s.study_id) AS display_name,
                s.status,
-               s.reward_amount_minor,
+               {$rewardExpr} AS effective_reward_amount_minor,
                s.reward_currency,
                s.time_taken_seconds,
                s.completed_at
         FROM submissions s
         LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
-          AND s.reward_amount_minor > 0
+          AND {$rewardExpr} > 0
           $timeFilter
         ORDER BY $orderBy
         LIMIT 5
@@ -602,7 +614,7 @@ function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode)
     $items = [];
 
     foreach ($stmt->fetchAll() as $row) {
-        $rewardMinor = (int)$row['reward_amount_minor'];
+        $rewardMinor = (int)$row['effective_reward_amount_minor'];
         $seconds = (int)$row['time_taken_seconds'];
 
         $items[] = [
@@ -625,6 +637,7 @@ function build_daily_stats(PDO $pdo, array $earnedStatuses, array $pendingStatus
     $end = (clone $today)->modify('+1 day')->setTime(0, 0, 0);
     $allStatuses = array_merge($earnedStatuses, $pendingStatuses);
     $placeholders = implode(',', array_fill(0, count($allStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
 
     $params = $allStatuses;
     $params[] = $start->format('Y-m-d H:i:s');
@@ -634,12 +647,12 @@ function build_daily_stats(PDO $pdo, array $earnedStatuses, array $pendingStatus
         SELECT DATE(completed_at) stat_date,
                status,
                reward_currency,
-               SUM(reward_amount_minor) total
+               SUM({$rewardExpr}) total
         FROM submissions
         WHERE status IN ($placeholders)
           AND completed_at >= ?
           AND completed_at < ?
-          AND reward_amount_minor > 0
+          AND {$rewardExpr} > 0
         GROUP BY DATE(completed_at), status, reward_currency
     ");
     $stmt->execute($params);
@@ -941,6 +954,7 @@ function build_month_heatmap(
     $endExclusive = (clone $today)->modify('+1 day')->setTime(0, 0, 0);
     $allStatuses = array_merge($earnedStatuses, $pendingStatuses);
     $placeholders = implode(',', array_fill(0, count($allStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
     $params = $allStatuses;
     $params[] = $monthStart->format('Y-m-d H:i:s');
     $params[] = $endExclusive->format('Y-m-d H:i:s');
@@ -949,12 +963,12 @@ function build_month_heatmap(
         SELECT DATE(completed_at) stat_date,
                status,
                reward_currency,
-               SUM(reward_amount_minor) total
+               SUM({$rewardExpr}) total
         FROM submissions
         WHERE status IN ($placeholders)
           AND completed_at >= ?
           AND completed_at < ?
-          AND reward_amount_minor > 0
+          AND {$rewardExpr} > 0
         GROUP BY DATE(completed_at), status, reward_currency
     ");
     $stmt->execute($params);
@@ -1008,13 +1022,14 @@ function build_monthly_report(
 }
 
 function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from = null, ?DateTime $to = null, int $limit = 10): array {
+    $rewardExpr = effective_reward_amount_sql();
     $sql = "
         SELECT COALESCE(NULLIF(researcher_name, ''), NULLIF(institution, ''), 'Unbekannt') requester,
                status,
                reward_currency,
                COUNT(*) submission_count,
-               SUM(reward_amount_minor) reward_total,
-               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN reward_amount_minor ELSE 0 END) hourly_reward_total,
+               SUM({$rewardExpr}) reward_total,
+               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN {$rewardExpr} ELSE 0 END) hourly_reward_total,
                SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN time_taken_seconds ELSE 0 END) seconds_total,
                SUM(CASE
                    WHEN status = 'APPROVED'
@@ -1048,7 +1063,7 @@ function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from 
 
     $sql .= "
         GROUP BY requester, status, reward_currency
-        ORDER BY SUM(reward_amount_minor) DESC
+        ORDER BY SUM({$rewardExpr}) DESC
     ";
 
     $stmt = $pdo->prepare($sql);
@@ -1175,6 +1190,7 @@ function count_statuses_by_period(PDO $pdo, DateTime $from, DateTime $to): array
 
 function build_top_studies_for_period(PDO $pdo, array $earnedStatuses, DateTime $from, DateTime $to): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
+    $rewardExpr = effective_reward_amount_sql('s');
     $params = $earnedStatuses;
     $params[] = $from->format('Y-m-d H:i:s');
     $params[] = $to->format('Y-m-d H:i:s');
@@ -1183,24 +1199,24 @@ function build_top_studies_for_period(PDO $pdo, array $earnedStatuses, DateTime 
         SELECT s.study_id,
                COALESCE(NULLIF(s.study_name, ''), NULLIF(st.name, ''), s.study_id) AS display_name,
                s.status,
-               s.reward_amount_minor,
+               {$rewardExpr} AS effective_reward_amount_minor,
                s.reward_currency,
                s.time_taken_seconds,
                s.completed_at
         FROM submissions s
         LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
-          AND s.reward_amount_minor > 0
+          AND {$rewardExpr} > 0
           AND s.completed_at >= ?
           AND s.completed_at < ?
-        ORDER BY s.reward_amount_minor DESC, s.completed_at DESC
+        ORDER BY {$rewardExpr} DESC, s.completed_at DESC
         LIMIT 5
     ");
     $stmt->execute($params);
 
     $items = [];
     foreach ($stmt->fetchAll() as $row) {
-        $rewardMinor = (int)$row['reward_amount_minor'];
+        $rewardMinor = (int)$row['effective_reward_amount_minor'];
         $seconds = (int)$row['time_taken_seconds'];
         $items[] = [
             'studyId' => $row['study_id'],
@@ -1266,7 +1282,7 @@ function count_table_rows(PDO $pdo, string $table): int {
 }
 
 /**
- * Summiert reward_amount_minor pro Währung, gefiltert nach Status & completed_at.
+ * Summiert den effektiven Reward pro Währung, gefiltert nach Status & completed_at.
  *
  * $from / $to:
  * completed_at >= $from
@@ -1274,9 +1290,10 @@ function count_table_rows(PDO $pdo, string $table): int {
  */
 function sum_by_period(PDO $pdo, array $statuses, ?DateTime $from, ?DateTime $to): array {
     $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
 
     $sql = "
-        SELECT reward_currency, SUM(reward_amount_minor) total
+        SELECT reward_currency, SUM({$rewardExpr}) total
         FROM submissions
         WHERE status IN ($placeholders)
     ";

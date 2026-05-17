@@ -2249,6 +2249,12 @@ function renderSubmissions(data) {
 
     const statusClass = 'status-' + statusKey;
     const minutes = s.time_taken_seconds ? Math.round(s.time_taken_seconds / 60) : null;
+    const rewardMinor = firstNumber(s, [
+      'effective_reward_amount_minor',
+      'effectiveRewardAmountMinor',
+      'reward_amount_minor',
+      'rewardAmountMinor'
+    ]);
 
     return `
       <div class="submission-card">
@@ -2256,7 +2262,7 @@ function renderSubmissions(data) {
 
         <div class="meta">
           <span class="status ${escapeHtml(statusClass)}">${escapeHtml(s.status || '?')}</span>
-          · <span class="reward">${fmtAmount(s.reward_amount_minor, s.reward_currency)}</span>
+          · <span class="reward">${fmtAmount(rewardMinor, s.reward_currency)}</span>
           ${minutes ? ` · ${escapeHtml(minutes)} Min` : ''}
         </div>
 
