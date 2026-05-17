@@ -237,6 +237,16 @@ a:not(.icon-btn):hover {
   min-width: 0;
   margin-bottom: 0;
 }
+.forecast-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.forecast-status-grid .status-box {
+  min-width: 0;
+  margin-bottom: 0;
+}
 .goal-card-head {
   display: flex;
   align-items: center;
@@ -334,6 +344,10 @@ a:not(.icon-btn):hover {
 
 @media (max-width: 520px) {
   .goal-card-grid { gap: 8px; }
+  .forecast-status-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
   .goal-card { padding: 12px 10px; }
   .goal-card-head {
     align-items: flex-start;

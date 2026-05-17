@@ -1682,43 +1682,6 @@ function renderExpandedOverview(data) {
     </div>
   `;
 
-  html += `
-    <div class="status-box">
-      <h3>Monatsprognose</h3>
-
-      <div class="status-row">
-        <span class="key">Aktuell</span>
-        <span class="value">${fmtGbpAsEur(forecast.current, fxRates)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Ø pro Tag</span>
-        <span class="value">${fmtGbpAsEur(forecast.average, fxRates)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Prognose Monatsende</span>
-        <span class="value">${fmtGbpAsEur(forecast.projected, fxRates)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Abweichung zum Ziel</span>
-        <span class="value">${fmtSignedGbpAsEur(forecast.delta, fxRates)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Einschätzung</span>
-        <span class="value">${
-          forecast.willReach == null
-            ? DASH
-            : forecast.willReach
-              ? 'Ziel wird voraussichtlich erreicht'
-              : 'Ziel wird voraussichtlich verfehlt'
-        }</span>
-      </div>
-    </div>
-  `;
-
   const statusRows = Object.entries(statusCounts)
     .sort(([a], [b]) => {
       const ai = statusSortKey(a);
@@ -1737,29 +1700,66 @@ function renderExpandedOverview(data) {
     .join('');
 
   html += `
-    <div class="status-box">
-      <h3>Status-Verteilung</h3>
+    <div class="forecast-status-grid">
+      <div class="status-box">
+        <h3>Monatsprognose</h3>
 
-      ${statusRows || `
         <div class="status-row">
-          <span class="key">Status</span>
-          <span class="value">${DASH}</span>
+          <span class="key">Aktuell</span>
+          <span class="value">${fmtGbpAsEur(forecast.current, fxRates)}</span>
         </div>
-      `}
 
-      <div class="status-row">
-        <span class="key">Approval-Rate</span>
-        <span class="value">${fmtPercent(approvalRate)}</span>
+        <div class="status-row">
+          <span class="key">Ø pro Tag</span>
+          <span class="value">${fmtGbpAsEur(forecast.average, fxRates)}</span>
+        </div>
+
+        <div class="status-row">
+          <span class="key">Prognose Monatsende</span>
+          <span class="value">${fmtGbpAsEur(forecast.projected, fxRates)}</span>
+        </div>
+
+        <div class="status-row">
+          <span class="key">Abweichung zum Ziel</span>
+          <span class="value">${fmtSignedGbpAsEur(forecast.delta, fxRates)}</span>
+        </div>
+
+        <div class="status-row">
+          <span class="key">Einschätzung</span>
+          <span class="value">${
+            forecast.willReach == null
+              ? DASH
+              : forecast.willReach
+                ? 'Ziel wird voraussichtlich erreicht'
+                : 'Ziel wird voraussichtlich verfehlt'
+          }</span>
+        </div>
       </div>
 
-      <div class="status-row">
-        <span class="key">Reject-Rate</span>
-        <span class="value">${fmtPercent(rejectionRate)}</span>
-      </div>
+      <div class="status-box">
+        <h3>Status-Verteilung</h3>
 
-      <div class="status-row">
-        <span class="key">Pending-Rate</span>
-        <span class="value">${fmtPercent(pendingRate)}</span>
+        ${statusRows || `
+          <div class="status-row">
+            <span class="key">Status</span>
+            <span class="value">${DASH}</span>
+          </div>
+        `}
+
+        <div class="status-row">
+          <span class="key">Approval-Rate</span>
+          <span class="value">${fmtPercent(approvalRate)}</span>
+        </div>
+
+        <div class="status-row">
+          <span class="key">Reject-Rate</span>
+          <span class="value">${fmtPercent(rejectionRate)}</span>
+        </div>
+
+        <div class="status-row">
+          <span class="key">Pending-Rate</span>
+          <span class="value">${fmtPercent(pendingRate)}</span>
+        </div>
       </div>
     </div>
   `;

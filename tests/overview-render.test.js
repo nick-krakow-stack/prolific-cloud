@@ -163,6 +163,7 @@ const checks = [
   ['adds monthly participation stats to the current month card', html.includes('<span class="value">14</span>') && html.includes('<span class="value">€7,38</span>')],
   ['renders effective hourly as one combined EUR rate', html.includes('<span class="value">€25,90/h</span>') && !html.includes('$13,44/h')],
   ['renders monthly forecast in EUR', html.includes('<span class="value">€103,25</span>') && html.includes('<span class="value">€188,33</span>')],
+  ['renders forecast and status distribution side by side', html.includes('class="forecast-status-grid"') && /<div class="forecast-status-grid">[\s\S]*<h3>Monatsprognose<\/h3>[\s\S]*<h3>Status-Verteilung<\/h3>[\s\S]*<\/div>/.test(html) && css.includes('.forecast-status-grid') && css.includes('grid-template-columns: repeat(2, minmax(0, 1fr))')],
   ['renders efficiency hourly rates in EUR', html.includes('€14,16/h') && html.includes('€15,93/h')],
   ['renders top studies in EUR', html.includes('€10,03') && html.includes('€40,12/h') && !html.includes('£34,00/h')],
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
