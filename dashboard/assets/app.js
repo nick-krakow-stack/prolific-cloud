@@ -164,6 +164,22 @@ function comparisonPercentClass(percent) {
   return 'is-good';
 }
 
+function fmtComparisonPercent(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  const percent = Math.abs(numeric) <= 1 && numeric !== 0 ? numeric * 100 : numeric;
+  const rounded = Math.round(percent * 10) / 10;
+  const sign = rounded < 100 ? '-' : rounded === 100 ? '=' : '+';
+  const formatted = rounded.toLocaleString('de-DE', {
+    minimumFractionDigits: Number.isInteger(rounded) ? 0 : 1,
+    maximumFractionDigits: 1
+  });
+
+  return `${sign} ${formatted} %`;
+}
+
 function renderProgressBar(percent) {
   const clamped = clampPercent(percent);
 
@@ -1613,8 +1629,8 @@ function renderExpandedOverview(data) {
 
     return `
       <div class="earning-tile comparison-tile">
-        <div class="label">Vormonat</div>
-        <div class="value comparison-value ${comparisonPercentClass(percent)}">${fmtPercent(percent)}</div>
+        <div class="label">Entwicklung zum Vormonat</div>
+        <div class="value comparison-value ${comparisonPercentClass(percent)}">${fmtComparisonPercent(percent)}</div>
         <div class="secondary">${fmtMulti(lastMonth.earned)}</div>
       </div>
     `;
