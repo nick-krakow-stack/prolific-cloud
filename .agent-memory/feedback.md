@@ -2,6 +2,9 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Requester analysis should have column
+  headings and separate columns for count, earnings, hourly rate, and the
+  percentage value.
 - 2026-05-17 - Browser feedback: Calendar heatmap idea is good, but tiles are
   too wide. Render seven days per row, show every day of the current month, and
   dim future days.

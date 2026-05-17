@@ -1679,11 +1679,16 @@ function renderStats(data) {
         const name = firstDefined(item, ['requester', 'requesterName', 'requester_name', 'name']) || DASH;
         const total = readCurrencyMetric(item, ['totalReward', 'total_reward', 'earned', 'reward'], ['total_reward_gbp_minor', 'totalRewardGbpMinor']);
         const hourly = readCurrencyMetric(item, ['averageHourlyRate', 'average_hourly_rate', 'hourlyRate', 'hourly_rate'], ['average_hourly_gbp_minor', 'averageHourlyGbpMinor']);
+        const count = firstNumber(item, ['submissionsCount', 'submissions_count', 'count']);
+        const approvalRate = firstNumeric(item, ['approvalRate', 'approval_rate']);
 
         return `
-          <div class="status-row">
-            <span class="key">${escapeHtml(name)}</span>
-            <span class="value">${fmtCount(firstNumber(item, ['submissionsCount', 'submissions_count', 'count']))} &middot; ${fmtMulti(total)} &middot; ${fmtMetricHourly(hourly, 'GBP')} &middot; ${fmtPercent(firstNumeric(item, ['approvalRate', 'approval_rate']))}</span>
+          <div class="requester-row">
+            <span class="requester-name">${escapeHtml(name)}</span>
+            <span class="requester-number" data-label="Anzahl">${fmtCount(count)}</span>
+            <span class="requester-number" data-label="Verdienst">${fmtMulti(total)}</span>
+            <span class="requester-number" data-label="Stundenlohn">${fmtMetricHourly(hourly, 'GBP')}</span>
+            <span class="requester-number" data-label="Approval-Rate">${fmtPercent(approvalRate)}</span>
           </div>
         `;
       }).join('')
@@ -1726,7 +1731,16 @@ function renderStats(data) {
 
     <div class="status-box">
       <h3>Requester-Analyse</h3>
-      ${requesterRows}
+      <div class="requester-table">
+        <div class="requester-row requester-head">
+          <span>Requester</span>
+          <span>Anzahl</span>
+          <span>Verdienst</span>
+          <span>Stundenlohn</span>
+          <span>Approval-Rate</span>
+        </div>
+        ${requesterRows}
+      </div>
     </div>
 
     <div class="status-box">

@@ -4,6 +4,9 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Convert requester analysis to a column table.
+- [x] Label requester columns: Anzahl, Verdienst, Stundenlohn, Approval-Rate.
+- [x] Deploy requester analysis review fix to production and verify runtime files.
 - [x] Change calendar heatmap to a 7-column current-month grid.
 - [x] Fill future days in the current month and show them dimmed.
 - [x] Deploy heatmap review fix to production and verify runtime files.
@@ -53,5 +56,7 @@ Last updated: 2026-05-17
   blue; tabs, controls, and focus rings keep their existing interaction colors.
 - [x] Calendar heatmap now renders all days of the current server month in a
   7-column grid, with future days dimmed.
+- [x] Requester analysis now renders as a responsive table with columns for
+  requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

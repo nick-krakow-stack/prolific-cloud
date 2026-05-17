@@ -127,6 +127,7 @@ const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
   ['renders monthly comparison', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsvergleich')],
   ['renders requester analysis', typeof sandbox.renderStats === 'function' && statsHtml.includes('ABC Research')],
+  ['renders requester analysis as table columns', statsHtml.includes('class="requester-table"') && statsHtml.includes('<span>Requester</span>') && statsHtml.includes('<span>Anzahl</span>') && statsHtml.includes('<span>Verdienst</span>') && statsHtml.includes('<span>Stundenlohn</span>') && statsHtml.includes('<span>Approval-Rate</span>')],
   ['renders monthly report', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsbericht')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],

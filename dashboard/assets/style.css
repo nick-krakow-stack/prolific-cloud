@@ -799,6 +799,45 @@ a:not(.icon-btn):hover {
   overflow-wrap: anywhere;
 }
 
+.requester-table {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.requester-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.7fr) minmax(64px, 0.45fr) minmax(110px, 0.8fr) minmax(112px, 0.8fr) minmax(96px, 0.65fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.requester-row:last-child {
+  border-bottom: none;
+}
+
+.requester-head {
+  padding-top: 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.requester-number {
+  min-width: 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
 .settings-form {
   display: grid;
   gap: 14px;
@@ -1068,6 +1107,39 @@ a:not(.icon-btn):hover {
 
   .heatmap-value {
     font-size: 10px;
+  }
+
+  .requester-table {
+    gap: 8px;
+  }
+
+  .requester-head {
+    display: none;
+  }
+
+  .requester-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+    padding: 9px 0;
+  }
+
+  .requester-row .requester-name {
+    grid-column: 1 / -1;
+  }
+
+  .requester-number {
+    text-align: left;
+  }
+
+  .requester-number::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 1px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
 
   .report-actions,

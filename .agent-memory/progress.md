@@ -1,5 +1,8 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: requester analysis now renders as a
+  responsive table with columns for requester, count, earnings, hourly rate, and
+  approval rate.
 - 2026-05-17 - Browser review fix deployed: calendar heatmap now uses a
   7-column current-month grid and dims future days.
 - 2026-05-17 - Browser review fix deployed: global page links now use a warm

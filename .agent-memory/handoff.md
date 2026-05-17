@@ -24,7 +24,9 @@ for links is implemented and deployed: normal page links are warm near-white /
 yellow instead of blue, while tabs and controls keep their interaction colors.
 Browser review fix for the stats heatmap is implemented and deployed: the
 frontend renders all days of the current server month in seven columns and dims
-future days. The production webroot is
+future days. Browser review fix for requester analysis is implemented and
+deployed: it now renders as a responsive table with columns for requester,
+count, earnings, hourly rate, and Approval-Rate. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -33,12 +35,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: 4cb1f00 Render heatmap as full month grid
+- Last product commit before this snapshot: pending requester table commit
 
 ## Working Tree
 
 ~~~text
-clean after commit/push except this handoff refresh
+requester table changes pending commit/push
 ~~~
 
 ## Current State Summary
