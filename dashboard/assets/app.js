@@ -303,6 +303,30 @@ function fmtTimestamp(iso) {
   }) + ' ' + time;
 }
 
+function fmtMonthLabel(value) {
+  if (!value) return DASH;
+
+  const raw = String(value).trim();
+  const monthMatch = raw.match(/^(\d{4})-(\d{2})$/);
+
+  if (monthMatch) {
+    const month = Number(monthMatch[2]);
+
+    if (month >= 1 && month <= 12) {
+      const date = new Date(Number(monthMatch[1]), month - 1, 1);
+      return date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+  }
+
+  const date = new Date(raw);
+
+  if (!Number.isNaN(date.getTime())) {
+    return date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  }
+
+  return raw || DASH;
+}
+
 function fmtTimeAgo(iso) {
   if (!iso) return DASH;
 
@@ -1670,6 +1694,7 @@ function renderStats(data) {
   const delta = asObject(comparison.delta);
   const requesters = parseJsonMaybe(data.requesterStats || data.requester_stats) || [];
   const report = asObject(data.monthlyReport || data.monthly_report);
+  const reportMonth = firstDefined(report, ['month', 'label']);
   const reportHourly = asObject(report.hourlyRate || report.hourly_rate);
   const reportStatusCounts = normalizeStatusCounts(report.statusCounts || report.status_counts, {});
 
@@ -1747,7 +1772,7 @@ function renderStats(data) {
       <h3>Monatsbericht</h3>
       <div class="status-row">
         <span class="key">Monat</span>
-        <span class="value">${escapeHtml(firstDefined(report, ['month', 'label']) || DASH)}</span>
+        <span class="value">${escapeHtml(fmtMonthLabel(reportMonth))}</span>
       </div>
       <div class="status-row">
         <span class="key">Verdient</span>
