@@ -1525,8 +1525,8 @@ function renderDailyStatsCard(dailyStats, fxRates) {
 function renderSystemHealthCard(systemHealth) {
   const dbCounts = asObject(systemHealth.dbCounts);
   const countLabels = {
-    studies: 'Studies',
-    submissions: 'Submissions',
+    studies: 'Studien',
+    submissions: 'Teilnahmen',
     events: 'Events',
     syncLog: 'Sync-Log'
   };
