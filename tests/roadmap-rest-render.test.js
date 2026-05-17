@@ -118,13 +118,16 @@ const events = {
 };
 
 const eventsHtml = sandbox.renderEvents(events);
+const settingsHtml = sandbox.renderSettings(settings);
 
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Kalender-Heatmap')],
   ['renders monthly comparison', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsvergleich')],
   ['renders requester analysis', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('ABC Research')],
   ['renders monthly report', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsbericht')],
-  ['renders settings form', typeof sandbox.renderSettings === 'function' && sandbox.renderSettings(settings).includes('Monatsziel')],
+  ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
+  ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
+  ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['renders note control', sandbox.renderStudies(studies).includes('data-study-note')],
   ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],

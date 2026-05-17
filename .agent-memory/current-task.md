@@ -4,6 +4,8 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Modernize settings UI with sliders, polished number fields, and autosave.
+- [x] Deploy settings autosave review fix to production and verify runtime files.
 - [x] Implement browser review: summarize the Log tab as `Sync-Status`.
 - [x] Keep the detailed event log available in a collapsed `Log` disclosure.
 - [x] Deploy Sync-Status review fix to production and verify runtime files.
@@ -40,5 +42,7 @@ Last updated: 2026-05-17
 - [x] Sync lamp change deployed and verified.
 - [x] `Log` tab renamed to `Sync-Status`; it now shows last sync status,
   last successful sync, last failure, and a collapsed detailed log.
+- [x] Settings tab modernized with range sliders, exact GBP fields, debounced
+  autosave, and inline save status.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

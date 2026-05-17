@@ -17,8 +17,10 @@ account, system, settings, heatmap, monthly comparison, CSV export, monthly
 report, study notes, requester analysis, and quality tags. Browser review fix
 for the former `Log` tab is implemented and deployed: the tab now reads
 `Sync-Status`, shows last sync status, last successful sync, and last failure,
-and keeps the detailed event log collapsed behind `Log`. The production webroot
-is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+and keeps the detailed event log collapsed behind `Log`. Browser review fix for
+settings is implemented and deployed: sliders, exact GBP fields, and debounced
+autosave through the existing protected settings endpoint. The production
+webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
 browser, and review feedback are persisted in .agent-memory/feedback.md.
@@ -26,12 +28,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: 4b8234f Summarize sync status tab
+- Last product commit before this snapshot: pending settings autosave commit
 
 ## Working Tree
 
 ~~~text
-clean after commit/push except this handoff refresh
+settings autosave changes pending commit/push
 ~~~
 
 ## Current State Summary

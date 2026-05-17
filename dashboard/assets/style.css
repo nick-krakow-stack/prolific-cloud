@@ -783,24 +783,128 @@ body { font-size: 14px; line-height: 1.5; }
 
 .settings-form {
   display: grid;
+  gap: 14px;
+  min-width: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
   min-width: 0;
 }
 
-.form-grid {
+.settings-header h3 {
+  margin: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.settings-header p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.settings-save-state {
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.settings-save-state[data-state="saving"],
+.settings-save-state[data-state="dirty"] {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.settings-save-state[data-state="error"] {
+  background: var(--danger-bg);
+  color: var(--danger);
+  white-space: normal;
+}
+
+.form-grid,
+.settings-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
   min-width: 0;
 }
 
-.settings-form label {
+.settings-form label,
+.setting-control {
   display: grid;
-  gap: 4px;
+  gap: 10px;
   min-width: 0;
-  font-size: 12px;
-  font-weight: 650;
+}
+
+.setting-control {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 42%, var(--bg-card));
+}
+
+.setting-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.setting-label {
+  display: block;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--text);
+}
+
+.setting-hint {
+  display: block;
+  min-width: 0;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 500;
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.setting-value-field {
+  display: grid;
+  grid-template-columns: auto minmax(74px, 92px);
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.setting-prefix {
+  padding: 0 0 0 9px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .settings-form input,
@@ -815,6 +919,20 @@ body { font-size: 14px; line-height: 1.5; }
   background: var(--bg-card);
   color: var(--text);
   font: inherit;
+}
+
+.setting-value-field input {
+  border: none;
+  border-radius: 0;
+  padding-left: 6px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.setting-range {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
 }
 
 .settings-form input:focus,
@@ -907,6 +1025,7 @@ body { font-size: 14px; line-height: 1.5; }
 @media (min-width: 520px) {
   .comparison-grid,
   .form-grid,
+  .settings-grid,
   .account-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

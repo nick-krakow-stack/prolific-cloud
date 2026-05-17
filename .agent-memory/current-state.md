@@ -141,6 +141,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: the former `Log` tab is now labelled `Sync-Status`.
   `/api/data.php?type=events` returns a `syncStatus` summary, and the detailed
   event log is hidden behind a collapsed `Log` disclosure by default.
+- Browser review fix: the settings tab uses slider controls plus exact GBP
+  number inputs and saves changes automatically through the existing protected
+  `/api/data.php?type=settings` POST route.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

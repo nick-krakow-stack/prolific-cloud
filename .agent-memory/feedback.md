@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Modernize the settings form with sliders,
+  nicer input fields, and automatic saving instead of a manual save row.
 - 2026-05-17 - Browser feedback: Rename `Log` to `Sync-Status`, replace the
   long immediate event list with a summary for last sync, last successful sync,
   and last failure, and keep the detailed log collapsed by default.

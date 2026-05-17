@@ -1804,6 +1804,32 @@ function inputToMinor(value) {
   return Number.isFinite(numeric) ? Math.round(numeric * 100) : null;
 }
 
+function renderSettingsControl(options) {
+  const value = moneyMinorToInput(options.valueMinor);
+  const numeric = Number(value || 0);
+  const max = Math.max(options.max, Math.ceil(Math.max(numeric, 1) * 1.25));
+
+  return `
+    <label class="setting-control" for="${escapeHtml(options.id)}">
+      <span class="setting-main">
+        <span>
+          <span class="setting-label">${escapeHtml(options.label)}</span>
+          <span class="setting-hint">${escapeHtml(options.hint)}</span>
+        </span>
+        <span class="setting-value-field">
+          <span class="setting-prefix">£</span>
+          <input id="${escapeHtml(options.id)}" data-settings-input="${escapeHtml(options.field)}"
+                 type="number" min="0" max="${escapeHtml(max)}" step="0.01"
+                 value="${escapeHtml(value)}" inputmode="decimal">
+        </span>
+      </span>
+      <input class="setting-range" data-settings-range="${escapeHtml(options.field)}"
+             type="range" min="0" max="${escapeHtml(max)}" step="${escapeHtml(options.step)}"
+             value="${escapeHtml(value)}">
+    </label>
+  `;
+}
+
 function renderSettings(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
@@ -1814,29 +1840,52 @@ function renderSettings(data) {
   const thresholds = asObject(settings.thresholds);
 
   return `
-    <form id="settingsForm" class="status-box">
-      <h3>Einstellungen</h3>
-      <div class="status-row">
-        <label class="key" for="settingsDailyGoal">Tagesziel</label>
-        <span class="value"><input id="settingsDailyGoal" name="daily_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(goals.daily_gbp_minor))}"></span>
+    <form id="settingsForm" class="settings-form" novalidate>
+      <div class="settings-header">
+        <div>
+          <h3>Einstellungen</h3>
+          <p>Ziele und Qualitätsgrenzen werden automatisch gespeichert.</p>
+        </div>
+        <div id="settingsMessage" class="settings-save-state">Automatisch gespeichert</div>
       </div>
-      <div class="status-row">
-        <label class="key" for="settingsMonthlyGoal">Monatsziel</label>
-        <span class="value"><input id="settingsMonthlyGoal" name="monthly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(goals.monthly_gbp_minor))}"></span>
+      <div class="settings-grid">
+        ${renderSettingsControl({
+          id: 'settingsDailyGoal',
+          field: 'daily_gbp',
+          label: 'Tagesziel',
+          hint: 'Zielwert für die Tagesübersicht',
+          valueMinor: goals.daily_gbp_minor,
+          max: 50,
+          step: 0.25
+        })}
+        ${renderSettingsControl({
+          id: 'settingsMonthlyGoal',
+          field: 'monthly_gbp',
+          label: 'Monatsziel',
+          hint: 'Zielwert für Prognose und Fortschritt',
+          valueMinor: goals.monthly_gbp_minor,
+          max: 1000,
+          step: 1
+        })}
+        ${renderSettingsControl({
+          id: 'settingsGreatHourly',
+          field: 'great_hourly_gbp',
+          label: 'Sehr guter Stundenlohn',
+          hint: 'Ab hier bekommen Studien das Tag Sehr gut',
+          valueMinor: thresholds.great_hourly_gbp_minor,
+          max: 80,
+          step: 0.5
+        })}
+        ${renderSettingsControl({
+          id: 'settingsOkHourly',
+          field: 'ok_hourly_gbp',
+          label: 'Okay-Stundenlohn',
+          hint: 'Unter diesem Wert gilt eine Studie als niedrig',
+          valueMinor: thresholds.ok_hourly_gbp_minor,
+          max: 50,
+          step: 0.5
+        })}
       </div>
-      <div class="status-row">
-        <label class="key" for="settingsGreatHourly">Sehr guter Stundenlohn</label>
-        <span class="value"><input id="settingsGreatHourly" name="great_hourly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(thresholds.great_hourly_gbp_minor))}"></span>
-      </div>
-      <div class="status-row">
-        <label class="key" for="settingsOkHourly">Okay-Stundenlohn</label>
-        <span class="value"><input id="settingsOkHourly" name="ok_hourly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(thresholds.ok_hourly_gbp_minor))}"></span>
-      </div>
-      <div class="status-row">
-        <span class="key">Speichern</span>
-        <span class="value"><button type="submit">Speichern</button></span>
-      </div>
-      <div id="settingsMessage" class="study-time"></div>
     </form>
   `;
 }
@@ -1846,42 +1895,85 @@ function bindSettingsForm() {
 
   if (!form) return;
 
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
+  const message = $('settingsMessage');
+  let saveTimer = null;
+  let saveToken = 0;
 
-    const message = $('settingsMessage');
+  const inputFor = field => form.querySelector(`[data-settings-input="${field}"]`);
+  const rangeFor = field => form.querySelector(`[data-settings-range="${field}"]`);
+  const settingInputs = Array.from(form.querySelectorAll('[data-settings-input]'));
+  const settingRanges = Array.from(form.querySelectorAll('[data-settings-range]'));
+
+  const collectPayload = () => {
     const payload = {
       settings: {
         goals: {
-          daily_gbp_minor: inputToMinor(form.daily_gbp.value),
-          monthly_gbp_minor: inputToMinor(form.monthly_gbp.value)
+          daily_gbp_minor: inputToMinor(inputFor('daily_gbp')?.value),
+          monthly_gbp_minor: inputToMinor(inputFor('monthly_gbp')?.value)
         },
         thresholds: {
-          great_hourly_gbp_minor: inputToMinor(form.great_hourly_gbp.value),
-          ok_hourly_gbp_minor: inputToMinor(form.ok_hourly_gbp.value)
+          great_hourly_gbp_minor: inputToMinor(inputFor('great_hourly_gbp')?.value),
+          ok_hourly_gbp_minor: inputToMinor(inputFor('ok_hourly_gbp')?.value)
         }
       }
     };
 
+    return payload;
+  };
+
+  const setMessage = (text, state) => {
+    if (!message) return;
+
+    message.textContent = text;
+    message.dataset.state = state || '';
+  };
+
+  const saveSettings = async token => {
+    setMessage('Speichere...', 'saving');
+
     try {
-      const data = await postJson(`${API_BASE}?type=settings`, payload);
+      const data = await postJson(`${API_BASE}?type=settings`, collectPayload());
+
+      if (token !== saveToken) return;
 
       if (data && data.ok) {
         cachedData.settings = data;
-        const container = $('settingsContent');
-
-        if (container) {
-          container.innerHTML = renderSettings(data);
-          bindSettingsForm();
-        }
+        setMessage('Automatisch gespeichert', 'saved');
       } else if (message) {
-        message.textContent = 'Speichern fehlgeschlagen.';
+        setMessage('Speichern fehlgeschlagen', 'error');
       }
     } catch (e) {
-      if (message) {
-        message.textContent = 'Speichern fehlgeschlagen: ' + e.message;
-      }
+      setMessage('Speichern fehlgeschlagen: ' + e.message, 'error');
     }
+  };
+
+  const scheduleSave = () => {
+    const token = ++saveToken;
+
+    setMessage('Ungespeicherte Änderungen', 'dirty');
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(() => saveSettings(token), 650);
+  };
+
+  const syncControl = (field, value, source) => {
+    const input = inputFor(field);
+    const range = rangeFor(field);
+
+    if (input && source !== input) input.value = value;
+    if (range && source !== range) range.value = value;
+  };
+
+  [...settingInputs, ...settingRanges].forEach(control => {
+    const field = control.dataset.settingsInput || control.dataset.settingsRange;
+
+    control.addEventListener('input', () => {
+      syncControl(field, control.value, control);
+      scheduleSave();
+    });
+  });
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
   });
 }
 

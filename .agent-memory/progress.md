@@ -1,5 +1,7 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: settings now use modern slider
+  controls plus exact GBP inputs and debounced autosave with inline status.
 - 2026-05-17 - Browser review fix deployed: `Log` is now `Sync-Status`, with
   last sync summary rows and the detailed event log collapsed by default.
 - 2026-05-17 - Initial project backup committed and pushed to GitHub.
