@@ -3094,6 +3094,55 @@ function refreshStudiesList(options = {}) {
   el.addEventListener('input', () => refreshStudiesList({ resetPage: true }));
 });
 
+const studiesDateToggle = $('studiesDateToggle');
+const studiesDatePanel = $('studiesDatePanel');
+
+function setStudiesDatePanelOpen(isOpen) {
+  if (!studiesDateToggle || !studiesDatePanel) return;
+
+  studiesDatePanel.hidden = !isOpen;
+
+  if (isOpen) {
+    studiesDateToggle.setAttribute('aria-expanded', 'true');
+  } else {
+    studiesDateToggle.setAttribute('aria-expanded', 'false');
+  }
+}
+
+if (studiesDateToggle && studiesDatePanel) {
+  studiesDateToggle.addEventListener('click', event => {
+    event.stopPropagation();
+
+    const shouldOpen = studiesDatePanel.hidden;
+    setStudiesDatePanelOpen(shouldOpen);
+
+    if (shouldOpen) {
+      const studiesDateFrom = $('studiesDateFrom');
+
+      if (studiesDateFrom && typeof studiesDateFrom.showPicker === 'function') {
+        try {
+          studiesDateFrom.showPicker();
+        } catch (error) {
+          studiesDateFrom.focus();
+        }
+      } else if (studiesDateFrom) {
+        studiesDateFrom.focus();
+      }
+    }
+  });
+
+  studiesDatePanel.addEventListener('click', event => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener('click', () => setStudiesDatePanelOpen(false));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      setStudiesDatePanelOpen(false);
+    }
+  });
+}
+
 const studiesDateReset = $('studiesDateReset');
 
 if (studiesDateReset) {

@@ -59,7 +59,7 @@ require_login();
         </select>
       </label>
 
-      <label>Filter:
+      <label>
         <select id="studiesFilter">
           <option value="all">Alle</option>
           <option value="active">Aktive</option>
@@ -67,15 +67,22 @@ require_login();
         </select>
       </label>
 
-      <label>Anzeige:
+      <label>
         <select id="studiesPageSize">
           <option value="50" selected>50</option>
           <option value="all">Alle</option>
         </select>
       </label>
 
-      <fieldset class="date-filter" aria-label="Zeitraum">
-        <legend>Zeitraum:</legend>
+      <fieldset class="date-filter date-filter-popover" aria-label="Zeitraum">
+        <legend>Zeitraum</legend>
+        <button id="studiesDateToggle"
+                class="filter-icon date-filter-toggle"
+                type="button"
+                aria-label="Zeitraum auswaehlen"
+                aria-expanded="false"
+                aria-controls="studiesDatePanel">&#128197;</button>
+        <div id="studiesDatePanel" class="date-filter-panel" hidden>
         <label>Von
           <input id="studiesDateFrom" type="date">
         </label>
@@ -83,6 +90,7 @@ require_login();
           <input id="studiesDateTo" type="date">
         </label>
         <button id="studiesDateReset" class="filter-reset" type="button">Zurücksetzen</button>
+        </div>
       </fieldset>
     </div>
 

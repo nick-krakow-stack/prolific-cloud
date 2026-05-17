@@ -1345,16 +1345,20 @@ a:not(.icon-btn):hover {
   font-size: 13px;
 }
 .filter-bar input[type="date"] { color-scheme: dark; }
+#panel-studies .filter-bar,
 #panel-submissions .filter-bar {
   gap: 10px;
 }
+#panel-studies .date-filter,
 #panel-submissions .date-filter {
   flex-wrap: nowrap;
   position: relative;
 }
+#panel-studies .date-filter input[type="date"],
 #panel-submissions .date-filter input[type="date"] {
   width: 126px;
 }
+#panel-studies .filter-reset,
 #panel-submissions .filter-reset {
   white-space: nowrap;
 }
