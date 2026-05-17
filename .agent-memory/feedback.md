@@ -34,3 +34,5 @@ Last updated: 2026-05-17
 - 2026-05-17 - Browser feedback: The refresh button should visibly animate
   while manual refresh is running, and the page should show a loading animation
   so it is clear that clicking refresh did something.
+- 2026-05-17 - Browser feedback: Tagesziel and Monatsziel in the overview must
+  reflect values saved in the settings tab, not the config defaults.

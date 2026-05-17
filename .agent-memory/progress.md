@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: overview daily/monthly goal cards
+  now read saved `dashboardGoals` via `load_dashboard_settings()` instead of
+  using config defaults. Live browser verification showed `£30,00` daily and
+  `£600,00` monthly targets.
 - 2026-05-17 - Browser review fix deployed: manual refresh now spins the
   refresh icon, disables double-click refresh during the request, and shows a
   subtle page-level `Aktualisiere...` loading overlay for the active tab.
@@ -64,3 +68,5 @@
 - 2026-05-17 17:36:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 17:56:24 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 17:56:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 18:04:47 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 18:04:50 +02:00 - Stop hook ran and refreshed central memory snapshot.

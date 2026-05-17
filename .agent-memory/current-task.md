@@ -1,9 +1,12 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 17:56:24 +02:00
+Last updated: 2026-05-17 18:04:47 +02:00
 
 ## Active Task Checklist
 
+- [x] Fix overview goals to use saved dashboard settings.
+- [x] Add regression check for overview/settings goal source.
+- [x] Deploy settings-goals fix and verify live goal cards.
 - [x] Animate refresh button while manual refresh requests are running.
 - [x] Add page-level loading overlay for manual refresh.
 - [x] Deploy refresh loading animation and verify live assets.
@@ -75,6 +78,7 @@ Last updated: 2026-05-17 17:56:24 +02:00
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
+
 
 
 

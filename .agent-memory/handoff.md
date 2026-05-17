@@ -1,48 +1,42 @@
 # Handoff
 
-Last updated: 2026-05-17 18:03:00 +02:00
+Last updated: 2026-05-17 18:09:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Manual refresh loading feedback is implemented and deployed. The refresh button
-now contains `.icon-btn-symbol`, spins while a manual refresh is active, disables
-itself during the request, and sets `aria-busy`. The active tab receives
-`is-loading` and a subtle `Aktualisiere...` overlay until the API call completes.
-Automatic 60-second reloads and tab switches still load without the overlay.
+Overview goal cards now use saved dashboard settings. `build_overview()` reads
+`load_dashboard_settings()['goals']` instead of `$config['goals']`, so the
+Tagesziel and Monatsziel cards match the values saved in the settings tab.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 56c3238 Add refresh loading feedback
+- Last product commit: 466fa02 Use saved settings for overview goals
 - Last memory commit: pending this task
 
 ## Working Tree
 
 ~~~text
- M .agent-memory/current-state.md
  M .agent-memory/current-task.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M dashboard/app.php
- M dashboard/assets/app.js
- M dashboard/assets/style.css
- M tests/roadmap-rest-render.test.js
+ M api/data.php
+?? tests/settings-goals-source.test.js
 ~~~
 
 ## Verification Snapshot
 
-- `node --check dashboard/assets/app.js` passed.
-- `node tests\roadmap-rest-render.test.js` passed.
+- `node tests\settings-goals-source.test.js` passed.
 - `node tests\overview-render.test.js` passed.
-- Server `php74`/`php84 -l dashboard/app.php` passed.
+- `node tests\roadmap-rest-render.test.js` passed.
+- Server `php74`/`php84 -l api/data.php` passed.
 - Deploy helper uploaded runtime files to production.
-- Production asset checks confirmed refresh spinner CSS, page overlay CSS, and
-  JS loading-state helpers are present.
 - Production root returned `200`; unauthenticated overview API returned `401`.
 - Production setup files remain absent.
-- In-app browser reload showed the wrapped refresh symbol and dashboard content.
+- In-app browser verification showed `TAGESZIEL` as `£1,86 von £30,00` and
+  `MONATSZIEL` as `£127,48 von £600,00`; old `£150,00` target no longer appeared.
 
 ## Current State Summary
 

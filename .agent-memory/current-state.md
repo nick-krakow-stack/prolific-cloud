@@ -166,6 +166,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: the manual refresh button now wraps its icon in
   `.icon-btn-symbol`, spins while the active tab reloads, disables itself during
   the request, and shows a subtle page-level loading overlay on the active tab.
+- Browser review fix: overview daily and monthly goal cards now use saved
+  dashboard settings from `dashboardGoals` through `load_dashboard_settings()`,
+  so changing values in the settings tab updates the overview.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell
