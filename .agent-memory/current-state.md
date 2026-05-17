@@ -110,6 +110,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 
 ## Verification Notes
 
+- Reward calculation fix: `api/_rewards.php` derives effective rewards from
+  base reward, adjustment, bonus, screened-out amount, and raw reward fallback.
+  Production browser verification showed `HEUTE` as `Â£1,86` plus pending
+  amounts after reload.
 - GitHub CLI is installed at `C:\Program Files\GitHub CLI\gh.exe` and authorized.
 - Local `php` was not available in PATH during initial setup.
 - `node` availability should be checked before JS syntax verification.

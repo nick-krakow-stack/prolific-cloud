@@ -1,9 +1,14 @@
-# Current Task Checklist
+﻿# Current Task Checklist
 
-Last updated: 2026-05-17
+Last updated: 2026-05-17 17:36:07 +02:00
 
 ## Active Task Checklist
 
+- [x] Diagnose Reward/Adjustment-Berechnung mit echten Server-Aggregaten.
+- [x] Add regression tests for effective reward totals and submission rendering.
+- [x] Implement central effective reward helper for backend reads and sync writes.
+- [x] Apply effective reward totals to dashboard aggregations, CSV export, and UI.
+- [x] Deploy reward calculation fix to production and verify live aggregates.
 - [x] Replace compact study meta line with responsive detail tiles.
 - [x] Deploy study detail tile review fix to production and verify runtime files.
 - [x] Remove study note fields and save buttons from study cards.
@@ -66,4 +71,6 @@ Last updated: 2026-05-17
 - [x] Requester analysis now renders as a responsive table with columns for
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
-- [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.
+- [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
+
+

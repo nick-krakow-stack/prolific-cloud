@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Reward calculation fix deployed: dashboard totals, stats,
+  requester analysis, top studies, CSV export, and submission cards now use an
+  effective reward amount derived from base reward plus adjustment plus bonus,
+  with a screened-out fallback and raw reward fallback.
 - 2026-05-17 - Browser review fix deployed: study cards now render reward,
   duration, places, hourly rate, and seen time as responsive detail tiles
   instead of a compact dot-separated meta line.
@@ -51,3 +55,7 @@
   asset checks, and setup-file absence checks.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 17:31:52 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 17:31:57 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 17:36:07 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 17:36:11 +02:00 - Stop hook ran and refreshed central memory snapshot.

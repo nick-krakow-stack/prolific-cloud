@@ -1,55 +1,38 @@
-﻿# Handoff
+# Handoff
 
-Last updated: 2026-05-17
+Last updated: 2026-05-17 17:45:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Roadmap Phase 1 + Phase 2 has been implemented and deployed to the All-Inkl
-webspace. The topbar sync lamp now shows green only for a fresh Watcher sync and
-red when the Watcher appears inactive. The overview no longer shows the old
-`Prolific-Konto` status box; `Auszahlbar` and `In Prüfung` now render as tiles
-below the first four earnings tiles. The remaining overview roadmap block is
-implemented and deployed: efficiency, top studies, daily chart, system health,
-and EUR equivalents from the `prolific-watcher` Frankfurter.app `fxRates`
-structure. The rest of the roadmap is also implemented and deployed: stats,
-account, system, settings, heatmap, monthly comparison, CSV export, monthly
-report, requester analysis, and quality tags. Browser review fix
-for the former `Log` tab is implemented and deployed: the tab now reads
-`Sync-Status`, shows last sync status, last successful sync, and last failure,
-and keeps the detailed event log collapsed behind `Log`. Browser review fix for
-settings is implemented and deployed: sliders, exact GBP fields, and debounced
-autosave through the existing protected settings endpoint. Browser review fix
-for links is implemented and deployed: normal page links are warm near-white /
-yellow instead of blue, while tabs and controls keep their interaction colors.
-Browser review fix for the stats heatmap is implemented and deployed: the
-frontend renders all days of the current server month in seven columns and dims
-future days. Browser review fix for requester analysis is implemented and
-deployed: it now renders as a responsive table with columns for requester,
-count, earnings, hourly rate, and Approval-Rate. Browser review fix for the
-monthly report is implemented and deployed: month labels render in German
-format such as `Mai 2026` while API values stay machine-readable. Browser
-review fix for study notes is implemented and deployed: study cards no longer
-render notes, `api/notes.php` is removed from runtime deploys and the server,
-and the existing DB table was left untouched. Browser review fix for study
-cards is implemented and deployed: reward, duration, places, hourly rate, and
-seen time now render as responsive detail tiles instead of one compact meta
-line. The production webroot is
-`/www/htdocs/w021974e/prolific.nickkrakow.de`.
-
-Current task status is tracked in .agent-memory/current-task.md. Owner,
-browser, and review feedback are persisted in .agent-memory/feedback.md.
+Reward/adjustment bug fixed and deployed. Effective rewards are now calculated
+centrally in `api/_rewards.php` from base reward + adjustment + bonus, with
+screened-out and raw-reward fallbacks. Dashboard aggregations, stats, requester
+analysis, top studies, CSV export, submission cards, and sync writes now use the
+effective reward path.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: 671d3f7 Render study details as tiles
+- Last product commit: 1e0dbf1 Fix adjusted reward totals
+- Last memory commit: current HEAD memory commit for reward fix
 
 ## Working Tree
 
 ~~~text
-memory changes pending commit/push
+ clean after memory commit
 ~~~
+
+## Verification Snapshot
+
+- `node --check dashboard/assets/app.js` passed.
+- `node tests\overview-render.test.js` passed.
+- `node tests\roadmap-rest-render.test.js` passed.
+- `php74` and `php84` lint passed for `api/_rewards.php`, `api/data.php`,
+  `api/export.php`, and `api/sync.php` on production.
+- Production root returned `200`; unauthenticated overview API returned `401`.
+- Production setup files remain absent.
+- In-app browser showed `HEUTE` as `Â£1,86` plus pending amounts after reload.
 
 ## Current State Summary
 
@@ -57,7 +40,8 @@ See .agent-memory/current-state.md.
 
 ## Next Planned Work
 
-See .agent-memory/next-steps.md.
+Owner can continue the full browser review; the next item is the next review
+note or backlog item from `.agent-memory/next-steps.md`.
 
 ## Required Startup For Next Agent
 
@@ -77,6 +61,3 @@ See .agent-memory/next-steps.md.
 - Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
 - Keep config.php local and ignored.
 - Preserve root routing through / and absolute frontend paths.
-- Deploy only runtime files through scripts/deploy-webspace.ps1 by default.
-- Use scripts/deploy-webspace.ps1 -IncludeConfig only when a task explicitly changes config.php.
-- Keep setup files in GitHub for backup/reinstall, but do not upload them to the live server during normal operation.
