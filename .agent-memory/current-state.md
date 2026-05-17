@@ -54,7 +54,8 @@ earnings, studies, submissions, account balance, logs, and future analytics.
 - SSH alias: `prolific-cloud` configured locally in `~/.ssh/config`.
 - SSH host: `w021974e.kasserver.com`.
 - Webroot: `/www/htdocs/w021974e/prolific.nickkrakow.de`.
-- Server PHP CLI: `PHP 7.4.33-nmm8`.
+- Production PHP target: PHP 8.4 in All-Inkl/KAS for `prolific.nickkrakow.de`.
+- Server PHP CLI check target: `php84`.
 - Server DB client: `MariaDB 10.6.23`.
 - Server `config.php` is present and must remain server-side.
 - `install.php`, `hash-generator.php`, and `config.example.php` are absent on production.
@@ -126,7 +127,7 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Remaining overview block currently has a dedicated Node render contract test at
   `tests/overview-render.test.js`.
 - Deployment verification for the remaining overview block passed: `node --check`,
-  `tests/overview-render.test.js`, `php74`/`php84` lint on `api/data.php`,
+  `tests/overview-render.test.js`, historical `php74`/`php84` lint on `api/data.php`,
   server-side PHP lints for runtime files, live root `200`, unauthenticated
   overview API `401`, asset delivery checks, and direct server DB query smoke test.
 - A final read-only review found one P2 hardening issue; `fmtAmount()` now
