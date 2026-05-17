@@ -100,7 +100,7 @@ require_login();
         </select>
       </label>
 
-      <label>Filter:
+      <label>
         <select id="submissionsFilter">
           <option value="all">Alle</option>
           <option value="APPROVED">Approved</option>
@@ -111,7 +111,7 @@ require_login();
         </select>
       </label>
 
-      <label>Anzeige:
+      <label>
         <select id="submissionsPageSize">
           <option value="50" selected>50</option>
           <option value="all">Alle</option>
