@@ -107,6 +107,18 @@ a:not(.icon-btn):hover {
 .icon-btn:hover { background: var(--bg); }
 .icon-btn:disabled { cursor: progress; opacity: 0.8; }
 .icon-btn-symbol { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.logout-btn {
+  color: #fca5a5;
+}
+.logout-btn:hover {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+.logout-btn .icon-btn-symbol {
+  font-size: 18px;
+  font-weight: 800;
+}
 .icon-btn.is-refreshing .icon-btn-symbol { animation: refresh-spin 0.8s linear infinite; }
 @keyframes refresh-spin {
   from { transform: rotate(0deg); }

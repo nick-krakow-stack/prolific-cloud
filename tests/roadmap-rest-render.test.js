@@ -321,6 +321,7 @@ const checks = [
   ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')],
   ['limits system log rendering to ten events', (manyEventsHtml.match(/class="event-card"/g) || []).length === 10 && manyEventsHtml.includes('Sync 10') && !manyEventsHtml.includes('Sync 11')],
   ['system endpoint fetches only ten log events', /function build_system_response[\s\S]*bindValue\(1,\s*10,\s*PDO::PARAM_INT\)/.test(systemResponseSource)],
+  ['renders distinct logout button symbol', appShell.includes('href="/logout.php" class="icon-btn logout-btn"') && appShell.includes('aria-label="Abmelden"') && appShell.includes('&#x23FB;') && !appShell.includes('>⎋</a>')],
   ['styles page links with warm non-blue color', css.includes('--link:') && css.includes('a:not(.icon-btn)') && css.includes('color: var(--link)')],
   ['styles refresh button spinner state', css.includes('@keyframes refresh-spin') && css.includes('.icon-btn.is-refreshing .icon-btn-symbol') && css.includes('animation: refresh-spin')],
   ['styles page refresh loading overlay', css.includes('.tab-panel.is-loading::after') && css.includes('.tab-panel.is-loading::before') && css.includes('@keyframes loading-pulse')]

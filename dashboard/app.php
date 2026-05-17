@@ -27,7 +27,9 @@ require_login();
       <button id="refreshBtn" class="icon-btn" title="Aktualisieren" aria-label="Aktualisieren">
         <span class="icon-btn-symbol" aria-hidden="true">↻</span>
       </button>
-      <a href="/logout.php" class="icon-btn" title="Abmelden">⎋</a>
+      <a href="/logout.php" class="icon-btn logout-btn" title="Abmelden" aria-label="Abmelden">
+        <span class="icon-btn-symbol" aria-hidden="true">&#x23FB;</span>
+      </a>
     </div>
   </div>
 </header>
