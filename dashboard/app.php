@@ -69,6 +69,13 @@ require_login();
         </select>
       </label>
 
+      <label>Anzeige:
+        <select id="studiesPageSize">
+          <option value="50" selected>50</option>
+          <option value="all">Alle</option>
+        </select>
+      </label>
+
       <fieldset class="date-filter" aria-label="Zeitraum">
         <legend>Zeitraum:</legend>
         <label>Von

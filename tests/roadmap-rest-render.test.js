@@ -3,6 +3,7 @@ const vm = require('vm');
 
 const code = fs.readFileSync('dashboard/assets/app.js', 'utf8');
 const css = fs.readFileSync('dashboard/assets/style.css', 'utf8');
+const appShell = fs.readFileSync('dashboard/app.php', 'utf8');
 
 const sandbox = {
   console,
@@ -116,6 +117,20 @@ const studies = {
   ]
 };
 
+for (let i = 3; i <= 55; i++) {
+  studies.studies.push({
+    id: `study-${i}`,
+    name: `Paged study ${i}`,
+    reward_minor: 100 + i,
+    reward_currency: 'GBP',
+    estimated_minutes: 5,
+    total_places: 10,
+    reward_per_hour: 1200,
+    first_seen: `2026-05-${String(18 - (i % 9)).padStart(2, '0')} 09:00:00`,
+    is_active: 1
+  });
+}
+
 const events = {
   ok: true,
   syncStatus: {
@@ -178,6 +193,9 @@ const checks = [
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['studies panel has date range controls', typeof sandbox.studyInDateRange === 'function' && sandbox.studyInDateRange(studies.studies[0], '2026-05-15', '2026-05-18') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-15', '2026-05-18')],
   ['studies date range handles swapped bounds', sandbox.studyInDateRange(studies.studies[0], '2026-05-18', '2026-05-15') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-18', '2026-05-15')],
+  ['studies panel has page-size control', appShell.includes('id="studiesPageSize"') && appShell.includes('value="50"') && appShell.includes('value="all"')],
+  ['studies default page size is 50 with lazy load control', (studiesHtml.match(/class="study-card"/g) || []).length === 50 && studiesHtml.includes('50 von 55') && studiesHtml.includes('Weitere 5 laden')],
+  ['studies page-size helper supports all', typeof sandbox.resolveStudiesPageSize === 'function' && sandbox.resolveStudiesPageSize('all', 55) === 55 && sandbox.resolveStudiesPageSize('50', 55) === 50],
   ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],
   ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
   ['renders quality tag', studiesHtml.includes('Sehr gut')],

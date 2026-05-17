@@ -2419,6 +2419,62 @@ function studyInDateRange(study, from, to) {
   return true;
 }
 
+const STUDIES_PAGE_SIZE = 50;
+let studiesVisibleLimit = STUDIES_PAGE_SIZE;
+
+function resolveStudiesPageSize(value, total) {
+  if (value === 'all') {
+    return Math.max(0, Number(total) || 0);
+  }
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) && numeric > 0
+    ? Math.round(numeric)
+    : STUDIES_PAGE_SIZE;
+}
+
+function studiesPageSizeValue() {
+  const el = $('studiesPageSize');
+
+  return el ? el.value : String(STUDIES_PAGE_SIZE);
+}
+
+function currentStudiesVisibleLimit(total) {
+  const value = studiesPageSizeValue();
+  const pageSize = resolveStudiesPageSize(value, total);
+
+  if (value === 'all') {
+    return total;
+  }
+
+  return Math.min(total, Math.max(pageSize, studiesVisibleLimit || pageSize));
+}
+
+function resetStudiesPagination() {
+  studiesVisibleLimit = STUDIES_PAGE_SIZE;
+}
+
+function renderStudiesPagination(visible, total) {
+  if (total <= visible) {
+    return `
+      <div class="study-pagination">
+        <span>${fmtCount(total)} von ${fmtCount(total)} Studien</span>
+      </div>
+    `;
+  }
+
+  const remaining = total - visible;
+  const next = Math.min(STUDIES_PAGE_SIZE, remaining);
+
+  return `
+    <div class="study-pagination">
+      <span>${fmtCount(visible)} von ${fmtCount(total)} Studien</span>
+      <button id="studiesLoadMore" class="filter-reset" type="button">Weitere ${fmtCount(next)} laden</button>
+    </div>
+  `;
+}
+
 // ---- Renderer: Studien ----
 
 function renderStudies(data) {
@@ -2426,7 +2482,7 @@ function renderStudies(data) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
   }
 
-  let studies = data.studies || [];
+  let studies = [...(data.studies || [])];
 
   const filterEl = $('studiesFilter');
   const sortEl = $('studiesSort');
@@ -2468,7 +2524,11 @@ function renderStudies(data) {
     return '<div class="loading">Keine Studien.</div>';
   }
 
-  return studies.map(s => {
+  const totalCount = studies.length;
+  const visibleLimit = currentStudiesVisibleLimit(totalCount);
+  const visibleStudies = studies.slice(0, visibleLimit);
+
+  const studyCards = visibleStudies.map(s => {
     const tags = [];
 
     if (s.is_active == 1) {
@@ -2523,6 +2583,8 @@ function renderStudies(data) {
       </div>
     `;
   }).join('');
+
+  return studyCards + renderStudiesPagination(visibleStudies.length, totalCount);
 }
 
 // ---- Renderer: Submissions ----
@@ -2809,7 +2871,11 @@ if (refreshBtn) {
   });
 }
 
-function refreshStudiesList() {
+function refreshStudiesList(options = {}) {
+  if (options.resetPage) {
+    resetStudiesPagination();
+  }
+
   if (cachedData.studies) {
     const studiesContent = $('studiesContent');
 
@@ -2819,13 +2885,13 @@ function refreshStudiesList() {
   }
 }
 
-['studiesSort', 'studiesFilter', 'studiesDateFrom', 'studiesDateTo'].forEach(id => {
+['studiesSort', 'studiesFilter', 'studiesPageSize', 'studiesDateFrom', 'studiesDateTo'].forEach(id => {
   const el = $(id);
 
   if (!el) return;
 
-  el.addEventListener('change', refreshStudiesList);
-  el.addEventListener('input', refreshStudiesList);
+  el.addEventListener('change', () => refreshStudiesList({ resetPage: true }));
+  el.addEventListener('input', () => refreshStudiesList({ resetPage: true }));
 });
 
 const studiesDateReset = $('studiesDateReset');
@@ -2838,6 +2904,19 @@ if (studiesDateReset) {
     if (from) from.value = '';
     if (to) to.value = '';
 
+    refreshStudiesList({ resetPage: true });
+  });
+}
+
+const studiesContent = $('studiesContent');
+
+if (studiesContent) {
+  studiesContent.addEventListener('click', event => {
+    const target = event.target;
+
+    if (!target || target.id !== 'studiesLoadMore') return;
+
+    studiesVisibleLimit += STUDIES_PAGE_SIZE;
     refreshStudiesList();
   });
 }
