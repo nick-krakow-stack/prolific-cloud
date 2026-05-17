@@ -2198,7 +2198,13 @@ function renderSettings(data) {
   const fxRates = data.fxRates || data.fx_rates;
   const useEurSettings = canConvertGbpEur(fxRates);
   const settingsPrefix = useEurSettings ? '€' : '£';
-  const settingsMinor = value => useEurSettings ? convertGbpToEurMinor(value, fxRates) : value;
+  const settingsMinor = (group, gbpKey, eurKey) => {
+    const gbpMinor = firstNumber(group, [gbpKey]);
+
+    if (!useEurSettings) return gbpMinor;
+
+    return firstNumber(group, [eurKey]) ?? convertGbpToEurMinor(gbpMinor, fxRates);
+  };
 
   return `
     <div class="settings-stack">
@@ -2216,7 +2222,7 @@ function renderSettings(data) {
           field: 'daily_gbp',
           label: 'Tagesziel',
           hint: 'Zielwert für die Tagesübersicht',
-          valueMinor: settingsMinor(goals.daily_gbp_minor),
+          valueMinor: settingsMinor(goals, 'daily_gbp_minor', 'daily_eur_minor'),
           prefix: settingsPrefix,
           max: useEurSettings ? 60 : 50,
           step: 0.25
@@ -2226,7 +2232,7 @@ function renderSettings(data) {
           field: 'monthly_gbp',
           label: 'Monatsziel',
           hint: 'Zielwert für Prognose und Fortschritt',
-          valueMinor: settingsMinor(goals.monthly_gbp_minor),
+          valueMinor: settingsMinor(goals, 'monthly_gbp_minor', 'monthly_eur_minor'),
           prefix: settingsPrefix,
           max: useEurSettings ? 1200 : 1000,
           step: 1
@@ -2236,7 +2242,7 @@ function renderSettings(data) {
           field: 'great_hourly_gbp',
           label: 'Sehr guter Stundenlohn',
           hint: 'Ab hier bekommen Studien das Tag Sehr gut',
-          valueMinor: settingsMinor(thresholds.great_hourly_gbp_minor),
+          valueMinor: settingsMinor(thresholds, 'great_hourly_gbp_minor', 'great_hourly_eur_minor'),
           prefix: settingsPrefix,
           max: useEurSettings ? 100 : 80,
           step: 0.5
@@ -2246,7 +2252,7 @@ function renderSettings(data) {
           field: 'ok_hourly_gbp',
           label: 'Okay-Stundenlohn',
           hint: 'Unter diesem Wert gilt eine Studie als niedrig',
-          valueMinor: settingsMinor(thresholds.ok_hourly_gbp_minor),
+          valueMinor: settingsMinor(thresholds, 'ok_hourly_gbp_minor', 'ok_hourly_eur_minor'),
           prefix: settingsPrefix,
           max: useEurSettings ? 60 : 50,
           step: 0.5
@@ -2279,17 +2285,23 @@ function bindSettingsForm() {
 
     return convertEurToGbpMinor(minor, settingsFxRates) ?? minor;
   };
+  const inputToDisplayMinor = value => settingsUseEur ? inputToMinor(value) : null;
 
   const collectPayload = () => {
     const payload = {
+      currency: settingsUseEur ? 'EUR' : 'GBP',
       settings: {
         goals: {
           daily_gbp_minor: inputToStoredMinor(inputFor('daily_gbp')?.value),
-          monthly_gbp_minor: inputToStoredMinor(inputFor('monthly_gbp')?.value)
+          monthly_gbp_minor: inputToStoredMinor(inputFor('monthly_gbp')?.value),
+          daily_eur_minor: inputToDisplayMinor(inputFor('daily_gbp')?.value),
+          monthly_eur_minor: inputToDisplayMinor(inputFor('monthly_gbp')?.value)
         },
         thresholds: {
           great_hourly_gbp_minor: inputToStoredMinor(inputFor('great_hourly_gbp')?.value),
-          ok_hourly_gbp_minor: inputToStoredMinor(inputFor('ok_hourly_gbp')?.value)
+          ok_hourly_gbp_minor: inputToStoredMinor(inputFor('ok_hourly_gbp')?.value),
+          great_hourly_eur_minor: inputToDisplayMinor(inputFor('great_hourly_gbp')?.value),
+          ok_hourly_eur_minor: inputToDisplayMinor(inputFor('ok_hourly_gbp')?.value)
         }
       }
     };

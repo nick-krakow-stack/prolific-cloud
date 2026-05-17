@@ -269,6 +269,17 @@ function positive_int($value, int $default): int {
     return $default;
 }
 
+function optional_positive_int($value): ?int {
+    if (is_int($value) || is_string($value) || is_float($value)) {
+        $intValue = (int)$value;
+        if ($intValue > 0) {
+            return $intValue;
+        }
+    }
+
+    return null;
+}
+
 function amount_for_currency(array $amounts, string $currency): int {
     foreach ($amounts as $key => $value) {
         if (strtoupper((string)$key) === $currency) {
@@ -891,6 +902,7 @@ function save_dashboard_settings(): array {
     $body = read_json_body();
     $current = load_dashboard_settings();
     $source = isset($body['settings']) && is_array($body['settings']) ? $body['settings'] : $body;
+    $inputCurrency = strtoupper((string)($body['currency'] ?? ($source['currency'] ?? 'GBP')));
 
     $goalsInput = isset($source['goals']) && is_array($source['goals']) ? $source['goals'] : [];
     $thresholdsInput = isset($source['thresholds']) && is_array($source['thresholds']) ? $source['thresholds'] : [];
@@ -905,6 +917,19 @@ function save_dashboard_settings(): array {
             $current['goals']['monthly_gbp_minor']
         ),
     ];
+
+    if ($inputCurrency === 'EUR') {
+        $dailyEurMinor = optional_positive_int($goalsInput['daily_eur_minor'] ?? null);
+        $monthlyEurMinor = optional_positive_int($goalsInput['monthly_eur_minor'] ?? null);
+
+        if ($dailyEurMinor !== null) {
+            $goals['daily_eur_minor'] = $dailyEurMinor;
+        }
+        if ($monthlyEurMinor !== null) {
+            $goals['monthly_eur_minor'] = $monthlyEurMinor;
+        }
+    }
+
     $thresholds = [
         'great_hourly_gbp_minor' => positive_int(
             $thresholdsInput['great_hourly_gbp_minor'] ?? null,
@@ -915,6 +940,18 @@ function save_dashboard_settings(): array {
             $current['thresholds']['ok_hourly_gbp_minor']
         ),
     ];
+
+    if ($inputCurrency === 'EUR') {
+        $greatHourlyEurMinor = optional_positive_int($thresholdsInput['great_hourly_eur_minor'] ?? null);
+        $okHourlyEurMinor = optional_positive_int($thresholdsInput['ok_hourly_eur_minor'] ?? null);
+
+        if ($greatHourlyEurMinor !== null) {
+            $thresholds['great_hourly_eur_minor'] = $greatHourlyEurMinor;
+        }
+        if ($okHourlyEurMinor !== null) {
+            $thresholds['ok_hourly_eur_minor'] = $okHourlyEurMinor;
+        }
+    }
 
     set_setting('dashboardGoals', $goals);
     set_setting('dashboardThresholds', $thresholds);
@@ -951,21 +988,38 @@ function load_dashboard_settings(): array {
         $savedThresholds = [];
     }
 
+    $goals = [
+        'daily_gbp_minor' => positive_int($savedGoals['daily_gbp_minor'] ?? null, $defaultGoals['daily_gbp_minor']),
+        'monthly_gbp_minor' => positive_int($savedGoals['monthly_gbp_minor'] ?? null, $defaultGoals['monthly_gbp_minor']),
+    ];
+    $thresholds = [
+        'great_hourly_gbp_minor' => positive_int(
+            $savedThresholds['great_hourly_gbp_minor'] ?? null,
+            $defaultThresholds['great_hourly_gbp_minor']
+        ),
+        'ok_hourly_gbp_minor' => positive_int(
+            $savedThresholds['ok_hourly_gbp_minor'] ?? null,
+            $defaultThresholds['ok_hourly_gbp_minor']
+        ),
+    ];
+
+    foreach (['daily_eur_minor', 'monthly_eur_minor'] as $key) {
+        $value = optional_positive_int($savedGoals[$key] ?? null);
+        if ($value !== null) {
+            $goals[$key] = $value;
+        }
+    }
+
+    foreach (['great_hourly_eur_minor', 'ok_hourly_eur_minor'] as $key) {
+        $value = optional_positive_int($savedThresholds[$key] ?? null);
+        if ($value !== null) {
+            $thresholds[$key] = $value;
+        }
+    }
+
     return [
-        'goals' => [
-            'daily_gbp_minor' => positive_int($savedGoals['daily_gbp_minor'] ?? null, $defaultGoals['daily_gbp_minor']),
-            'monthly_gbp_minor' => positive_int($savedGoals['monthly_gbp_minor'] ?? null, $defaultGoals['monthly_gbp_minor']),
-        ],
-        'thresholds' => [
-            'great_hourly_gbp_minor' => positive_int(
-                $savedThresholds['great_hourly_gbp_minor'] ?? null,
-                $defaultThresholds['great_hourly_gbp_minor']
-            ),
-            'ok_hourly_gbp_minor' => positive_int(
-                $savedThresholds['ok_hourly_gbp_minor'] ?? null,
-                $defaultThresholds['ok_hourly_gbp_minor']
-            ),
-        ],
+        'goals' => $goals,
+        'thresholds' => $thresholds,
     ];
 }
 

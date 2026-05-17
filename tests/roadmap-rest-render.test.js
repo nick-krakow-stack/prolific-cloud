@@ -161,6 +161,23 @@ const events = {
 
 const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
+const exactEurSettingsHtml = sandbox.renderSettings({
+  ...settings,
+  settings: {
+    goals: {
+      daily_gbp_minor: 2542,
+      daily_eur_minor: 3000,
+      monthly_gbp_minor: 50847,
+      monthly_eur_minor: 60000
+    },
+    thresholds: {
+      great_hourly_gbp_minor: 2119,
+      great_hourly_eur_minor: 2500,
+      ok_hourly_gbp_minor: 847,
+      ok_hourly_eur_minor: 1000
+    }
+  }
+});
 const systemHtml = sandbox.renderSystem({ ...settings, ...events });
 const statsHtml = sandbox.renderStats(stats);
 const accountHtml = sandbox.renderAccount({
@@ -259,6 +276,8 @@ const checks = [
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
+  ['preserves exact EUR settings values after reload', /id="settingsOkHourly"[\s\S]*value="10\.00"/.test(exactEurSettingsHtml) && /id="settingsDailyGoal"[\s\S]*value="30\.00"/.test(exactEurSettingsHtml)],
+  ['settings save payload carries exact EUR values', code.includes('ok_hourly_eur_minor: inputToDisplayMinor') && apiData.includes("'ok_hourly_eur_minor'")],
   ['moves system health from settings to system tab', !settingsHtml.includes('System-Health') && !settingsHtml.includes('health-grid') && systemHtml.includes('System-Health') && systemHtml.includes('health-grid')],
   ['moves sync status from tab to system tab', !appShell.includes('data-tab="events"') && !appShell.includes('id="panel-events"') && !appShell.includes('eventsContent') && systemHtml.includes('Sync-Status') && systemHtml.includes('Letzter erfolgreicher Sync') && systemHtml.includes('<details class="log-details">')],
   ['moves currency box from settings to system tab', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && !settingsHtml.includes('W&auml;hrungen') && !settingsHtml.includes('FX-Rates') && systemHtml.includes('W&auml;hrungen') && systemHtml.includes('FX-Rates') && systemHtml.includes('Teilnahmen exportieren')],
