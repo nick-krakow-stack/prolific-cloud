@@ -1,0 +1,182 @@
+/* ============================================================
+   Prolific Watcher Dashboard - Stylesheet
+   Mobile-first. Funktioniert auf Phone, Tablet, Desktop.
+   ============================================================ */
+
+:root {
+  --bg: #f5f6f7;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #166534;
+  --success-bg: #d1fae5;
+  --warn: #92400e;
+  --warn-bg: #fef9c3;
+  --danger: #991b1b;
+  --danger-bg: #fee2e2;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --bg-card: #1a1d23;
+    --border: #2a2f37;
+    --text: #e5e7eb;
+    --text-muted: #9ca3af;
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --success: #4ade80;
+    --success-bg: #14532d;
+    --warn: #fbbf24;
+    --warn-bg: #422006;
+    --danger: #f87171;
+    --danger-bg: #450a0a;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+             background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+body { font-size: 14px; line-height: 1.5; }
+
+/* ---- Login-Page ---- */
+.login-page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 20px;
+}
+.login-box {
+  width: 100%; max-width: 380px; background: var(--bg-card);
+  padding: 32px 24px; border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.login-box h1 { margin: 0 0 4px; font-size: 22px; }
+.login-box .subtitle { margin: 0 0 24px; color: var(--text-muted); font-size: 13px; }
+.login-box label { display: block; margin-bottom: 14px; }
+.login-box label span { display: block; font-size: 12px; font-weight: 600;
+                        color: var(--text-muted); margin-bottom: 4px; }
+.login-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+                   border-radius: var(--radius-sm); font-size: 14px;
+                   background: var(--bg-card); color: var(--text); }
+.login-box input:focus { outline: none; border-color: var(--primary); }
+.login-box button { width: 100%; padding: 12px; background: var(--primary); color: white;
+                    border: none; border-radius: var(--radius-sm); font-size: 14px;
+                    font-weight: 600; cursor: pointer; margin-top: 8px; }
+.login-box button:hover { background: var(--primary-dark); }
+.error { background: var(--danger-bg); color: var(--danger); padding: 10px 12px;
+         border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 16px; }
+
+/* ---- Top-Bar ---- */
+.topbar {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar-content { max-width: 1100px; margin: 0 auto; padding: 12px 16px;
+                  display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 16px; font-weight: 600; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn { background: transparent; border: 1px solid var(--border); width: 32px; height: 32px;
+            border-radius: var(--radius-sm); display: inline-flex; align-items: center;
+            justify-content: center; font-size: 16px; cursor: pointer; color: var(--text);
+            text-decoration: none; }
+.icon-btn:hover { background: var(--bg); }
+.sync-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+                  background: var(--text-muted); transition: background 0.2s; }
+.sync-indicator.is-fresh { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.sync-indicator.is-stale { background: #f59e0b; }
+.sync-indicator.is-old { background: #ef4444; }
+
+/* ---- Tabs ---- */
+.tabs { background: var(--bg-card); border-bottom: 1px solid var(--border);
+        display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
+        position: sticky; top: 57px; z-index: 9; }
+.tab { background: transparent; border: none; padding: 12px 16px; font-size: 13px;
+       font-weight: 500; color: var(--text-muted); cursor: pointer; white-space: nowrap;
+       border-bottom: 2px solid transparent; }
+.tab.is-active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ---- Container ---- */
+.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
+.loading { padding: 40px 20px; text-align: center; color: var(--text-muted); }
+
+/* ---- Earnings-Kacheln ---- */
+.earnings-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;
+}
+@media (min-width: 600px) {
+  .earnings-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.earning-tile {
+  background: var(--bg-card); border-radius: var(--radius); padding: 14px;
+  box-shadow: var(--shadow);
+}
+.earning-tile .label { font-size: 11px; font-weight: 600; color: var(--text-muted);
+                       text-transform: uppercase; letter-spacing: 0.5px; }
+.earning-tile .value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.earning-tile .secondary { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.earning-tile .pending { font-size: 11px; color: var(--warn); margin-top: 2px; }
+
+/* ---- Status-Box ---- */
+.status-box {
+  background: var(--bg-card); border-radius: var(--radius); padding: 14px 16px;
+  box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.status-box h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase;
+                 letter-spacing: 0.5px; color: var(--text-muted); }
+.status-row { display: flex; justify-content: space-between; padding: 4px 0;
+              border-bottom: 1px solid var(--border); font-size: 13px; }
+.status-row:last-child { border-bottom: none; }
+.status-row .key { color: var(--text-muted); }
+.status-row .value { font-weight: 600; }
+
+/* ---- Studien-Liste ---- */
+.filter-bar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-bar label { font-size: 12px; color: var(--text-muted); display: flex;
+                    align-items: center; gap: 6px; }
+.filter-bar select { padding: 6px 8px; border: 1px solid var(--border);
+                     border-radius: var(--radius-sm); background: var(--bg-card);
+                     color: var(--text); font-size: 13px; }
+
+.study-card, .submission-card, .event-card {
+  background: var(--bg-card); border-radius: var(--radius); padding: 12px 14px;
+  box-shadow: var(--shadow); margin-bottom: 8px;
+}
+.study-card .name, .submission-card .name { font-weight: 600; margin-bottom: 4px;
+                                             font-size: 14px; }
+.study-card .meta, .submission-card .meta { font-size: 12px; color: var(--text-muted); }
+.study-card .meta .reward { color: var(--primary); font-weight: 600; }
+.study-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex;
+              align-items: center; gap: 4px; }
+.tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600;
+       text-transform: uppercase; letter-spacing: 0.3px; }
+.tag-active   { background: var(--success-bg); color: var(--success); }
+.tag-expired  { background: var(--warn-bg); color: var(--warn); }
+.tag-inactive { background: var(--border); color: var(--text-muted); }
+.tag-times    { background: var(--border); color: var(--text-muted); }
+
+.study-card a.open-link { float: right; color: var(--primary); text-decoration: none;
+                          font-size: 16px; padding: 2px 6px; }
+
+.submission-card .status { display: inline-block; padding: 1px 6px; border-radius: 3px;
+                            font-size: 11px; font-weight: 600; }
+.status-APPROVED { background: var(--success-bg); color: var(--success); }
+.status-AWAITING { background: var(--warn-bg); color: var(--warn); }
+.status-SCREENED { background: #e0e7ff; color: #3730a3; }
+.status-RETURNED { background: var(--border); color: var(--text-muted); }
+.status-REJECTED { background: var(--danger-bg); color: var(--danger); }
+.status-TIMEDOUT { background: var(--danger-bg); color: var(--danger); }
+
+.event-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.event-card .type { font-size: 11px; font-weight: 600; color: var(--text-muted);
+                    text-transform: uppercase; }
+.event-card .message { flex: 1; }
+.event-card time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }

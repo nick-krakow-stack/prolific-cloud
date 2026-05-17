@@ -1,0 +1,44 @@
+# =================================================================
+# Prolific Watcher - Webserver-Konfiguration
+# =================================================================
+
+RewriteEngine On
+
+# HTTPS erzwingen
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Falls jemand direkt /app.php aufruft, wieder auf Root zurückführen
+RewriteCond %{THE_REQUEST} \s/+app\.php[?\s]
+RewriteRule ^app\.php$ / [R=302,L]
+
+# Root-Domain intern auf dashboard/index.php legen
+RewriteRule ^$ dashboard/index.php [L]
+
+# Assets aus dem Dashboard-Ordner unter /assets erreichbar machen
+RewriteRule ^assets/(.*)$ dashboard/assets/$1 [L]
+
+# Logout ohne sichtbaren dashboard-Unterordner ermöglichen
+RewriteRule ^logout\.php$ dashboard/logout.php [L]
+
+# Favicon optional sauber erreichbar machen
+RewriteRule ^favicon\.ico$ dashboard/favicon.ico [L]
+
+# config.php und andere sensible Dateien vor direktem Zugriff schützen
+<FilesMatch "^(config\.php|config\.example\.php|\.env|.*\.sql|.*\.md)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+AddDefaultCharset UTF-8
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+DirectoryIndex index.php index.html
+
+Options -Indexes
