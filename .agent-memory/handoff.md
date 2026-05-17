@@ -1,20 +1,18 @@
 # Handoff
 
-Last updated: 2026-05-17 18:36:02 +02:00
+Last updated: 2026-05-17 18:41:12 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-The overview no longer renders a separate `Tagesziel` card and separate `Heute`
-detail card. The daily goal card is now titled `Heute`; it keeps `Fortschritt`,
-`Erreicht`, and `Noch offen`, then appends `Teilnahmen`, `Ø pro Teilnahme`, and
-`Effektiver Stundenlohn`. The old `Verdient` and `Ausstehend` detail rows are
-removed from that section.
+Dashboard UI terminology now uses `Studie`/`Studien` instead of `Samples` for
+efficiency and monthly-report hourly-rate basis counts. Singular and plural are
+handled by `fmtStudyCount()`.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 073bfa2 Merge today goal and stats card
+- Last product commit: 66d25dd Use study wording for sample counts
 - Last memory commit: pending this task
 
 ## Working Tree
@@ -27,26 +25,24 @@ removed from that section.
  M .agent-memory/progress.md
  M dashboard/assets/app.js
  M tests/overview-render.test.js
+ M tests/roadmap-rest-render.test.js
 ~~~
 
 ## Verification Snapshot
 
-- Red test first: `node tests\overview-render.test.js` failed on the missing
-  merge behavior before implementation.
+- Red tests failed before implementation:
+  - `node tests\overview-render.test.js`
+  - `node tests\roadmap-rest-render.test.js`
 - Green checks passed:
   - `node --check dashboard/assets/app.js`
   - `node tests\overview-render.test.js`
   - `node tests\roadmap-rest-render.test.js`
   - `node tests\goals-progress-source.test.js`
   - `node tests\settings-goals-source.test.js`
-- Read-only Explorer review reported no findings.
 - Deploy helper uploaded runtime files to production.
 - Production root returned `200`; unauthenticated overview API returned `401`.
-- Production `api/data.php` lint passed with `php74` and `php84`.
-- In-app browser verification showed one `HEUTE` status card containing
-  `Fortschritt`, `Erreicht`, `Noch offen`, `Teilnahmen`, `Ø pro Teilnahme`, and
-  `Effektiver Stundenlohn`; `TAGESZIEL`, `Verdient`, and `Ausstehend` were not
-  present in that card.
+- In-app browser verification showed efficiency basis rows such as
+  `1 Studie · 10 Min` and `26 Studien · 7 Std`; no `Samples` text remained.
 
 ## Current State Summary
 

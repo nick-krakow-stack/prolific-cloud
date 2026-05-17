@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: replaced dashboard UI wording
+  `Samples` with German `Studie`/`Studien` for efficiency basis and monthly
+  report hourly-rate basis. Live browser verification showed `1 Studie · 10 Min`
+  and no `Samples` text.
 - 2026-05-17 - Browser review fix deployed: overview now merges the former
   `Tagesziel` card and the separate `Heute` stats card. The card title is
   `Heute`, keeps `Fortschritt`, `Erreicht`, and `Noch offen`, then shows

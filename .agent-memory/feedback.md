@@ -47,3 +47,5 @@ Last updated: 2026-05-17
   `Erreicht`, and `Noch offen`, then add `Teilnahmen`, `Ø pro Teilnahme`, and
   `Effektiver Stundenlohn`; remove the separate `Verdient` and `Ausstehend`
   rows from that detail section.
+- 2026-05-17 - Browser feedback: `Samples` in the efficiency basis is unclear;
+  use `Studie`/`Studien` instead.

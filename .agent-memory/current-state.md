@@ -182,6 +182,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   status card. It combines daily goal progress with the useful today stats:
   `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn`. The separate
   today detail card with `Verdient` and `Ausstehend` rows is removed.
+- Browser review fix: efficiency and monthly-report basis labels use
+  `Studie`/`Studien` instead of `Samples`.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

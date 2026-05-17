@@ -1,9 +1,12 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:36:02 +02:00
+Last updated: 2026-05-17 18:41:12 +02:00
 
 ## Active Task Checklist
 
+- [x] Replace `Samples` wording with `Studie`/`Studien` in dashboard UI.
+- [x] Add render tests for pluralized study wording.
+- [x] Deploy terminology fix and verify live efficiency card.
 - [x] Merge daily goal and today stats into one `Heute` overview card.
 - [x] Keep `Fortschritt`, `Erreicht`, and `Noch offen` in the merged card.
 - [x] Move `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn` into the merged card.
