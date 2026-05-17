@@ -62,8 +62,10 @@ earnings, studies, submissions, account balance, logs, and future analytics.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
 ```
 
-Only runtime files should be deployed: `.htaccess`, `api/`, and `dashboard/`.
-Never deploy or overwrite `config.php`.
+Normal deploys upload only runtime files: `.htaccess`, `api/`, and `dashboard/`.
+If a task explicitly changes real configuration, deploy `config.php` deliberately
+with `scripts/deploy-webspace.ps1 -IncludeConfig`. Never commit or print
+`config.php`.
 
 ## Current Product Direction
 

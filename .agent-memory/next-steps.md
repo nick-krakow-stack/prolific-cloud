@@ -34,7 +34,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
 ```
 
-- The helper uploads only runtime files and must not overwrite server `config.php`.
+- The helper uploads only runtime files by default.
+- If a task explicitly changes real config, use `-IncludeConfig` to upload `config.php` deliberately.
 
 ## Backlog
 

@@ -2,7 +2,8 @@ param(
   [string]$SshHost = "prolific-cloud",
   [string]$RemoteRoot = "/www/htdocs/w021974e/prolific.nickkrakow.de",
   [switch]$DryRun,
-  [switch]$SkipChecks
+  [switch]$SkipChecks,
+  [switch]$IncludeConfig
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,6 +24,11 @@ $runtimeFiles = @(
   "dashboard/assets/app.js",
   "dashboard/assets/style.css"
 )
+
+if ($IncludeConfig) {
+  Write-Warning "Including config.php in deployment because -IncludeConfig was specified."
+  $runtimeFiles += "config.php"
+}
 
 $remoteDirs = @(
   $RemoteRoot,

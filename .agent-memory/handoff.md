@@ -56,4 +56,5 @@ See .agent-memory/next-steps.md.
 - Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
 - Keep config.php local and ignored.
 - Preserve root routing through / and absolute frontend paths.
-- Deploy only runtime files through scripts/deploy-webspace.ps1.
+- Deploy only runtime files through scripts/deploy-webspace.ps1 by default.
+- Use scripts/deploy-webspace.ps1 -IncludeConfig only when a task explicitly changes config.php.

@@ -33,5 +33,6 @@ Last updated: 2026-05-17
 - Do not create deployment artifacts unless the owner explicitly asks.
 - Use SSH alias `prolific-cloud` for All-Inkl webspace access.
 - Normal updates are file-based deployments to `/www/htdocs/w021974e/prolific.nickkrakow.de`.
-- Deploy only runtime files (`.htaccess`, `api/`, `dashboard/`) through `scripts/deploy-webspace.ps1`.
-- Never deploy or overwrite `config.php`, setup scripts, repo metadata, memory files, docs, logs, SQL dumps, or local secrets.
+- Deploy only runtime files (`.htaccess`, `api/`, `dashboard/`) through `scripts/deploy-webspace.ps1` by default.
+- If real configuration changes are required, upload `config.php` deliberately with `scripts/deploy-webspace.ps1 -IncludeConfig`.
+- Never commit or print `config.php`; never deploy setup scripts, repo metadata, memory files, docs, logs, SQL dumps, or local secrets.

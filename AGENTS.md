@@ -156,10 +156,19 @@ Use the deployment helper for normal file updates:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
 ```
 
-The deployment helper intentionally uploads only runtime files: `.htaccess`,
-`api/`, and `dashboard/`. It must not upload or overwrite `config.php`, `.env`,
-`.git/`, `.agent-memory/`, `.codex/`, roadmap/docs, SQL dumps, logs,
-`install.php`, `hash-generator.php`, or `config.example.php`.
+By default, the deployment helper uploads only runtime files: `.htaccess`,
+`api/`, and `dashboard/`. It must not upload or overwrite `config.php` during
+normal deploys. If a task explicitly changes the real server configuration, use
+the helper with `-IncludeConfig` so `config.php` is uploaded deliberately:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1 -IncludeConfig
+```
+
+Even then, never commit `config.php`, print its contents, or include it in broad
+staging. The helper must not upload `.env`, `.git/`, `.agent-memory/`, `.codex/`,
+roadmap/docs, SQL dumps, logs, `install.php`, `hash-generator.php`, or
+`config.example.php`.
 
 Do not create deployment packages automatically. Only prepare deployment or
 release artifacts when the owner explicitly asks.
