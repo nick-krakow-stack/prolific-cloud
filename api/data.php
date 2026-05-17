@@ -132,8 +132,6 @@ function decode_setting_value($value) {
 // ============================================================
 
 function build_overview(PDO $pdo): array {
-    global $config;
-
     $tz = new DateTimeZone(date_default_timezone_get());
 
     $now            = new DateTime('now', $tz);
@@ -177,8 +175,10 @@ function build_overview(PDO $pdo): array {
         $subCounts[$row['status']] = (int)$row['cnt'];
     }
 
-    $dailyGoalGbpMinor   = positive_int($config['goals']['daily_gbp_minor'] ?? null, 500);
-    $monthlyGoalGbpMinor = positive_int($config['goals']['monthly_gbp_minor'] ?? null, 15000);
+    $dashboardSettings = load_dashboard_settings();
+    $dashboardGoals = $dashboardSettings['goals'];
+    $dailyGoalGbpMinor = $dashboardGoals['daily_gbp_minor'];
+    $monthlyGoalGbpMinor = $dashboardGoals['monthly_gbp_minor'];
 
     $earnedTodayGbp = amount_for_currency($earnedToday, 'GBP');
     $earnedMonthGbp = amount_for_currency($earnedMonth, 'GBP');
