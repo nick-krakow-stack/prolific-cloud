@@ -1,20 +1,19 @@
 # Handoff
 
-Last updated: 2026-05-17 18:16:58 +02:00
+Last updated: 2026-05-17 18:24:22 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-The overview `Vergleich` block has been moved into the top earnings tile grid.
-It now renders as `comparison-tile`, shows current month versus previous month
-as a percentage using the existing FX-aware EUR conversion when rates are
-available, and keeps the previous month amounts in the subline. The old wide
-`Vergleich` status box is no longer rendered.
+Tagesziel and Monatsziel now calculate progress from GBP `earned + pending`.
+`earned` already includes `APPROVED`, `SCREENED OUT`, and `SCREENED-OUT` through
+the effective reward helper; `pending` adds `AWAITING REVIEW`. The visible label
+stays `Erreicht`. Earnings tiles still display earned and pending separately.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: bb81620 Move monthly comparison into overview tiles
+- Last product commit: 64f21d4 Include pending rewards in goal progress
 - Last memory commit: pending this task
 
 ## Working Tree
@@ -25,21 +24,31 @@ available, and keeps the previous month amounts in the subline. The old wide
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/data.php
  M dashboard/assets/app.js
  M tests/overview-render.test.js
+?? tests/goals-progress-source.test.js
 ~~~
 
 ## Verification Snapshot
 
-- `node --check dashboard/assets/app.js` passed.
-- `node tests\overview-render.test.js` passed.
-- `node tests\roadmap-rest-render.test.js` passed.
-- `git check-ignore -v config.php` confirmed `config.php` is ignored.
+- Red tests failed before implementation:
+  - `node tests\overview-render.test.js`
+  - `node tests\goals-progress-source.test.js`
+- Green checks passed:
+  - `node --check dashboard/assets/app.js`
+  - `node tests\overview-render.test.js`
+  - `node tests\goals-progress-source.test.js`
+  - `node tests\settings-goals-source.test.js`
+  - `node tests\roadmap-rest-render.test.js`
+- Local `php` is not in PATH.
+- Server temp lint before deploy passed with `php74` and `php84`.
 - Deploy helper uploaded runtime files to production.
+- Production `api/data.php` lint passed with `php74` and `php84`.
 - Production root returned `200`; unauthenticated overview API returned `401`.
-- In-app browser verification showed 7 overview tiles, a live `comparison-tile`
-  with `VERGLEICH`, `1.003,9 %`, and `Vormonat: £13,92 + $0,15`; no old
-  comparison status box was present.
+- In-app browser verification showed `TAGESZIEL` as `£7,16 von £30,00`,
+  `Erreicht 23,9 %`, and `MONATSZIEL` as `£157,13 von £600,00`,
+  `Erreicht 26,2 %`.
 
 ## Current State Summary
 

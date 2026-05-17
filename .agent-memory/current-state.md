@@ -173,6 +173,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   `comparison-tile`. It shows current month versus previous month as an
   FX-aware percentage when `fxRates` are available and keeps the previous month
   amounts as the subline. The old wide `Vergleich` status box is removed.
+- Browser review fix: overview goal progress for Tagesziel and Monatsziel now
+  uses `earned + pending` in GBP. `earned` contains approved and screened-out
+  effective rewards, and `pending` contains in-review rewards. The UI label
+  remains `Erreicht`, while the normal earnings tiles keep earned and pending
+  visually separate.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

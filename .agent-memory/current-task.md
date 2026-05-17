@@ -1,9 +1,15 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:16:58 +02:00
+Last updated: 2026-05-17 18:24:22 +02:00
 
 ## Active Task Checklist
 
+- [x] Diagnose goal progress data flow for earned, pending, and screened-out rewards.
+- [x] Add failing frontend and backend-source tests for goal progress including pending rewards.
+- [x] Update backend goal and forecast basis to `earned + pending`.
+- [x] Update overview goal cards to calculate GBP progress from `earned + pending`.
+- [x] Keep the visible goal label as `Erreicht`.
+- [x] Deploy goal progress fix and verify live goal cards.
 - [x] Move monthly comparison into the top overview tile grid.
 - [x] Show comparison as current month versus previous month percentage.
 - [x] Keep previous month amounts as the comparison tile subline.
@@ -83,6 +89,7 @@ Last updated: 2026-05-17 18:16:58 +02:00
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
+
 
 
 

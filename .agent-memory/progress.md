@@ -1,5 +1,11 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: overview Tagesziel and Monatsziel
+  now calculate progress from `earned + pending` in GBP. `earned` already
+  includes `APPROVED`, `SCREENED OUT`, and `SCREENED-OUT` with effective reward
+  adjustments; pending adds `AWAITING REVIEW`. The goal label remains
+  `Erreicht`. Live browser verification showed `TAGESZIEL` at `£7,16 von
+  £30,00` and `MONATSZIEL` at `£157,13 von £600,00`.
 - 2026-05-17 - Browser review fix deployed: overview `Vergleich` now renders as
   a top earnings tile. The main value compares current month to previous month
   as a percentage using FX-aware EUR conversion when rates are available, and
@@ -75,3 +81,5 @@
 - 2026-05-17 17:56:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 18:04:47 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 18:04:50 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 18:19:52 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 18:19:54 +02:00 - Stop hook ran and refreshed central memory snapshot.

@@ -39,3 +39,6 @@ Last updated: 2026-05-17
 - 2026-05-17 - Browser feedback: Move the overview `Vergleich` block into the
   top tile grid. The main value should be the current month as a percentage of
   the previous month, with previous month amounts shown in the small subline.
+- 2026-05-17 - Browser feedback: Tagesziel and Monatsziel should count not only
+  approved rewards, but also in-review and screened-out payments plus existing
+  adjustment logic. The label should remain `Erreicht`.
