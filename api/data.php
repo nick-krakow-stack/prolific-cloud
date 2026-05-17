@@ -792,10 +792,15 @@ function build_system_response(PDO $pdo): array {
         ->query("SELECT * FROM sync_log ORDER BY id DESC LIMIT 1")
         ->fetch();
     $system = build_system_stats($pdo, $lastSyncAt, $lastSyncRow ?: null);
+    $eventStmt = $pdo->prepare("SELECT * FROM events ORDER BY timestamp DESC LIMIT ?");
+    $eventStmt->bindValue(1, 50, PDO::PARAM_INT);
+    $eventStmt->execute();
 
     return [
         'ok' => true,
         'system' => $system,
+        'syncStatus' => build_sync_status($pdo),
+        'events' => $eventStmt->fetchAll(),
         'lastSync' => [
             'at' => $lastSyncAt,
             'log' => $lastSyncRow ?: null,

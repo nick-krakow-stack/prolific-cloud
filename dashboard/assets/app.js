@@ -2141,6 +2141,7 @@ function renderSystem(data) {
       `).join('')}
     </div>
     ${renderSystemHealthCard(systemHealth)}
+    ${renderEvents(data)}
   `;
 }
 
@@ -2974,8 +2975,7 @@ async function loadTab(tab, options = {}) {
     stats: renderStats,
     account: renderAccount,
     system: renderSystem,
-    settings: renderSettings,
-    events: renderEvents
+    settings: renderSettings
   };
 
   if (options.showPageLoader) {
