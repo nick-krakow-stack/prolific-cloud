@@ -5,10 +5,11 @@
  * ANLEITUNG:
  * 1. Diese Datei zu "config.php" kopieren (Originalname behalten!)
  * 2. Werte unten ausfüllen - alle Felder mit "HIER_..." müssen ersetzt werden!
- * 3. hash-generator.php aufrufen - das erzeugt 3 Werte:
+ * 3. hash-generator.php aufrufen - das erzeugt 4 Werte:
  *      (A) Passwort-Hash    → dashboard.password_hash
  *      (B) API-Key          → api_key
  *      (C) Session-Secret   → session_secret
+ *      (D) Webhook-Secret   → telegram.webhook_secret
  * 4. Niemals ins Git/öffentlich!
  *
  * Die .htaccess schützt config.php vor direktem Web-Zugriff.
@@ -47,6 +48,17 @@ return [
     //   Aus hash-generator.php → "Session-Secret" einfügen
     // ============================================================
     'session_secret' => 'HIER_SESSION_SECRET_AUS_HASH_GENERATOR_EINFUEGEN',
+
+    // ============================================================
+    //   TELEGRAM-BOT
+    //   Bot-Token und Chat-ID kommen von Telegram. Webhook-Secret
+    //   aus hash-generator.php → "Webhook-Secret" einfügen.
+    // ============================================================
+    'telegram' => [
+        'bot_token'       => 'HIER_TELEGRAM_BOT_TOKEN_EINFUEGEN',
+        'allowed_chat_id' => 'HIER_DEINE_CHAT_ID_EINFUEGEN',
+        'webhook_secret'  => 'HIER_WEBHOOK_SECRET_AUS_HASH_GENERATOR_EINFUEGEN',
+    ],
 
     // ============================================================
     //   OPTIONEN (müssen normalerweise nicht angepasst werden)

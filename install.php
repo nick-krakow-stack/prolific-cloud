@@ -130,6 +130,22 @@ $statements = [
     `user_agent`   VARCHAR(255),
     INDEX `idx_timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+// === telegram_messages: eingehende Telegram-Updates und Replay-Schutz ===
+"CREATE TABLE IF NOT EXISTS `telegram_messages` (
+    `id`             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `update_id`      BIGINT UNSIGNED NOT NULL UNIQUE,
+    `chat_id`        BIGINT,
+    `from_user`      VARCHAR(255),
+    `text`           TEXT,
+    `command`        VARCHAR(64),
+    `received_at`    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `response_sent`  TINYINT(1) DEFAULT 0,
+    `response_error` VARCHAR(500),
+    INDEX `idx_received_at` (`received_at`),
+    INDEX `idx_chat_id` (`chat_id`),
+    INDEX `idx_command` (`command`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 ];
 
 $created = [];
@@ -181,7 +197,7 @@ while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
 <div class="box">
   <h2>📦 Tabellen</h2>
   <ul>
-    <?php foreach (['studies','submissions','settings','events','sync_log'] as $t): ?>
+    <?php foreach (['studies','submissions','settings','events','sync_log','telegram_messages'] as $t): ?>
       <li>
         <code><?= htmlspecialchars($t) ?></code>:
         <?php if (in_array($t, $existing, true)): ?>

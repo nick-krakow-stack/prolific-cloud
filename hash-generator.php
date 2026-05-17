@@ -3,12 +3,13 @@
  * Passwort-Hash Generator
  *
  * Einmalig aufrufen, Passwort eingeben.
- * Erzeugt 3 Werte für config.php:
+ * Erzeugt 4 Werte für config.php:
  *   (A) Passwort-Hash    → dashboard.password_hash
  *   (B) API-Key          → api_key
  *   (C) Session-Secret   → session_secret
+ *   (D) Webhook-Secret   → telegram.webhook_secret
  *
- * Alle 3 Werte müssen in die config.php übertragen werden!
+ * Alle 4 Werte müssen in die config.php übertragen werden!
  * Danach diese Datei LÖSCHEN.
  */
 
@@ -30,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // (sind aber gleich gut - der User soll einen aussuchen und übernehmen)
 $apiKey        = bin2hex(random_bytes(24));   // 48 Zeichen hex
 $sessionSecret = bin2hex(random_bytes(24));
+$webhookSecret = bin2hex(random_bytes(32));
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -65,7 +67,7 @@ $sessionSecret = bin2hex(random_bytes(24));
 
 <div class="box">
   <h1>🔐 Konfigurations-Werte für config.php</h1>
-  <p>Diese Seite erzeugt <strong>3 Werte</strong>, die alle in die <code>config.php</code> eingetragen werden müssen.</p>
+  <p>Diese Seite erzeugt <strong>4 Werte</strong>, die alle in die <code>config.php</code> eingetragen werden müssen.</p>
 
   <div class="checklist">
     <strong>Übertragungs-Checkliste:</strong>
@@ -73,6 +75,7 @@ $sessionSecret = bin2hex(random_bytes(24));
       <li><span class="label-tag">A</span> Passwort-Hash → <code>dashboard.password_hash</code></li>
       <li><span class="label-tag">B</span> API-Key → <code>api_key</code></li>
       <li><span class="label-tag">C</span> Session-Secret → <code>session_secret</code></li>
+      <li><span class="label-tag">D</span> Webhook-Secret → <code>telegram.webhook_secret</code></li>
     </ul>
   </div>
 </div>
@@ -123,10 +126,18 @@ $sessionSecret = bin2hex(random_bytes(24));
   <p class="target">→ In <code>config.php</code> bei <code>'session_secret' => '...'</code> einfügen</p>
 </div>
 
+<!-- (D) Webhook-Secret -->
+<div class="box">
+  <h2><span class="label-tag">D</span> Webhook-Secret (für Telegram)</h2>
+  <p>Wird als geheimer Pfad-Bestandteil der Webhook-URL verwendet.</p>
+  <p class="hash"><?= $webhookSecret ?></p>
+  <p class="target">→ In <code>config.php</code> bei <code>'webhook_secret' => '...'</code> einfügen</p>
+</div>
+
 <div class="warn">
   <strong>⚠️ Wichtig nach dem Übertragen:</strong>
   <ul style="margin:8px 0">
-    <li>Alle 3 Werte (A, B, C) müssen in <code>config.php</code> stehen</li>
+    <li>Alle 4 Werte (A, B, C, D) müssen in <code>config.php</code> stehen</li>
     <li>Diese Datei (<code>hash-generator.php</code>) per FTP <strong>löschen</strong></li>
     <li>Auch <code>install.php</code> und <code>config.example.php</code> löschen</li>
   </ul>

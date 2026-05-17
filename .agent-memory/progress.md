@@ -102,6 +102,10 @@
   asset checks, and setup-file absence checks.
 - 2026-05-18 - Production PHP version changed in All-Inkl/KAS to PHP 8.4.
   Live root/API/asset smoke checks and remote `php84 -l` checks passed.
+- 2026-05-18 - Telegram backend phase 1 implemented and deployed: config
+  placeholders, webhook secret generator, `telegram_messages` table, Telegram
+  helper, webhook endpoint with `/start`, `/help`, `/status`, and webhook
+  registration with Telegram.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 17:31:52 +02:00 - Captured owner feedback on UserPromptSubmit.
@@ -129,3 +133,7 @@
   now supports previous/next month navigation plus `Heute`; next month is
   disabled in the current server month, and the stats API returns historical
   heatmap day buckets through today.
+- 2026-05-18 01:19:08 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 01:19:17 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 01:47:46 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 01:47:50 +02:00 - Stop hook ran and refreshed central memory snapshot.
