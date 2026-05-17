@@ -68,6 +68,17 @@ require_login();
           <option value="expired">Voll/Abgelaufen</option>
         </select>
       </label>
+
+      <fieldset class="date-filter" aria-label="Zeitraum">
+        <legend>Zeitraum:</legend>
+        <label>Von
+          <input id="studiesDateFrom" type="date">
+        </label>
+        <label>Bis
+          <input id="studiesDateTo" type="date">
+        </label>
+        <button id="studiesDateReset" class="filter-reset" type="button">Zurücksetzen</button>
+      </fieldset>
     </div>
 
     <div id="studiesContent" class="loading">Lade…</div>

@@ -2387,6 +2387,38 @@ function renderStudyDetailTile(label, value, modifier) {
   `;
 }
 
+function studyDatePart(value) {
+  const raw = String(value || '');
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+
+  return match ? match[1] : '';
+}
+
+function normalizedStudyDateRange(from, to) {
+  let start = studyDatePart(from);
+  let end = studyDatePart(to);
+
+  if (start && end && start > end) {
+    [start, end] = [end, start];
+  }
+
+  return { start, end };
+}
+
+function studyInDateRange(study, from, to) {
+  const { start, end } = normalizedStudyDateRange(from, to);
+
+  if (!start && !end) return true;
+
+  const date = studyDatePart(study?.first_seen || study?.firstSeen || study?.created_at || study?.createdAt);
+
+  if (!date) return false;
+  if (start && date < start) return false;
+  if (end && date > end) return false;
+
+  return true;
+}
+
 // ---- Renderer: Studien ----
 
 function renderStudies(data) {
@@ -2398,6 +2430,8 @@ function renderStudies(data) {
 
   const filterEl = $('studiesFilter');
   const sortEl = $('studiesSort');
+  const dateFromEl = $('studiesDateFrom');
+  const dateToEl = $('studiesDateTo');
 
   const filter = filterEl ? filterEl.value : 'all';
 
@@ -2407,6 +2441,13 @@ function renderStudies(data) {
 
   if (filter === 'expired') {
     studies = studies.filter(s => s.expired == 1);
+  }
+
+  const dateFrom = dateFromEl ? dateFromEl.value : '';
+  const dateTo = dateToEl ? dateToEl.value : '';
+
+  if (dateFrom || dateTo) {
+    studies = studies.filter(s => studyInDateRange(s, dateFrom, dateTo));
   }
 
   const sort = sortEl ? sortEl.value : 'firstSeenDesc';
@@ -2768,21 +2809,38 @@ if (refreshBtn) {
   });
 }
 
-['studiesSort', 'studiesFilter'].forEach(id => {
+function refreshStudiesList() {
+  if (cachedData.studies) {
+    const studiesContent = $('studiesContent');
+
+    if (studiesContent) {
+      studiesContent.innerHTML = renderStudies(cachedData.studies);
+    }
+  }
+}
+
+['studiesSort', 'studiesFilter', 'studiesDateFrom', 'studiesDateTo'].forEach(id => {
   const el = $(id);
 
   if (!el) return;
 
-  el.addEventListener('change', () => {
-    if (cachedData.studies) {
-      const studiesContent = $('studiesContent');
-
-      if (studiesContent) {
-        studiesContent.innerHTML = renderStudies(cachedData.studies);
-      }
-    }
-  });
+  el.addEventListener('change', refreshStudiesList);
+  el.addEventListener('input', refreshStudiesList);
 });
+
+const studiesDateReset = $('studiesDateReset');
+
+if (studiesDateReset) {
+  studiesDateReset.addEventListener('click', () => {
+    const from = $('studiesDateFrom');
+    const to = $('studiesDateTo');
+
+    if (from) from.value = '';
+    if (to) to.value = '';
+
+    refreshStudiesList();
+  });
+}
 
 activateTab('overview');
 

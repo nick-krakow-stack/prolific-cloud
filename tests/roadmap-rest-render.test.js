@@ -101,6 +101,17 @@ const studies = {
       reward_per_hour: 3000,
       first_seen: '2026-05-17 10:00:00',
       is_active: 1
+    },
+    {
+      id: 'study-2',
+      name: 'Older study',
+      reward_minor: 200,
+      reward_currency: 'GBP',
+      estimated_minutes: 8,
+      total_places: 12,
+      reward_per_hour: 1500,
+      first_seen: '2026-05-10 10:00:00',
+      is_active: 1
     }
   ]
 };
@@ -165,6 +176,8 @@ const checks = [
   ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
+  ['studies panel has date range controls', typeof sandbox.studyInDateRange === 'function' && sandbox.studyInDateRange(studies.studies[0], '2026-05-15', '2026-05-18') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-15', '2026-05-18')],
+  ['studies date range handles swapped bounds', sandbox.studyInDateRange(studies.studies[0], '2026-05-18', '2026-05-15') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-18', '2026-05-15')],
   ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],
   ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
   ['renders quality tag', studiesHtml.includes('Sehr gut')],
