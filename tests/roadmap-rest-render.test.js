@@ -161,6 +161,23 @@ const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
 const statsHtml = sandbox.renderStats(stats);
 const studiesHtml = sandbox.renderStudies(studies);
+const expiredStudyHtml = sandbox.renderStudies({
+  ok: true,
+  studies: [
+    {
+      id: 'expired-low',
+      name: 'Expired low study',
+      reward_minor: 267,
+      reward_currency: 'GBP',
+      estimated_minutes: 20,
+      total_places: 45,
+      reward_per_hour: 500,
+      first_seen: '2026-05-17 19:22:00',
+      is_active: 0,
+      expired: 1
+    }
+  ]
+});
 const submissionsHtml = sandbox.renderSubmissions({
   ok: true,
   submissions: [
@@ -198,7 +215,8 @@ const checks = [
   ['studies page-size helper supports all', typeof sandbox.resolveStudiesPageSize === 'function' && sandbox.resolveStudiesPageSize('all', 55) === 55 && sandbox.resolveStudiesPageSize('50', 55) === 50],
   ['does not render study note controls', !studiesHtml.includes('data-study-note') && !studiesHtml.includes('Notiz speichern')],
   ['renders study detail tiles instead of a compact meta line', studiesHtml.includes('class="study-detail-grid"') && studiesHtml.includes('Vergütung') && studiesHtml.includes('Dauer') && studiesHtml.includes('Plätze') && studiesHtml.includes('Stundenlohn') && studiesHtml.includes('Gesehen') && !studiesHtml.includes('class="meta"')],
-  ['renders quality tag', studiesHtml.includes('Sehr gut')],
+  ['renders study quality tag next to title', expiredStudyHtml.includes('class="study-title"') && /<div class="name">Expired low study<\/div>[\s\S]*<span class="tag tag-inactive">Niedrig<\/span>/.test(expiredStudyHtml)],
+  ['does not render study availability status tags', !expiredStudyHtml.includes('Voll/Abgelaufen') && !expiredStudyHtml.includes('Aktiv') && !expiredStudyHtml.includes('Beendet')],
   ['submissions render effective reward amount when present', submissionsHtml.includes('1,86') && !submissionsHtml.includes('0,36')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],

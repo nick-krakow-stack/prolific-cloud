@@ -2530,24 +2530,11 @@ function renderStudies(data) {
 
   const studyCards = visibleStudies.map(s => {
     const tags = [];
-
-    if (s.is_active == 1) {
-      tags.push('<span class="tag tag-active">Aktiv</span>');
-    } else if (s.expired == 1) {
-      tags.push('<span class="tag tag-expired">⏱ Voll/Abgelaufen</span>');
-    } else {
-      tags.push('<span class="tag tag-inactive">Beendet</span>');
-    }
-
     if ((s.times_notified || 0) > 1) {
       tags.push(`<span class="tag tag-times">${escapeHtml(s.times_notified)}× gesehen</span>`);
     }
 
     const qualityTag = renderStudyQualityTag(s);
-
-    if (qualityTag) {
-      tags.push(qualityTag);
-    }
 
     const detailTiles = [];
 
@@ -2577,9 +2564,12 @@ function renderStudies(data) {
            rel="noopener"
            title="Auf Prolific öffnen">↗</a>
 
-        <div class="name">${escapeHtml(s.name || '(ohne Namen)')}</div>
+        <div class="study-title">
+          <div class="name">${escapeHtml(s.name || '(ohne Namen)')}</div>
+          ${qualityTag}
+        </div>
         <div class="study-detail-grid">${detailTiles.join('')}</div>
-        <div class="tags">${tags.join('')}</div>
+        ${tags.length ? `<div class="tags">${tags.join('')}</div>` : ''}
       </div>
     `;
   }).join('');
