@@ -38,7 +38,7 @@ const sampleOverview = {
     today: { earned: { GBP: 500 }, pending: {} },
     week: { earned: { GBP: 2500 }, pending: {} },
     month: { earned: { GBP: 7500 }, pending: {} },
-    lastMonth: {},
+    lastMonth: { earned: { GBP: 2500, USD: 150 }, pending: {} },
     allTime: { earned: { GBP: 15000 }, pending: {} }
   },
   balance: {
@@ -108,6 +108,8 @@ const checks = [
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders system health grid', html.includes('health-grid') && html.includes('API')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
+  ['renders monthly comparison as top tile', html.includes('class="earning-tile comparison-tile"') && html.includes('Vergleich') && html.includes('286,5 %') && html.includes('Vormonat: £25,00 + $1,50')],
+  ['does not render old comparison status box', !html.includes('<h3>Vergleich</h3>') && !html.includes('<span class="key">Vormonat</span>')],
   ['does not restore old account box', !html.includes('Prolific-Konto') && !html.includes('Gesamt offen')],
   ['sanitizes unknown currency codes', !sandbox.fmtAmount(123, '<img src=x onerror=alert(1)>').includes('<')]
 ];

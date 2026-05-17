@@ -115,6 +115,17 @@ function progressPercent(currentMinor, targetMinor) {
   return (current / target) * 100;
 }
 
+function monthComparisonPercent(currentEarned, previousEarned, fxRates) {
+  const currentValue = convertToEur(currentEarned, fxRates) ?? currencyMinor(currentEarned, 'GBP');
+  const previousValue = convertToEur(previousEarned, fxRates) ?? currencyMinor(previousEarned, 'GBP');
+
+  if (currentValue == null || previousValue == null || previousValue <= 0) {
+    return null;
+  }
+
+  return (currentValue / previousValue) * 100;
+}
+
 function renderProgressBar(percent) {
   const clamped = clampPercent(percent);
 
@@ -1374,6 +1385,13 @@ function renderExpandedOverview(data) {
       ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
     </div>
   `;
+  const comparisonTile = () => `
+    <div class="earning-tile comparison-tile">
+      <div class="label">Vergleich</div>
+      <div class="value">${fmtPercent(monthComparisonPercent(month.earned, lastMonth.earned, fxRates))}</div>
+      <div class="secondary">Vormonat: ${fmtMulti(lastMonth.earned)}</div>
+    </div>
+  `;
 
   let html = '<div class="earnings-grid">';
 
@@ -1383,19 +1401,10 @@ function renderExpandedOverview(data) {
   html += tile('Gesamt', allTime.earned, allTime.pending);
   html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
-  html += '</div>';
-
   if (Object.keys(lastMonth.earned || {}).length) {
-    html += `
-      <div class="status-box">
-        <h3>Vergleich</h3>
-        <div class="status-row">
-          <span class="key">Vormonat</span>
-          <span class="value">${fmtMulti(lastMonth.earned)}</span>
-        </div>
-      </div>
-    `;
+    html += comparisonTile();
   }
+  html += '</div>';
 
   html += renderGoalCard('Tagesziel', todayEarnedGbp, dailyGoalMinor);
   html += renderGoalCard('Monatsziel', monthEarnedGbp, monthlyGoalMinor);
