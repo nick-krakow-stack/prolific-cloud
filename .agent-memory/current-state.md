@@ -45,6 +45,26 @@ earnings, studies, submissions, account balance, logs, and future analytics.
 - DB state is stored in MySQL tables created by `install.php`: `studies`,
   `submissions`, `settings`, `events`, and `sync_log`.
 
+## Production Deployment
+
+- Hosting: All-Inkl file-based PHP webspace.
+- Domain: `https://prolific.nickkrakow.de/`.
+- SSH alias: `prolific-cloud` configured locally in `~/.ssh/config`.
+- SSH host: `w021974e.kasserver.com`.
+- Webroot: `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+- Server PHP CLI: `PHP 7.4.33-nmm8`.
+- Server DB client: `MariaDB 10.6.23`.
+- Server `config.php` is present and must remain server-side.
+- `install.php`, `hash-generator.php`, and `config.example.php` are absent on production.
+- Normal deploy command:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
+```
+
+Only runtime files should be deployed: `.htaccess`, `api/`, and `dashboard/`.
+Never deploy or overwrite `config.php`.
+
 ## Current Product Direction
 
 `CODEX_PROLIFIC_WATCHER_ROADMAP.md` defines the active roadmap. The first

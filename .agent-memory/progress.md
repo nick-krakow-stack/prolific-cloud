@@ -4,5 +4,8 @@
 - 2026-05-17 - GitHub CLI installed and owner authorized it.
 - 2026-05-17 - Roadmap file added to workspace.
 - 2026-05-17 - Reference workflow from `prolific-watcher` inspected and adapted for `prolific-cloud`.
+- 2026-05-17 - SSH key-based access to All-Inkl webspace verified.
+- 2026-05-17 - Production webroot confirmed as `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+- 2026-05-17 - Runtime-only deploy helper added at `scripts/deploy-webspace.ps1`.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

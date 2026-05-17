@@ -141,6 +141,26 @@ should not remain publicly accessible on production hosting:
 - `hash-generator.php`
 - `config.example.php`
 
+SSH deployment is available through the local alias `prolific-cloud`, configured
+outside the repository in `~/.ssh/config`.
+
+Production webroot:
+
+```text
+/www/htdocs/w021974e/prolific.nickkrakow.de
+```
+
+Use the deployment helper for normal file updates:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
+```
+
+The deployment helper intentionally uploads only runtime files: `.htaccess`,
+`api/`, and `dashboard/`. It must not upload or overwrite `config.php`, `.env`,
+`.git/`, `.agent-memory/`, `.codex/`, roadmap/docs, SQL dumps, logs,
+`install.php`, `hash-generator.php`, or `config.example.php`.
+
 Do not create deployment packages automatically. Only prepare deployment or
 release artifacts when the owner explicitly asks.
 

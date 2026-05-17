@@ -4,8 +4,7 @@ Last updated: 2026-05-17
 
 ## Immediate
 
-- Verify the adapted Codex workflow files.
-- Commit workflow/protocol setup separately from product changes.
+- Commit SSH/deployment setup separately from product changes.
 - Start `CODEX_PROLIFIC_WATCHER_ROADMAP.md` Phase 1 + Phase 2.
 
 ## Phase 1 + Phase 2 Work Split
@@ -18,6 +17,24 @@ Potential parallel Sub-Agent ownership:
 - QA/Review Agent: read-only review of data contracts, root routing, auth, and verification gaps.
 
 The Orchestrator should integrate cross-file contracts and keep shared-file edits sequenced.
+
+## Deployment Routine
+
+- Use SSH alias `prolific-cloud`.
+- Use webroot `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+- Dry-run deploy command:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1 -DryRun
+```
+
+- Real deploy command:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps1
+```
+
+- The helper uploads only runtime files and must not overwrite server `config.php`.
 
 ## Backlog
 

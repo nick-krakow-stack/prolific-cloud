@@ -5,23 +5,29 @@ Update mode: Stop
 
 ## Latest Notes
 
-Automatic handoff snapshot written by .codex/hooks/agent-protocol.ps1.
-Current task status is tracked in .agent-memory/current-task.md.
-Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
+SSH key-based access to the All-Inkl webspace is configured and verified through
+the local SSH alias `prolific-cloud`. The production webroot is
+`/www/htdocs/w021974e/prolific.nickkrakow.de`.
+
+Current task status is tracked in .agent-memory/current-task.md. Owner,
+browser, and review feedback are persisted in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 3b66524 Initial dashboard backup
+- Last commit: 5cdde93 Add Codex workflow protocol
 
 ## Working Tree
 
 ~~~text
-?? .agent-memory/
-?? .codex/
-?? .gitattributes
-?? AGENTS.md
-?? CODEX_PROLIFIC_WATCHER_ROADMAP.md
+ M .agent-memory/current-state.md
+ M .agent-memory/current-task.md
+ M .agent-memory/decisions.md
+ M .agent-memory/handoff.md
+ M .agent-memory/next-steps.md
+ M .agent-memory/progress.md
+ M AGENTS.md
+?? scripts/
 ~~~
 
 ## Current State Summary
@@ -50,3 +56,4 @@ See .agent-memory/next-steps.md.
 - Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
 - Keep config.php local and ignored.
 - Preserve root routing through / and absolute frontend paths.
+- Deploy only runtime files through scripts/deploy-webspace.ps1.
