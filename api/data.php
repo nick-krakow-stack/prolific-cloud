@@ -403,7 +403,8 @@ function build_status_stats(array $counts): array {
     }
 
     $approved = $normalizedCounts['APPROVED'] ?? 0;
-    $rejected = $normalizedCounts['REJECTED'] ?? 0;
+    $returned = $normalizedCounts['RETURNED'] ?? 0;
+    $rejected = ($normalizedCounts['REJECTED'] ?? 0) + $returned;
     $pending = $normalizedCounts['AWAITING REVIEW'] ?? 0;
 
     return [
@@ -1154,7 +1155,7 @@ function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from 
 
         if ($status === 'APPROVED') {
             $items[$requester]['approvedCount'] += $count;
-        } elseif ($status === 'REJECTED') {
+        } elseif (in_array($status, ['REJECTED', 'RETURNED'], true)) {
             $items[$requester]['rejectedCount'] += $count;
         } elseif ($status === 'AWAITING REVIEW') {
             $items[$requester]['pendingCount'] += $count;

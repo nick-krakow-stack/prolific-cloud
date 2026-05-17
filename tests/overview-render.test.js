@@ -165,6 +165,7 @@ const checks = [
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
   ['orders screened out second in status distribution', html.indexOf('>APPROVED<') < html.indexOf('>SCREENED OUT<') && html.indexOf('>SCREENED OUT<') < html.indexOf('>AWAITING REVIEW<')],
   ['colors paid and negative status tags', html.includes('class="tag tag-paid">SCREENED OUT</span>') && html.includes('class="tag tag-danger">RETURNED</span>') && html.includes('class="tag tag-danger-soft">TIMED-OUT</span>')],
+  ['counts returned as rejected in fallback reject rate', html.includes('<span class="key">Reject-Rate</span>') && html.includes('<span class="value">8,6 %</span>')],
   ['renders monthly comparison as development tile', html.includes('class="earning-tile comparison-tile"') && html.includes('<div class="label">Entwicklung zum Vormonat</div>') && !html.includes('<div class="label">Vormonat</div>') && !html.includes('<div class="label">Vergleich</div>')],
   ['renders monthly comparison percentage with sign and threshold color class', html.includes('class="value comparison-value is-good"') && html.includes('+ 286,5 %')],
   ['renders previous month amounts without duplicate label', html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat: £25,00 + $1,50')],

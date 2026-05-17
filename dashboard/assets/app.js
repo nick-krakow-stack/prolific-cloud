@@ -220,6 +220,9 @@ function firstDefined(source, keys) {
 
 function firstNumber(source, keys) {
   const value = firstDefined(source, keys);
+
+  if (value == null) return null;
+
   const numeric = Number(value);
 
   return Number.isFinite(numeric) ? Math.round(numeric) : null;
@@ -227,6 +230,9 @@ function firstNumber(source, keys) {
 
 function firstNumeric(source, keys) {
   const value = firstDefined(source, keys);
+
+  if (value == null) return null;
+
   const numeric = Number(value);
 
   return Number.isFinite(numeric) ? numeric : null;
@@ -1601,7 +1607,7 @@ function renderExpandedOverview(data) {
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
   const statusTotal = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
   const approvedCount = statusCount(statusCounts, ['APPROVED']);
-  const rejectedCount = statusCount(statusCounts, ['REJECTED']);
+  const rejectedCount = statusCount(statusCounts, ['REJECTED']) + statusCount(statusCounts, ['RETURNED']);
   const pendingCount = statusCount(statusCounts, ['AWAITING REVIEW']);
   const statusStats = asObject(data.statusStats);
   const approvalRate = readStatusRate(
