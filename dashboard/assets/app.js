@@ -201,6 +201,22 @@ function currencyMinor(byCurrency, currency = 'GBP') {
   return Number.isFinite(numeric) ? Math.round(numeric) : null;
 }
 
+function sumCurrencyMinor(currency, ...maps) {
+  let found = false;
+  let total = 0;
+
+  for (const map of maps) {
+    const value = currencyMinor(map, currency);
+
+    if (value == null) continue;
+
+    found = true;
+    total += value;
+  }
+
+  return found ? total : null;
+}
+
 function positiveCurrencyEntries(byCurrency) {
   return Object.entries(asObject(byCurrency))
     .map(([currency, value]) => [String(currency).toUpperCase(), Number(value)])
@@ -1334,8 +1350,8 @@ function renderExpandedOverview(data) {
   const goals = asObject(data.goals);
   const dailyGoalMinor = readGoalMinor(goals, 'daily');
   const monthlyGoalMinor = readGoalMinor(goals, 'monthly');
-  const todayEarnedGbp = currencyMinor(today.earned, 'GBP');
-  const monthEarnedGbp = currencyMinor(month.earned, 'GBP');
+  const todayGoalGbp = sumCurrencyMinor('GBP', today.earned, today.pending);
+  const monthGoalGbp = sumCurrencyMinor('GBP', month.earned, month.pending);
   const balance = asObject(data.balance);
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
   const todayStats = readTodayStats(data, today);
@@ -1367,7 +1383,7 @@ function renderExpandedOverview(data) {
   );
   const forecast = inferMonthlyForecast(
     asObject(data.forecast),
-    monthEarnedGbp,
+    monthGoalGbp,
     monthlyGoalMinor,
     data.serverTime
   );
@@ -1406,8 +1422,8 @@ function renderExpandedOverview(data) {
   }
   html += '</div>';
 
-  html += renderGoalCard('Tagesziel', todayEarnedGbp, dailyGoalMinor);
-  html += renderGoalCard('Monatsziel', monthEarnedGbp, monthlyGoalMinor);
+  html += renderGoalCard('Tagesziel', todayGoalGbp, dailyGoalMinor);
+  html += renderGoalCard('Monatsziel', monthGoalGbp, monthlyGoalMinor);
 
   html += `
     <div class="status-box">

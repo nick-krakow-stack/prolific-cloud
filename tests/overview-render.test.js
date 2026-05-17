@@ -35,9 +35,9 @@ vm.runInContext(code, sandbox);
 const sampleOverview = {
   ok: true,
   earnings: {
-    today: { earned: { GBP: 500 }, pending: {} },
+    today: { earned: { GBP: 500 }, pending: { GBP: 300 } },
     week: { earned: { GBP: 2500 }, pending: {} },
-    month: { earned: { GBP: 7500 }, pending: {} },
+    month: { earned: { GBP: 7500 }, pending: { GBP: 1250 } },
     lastMonth: { earned: { GBP: 2500, USD: 150 }, pending: {} },
     allTime: { earned: { GBP: 15000 }, pending: {} }
   },
@@ -50,7 +50,10 @@ const sampleOverview = {
     rates: { EUR: 1.18, USD: 1.27 },
     fetchedAt: '2026-05-17T10:00:00Z'
   },
-  goals: {},
+  goals: {
+    daily_gbp_minor: 1000,
+    monthly_gbp_minor: 10000
+  },
   forecast: {},
   pendingStats: {},
   statusStats: {},
@@ -108,6 +111,8 @@ const checks = [
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders system health grid', html.includes('health-grid') && html.includes('API')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
+  ['daily goal includes pending rewards', html.includes('£8,00 von £10,00') && html.includes('80 %')],
+  ['monthly goal includes pending rewards', html.includes('£87,50 von £100,00') && html.includes('87,5 %')],
   ['renders monthly comparison as top tile', html.includes('class="earning-tile comparison-tile"') && html.includes('Vergleich') && html.includes('286,5 %') && html.includes('Vormonat: £25,00 + $1,50')],
   ['does not render old comparison status box', !html.includes('<h3>Vergleich</h3>') && !html.includes('<span class="key">Vormonat</span>')],
   ['does not restore old account box', !html.includes('Prolific-Konto') && !html.includes('Gesamt offen')],

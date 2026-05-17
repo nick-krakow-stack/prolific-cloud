@@ -180,17 +180,19 @@ function build_overview(PDO $pdo): array {
     $dailyGoalGbpMinor = $dashboardGoals['daily_gbp_minor'];
     $monthlyGoalGbpMinor = $dashboardGoals['monthly_gbp_minor'];
 
-    $earnedTodayGbp = amount_for_currency($earnedToday, 'GBP');
-    $earnedMonthGbp = amount_for_currency($earnedMonth, 'GBP');
+    $goalToday = sum_currency_maps($earnedToday, $pendingToday);
+    $goalMonth = sum_currency_maps($earnedMonth, $pendingMonth);
+    $goalTodayGbp = amount_for_currency($goalToday, 'GBP');
+    $goalMonthGbp = amount_for_currency($goalMonth, 'GBP');
 
     $goals = [
         'daily_gbp_minor' => $dailyGoalGbpMinor,
         'monthly_gbp_minor' => $monthlyGoalGbpMinor,
-        'today' => build_goal_progress($earnedTodayGbp, $dailyGoalGbpMinor),
-        'month' => build_goal_progress($earnedMonthGbp, $monthlyGoalGbpMinor),
+        'today' => build_goal_progress($goalTodayGbp, $dailyGoalGbpMinor),
+        'month' => build_goal_progress($goalMonthGbp, $monthlyGoalGbpMinor),
     ];
 
-    $forecast = build_month_forecast($now, $earnedMonthGbp, $monthlyGoalGbpMinor);
+    $forecast = build_month_forecast($now, $goalMonthGbp, $monthlyGoalGbpMinor);
     $pendingStats = build_pending_stats($pdo, $pendingStatuses, $now);
     $statusStats = build_status_stats($subCounts);
     $todayStats = build_today_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
@@ -273,6 +275,30 @@ function amount_for_currency(array $amounts, string $currency): int {
     }
 
     return 0;
+}
+
+function sum_currency_maps(array ...$maps): array {
+    $result = [];
+
+    foreach ($maps as $map) {
+        foreach ($map as $currency => $value) {
+            $currency = strtoupper((string)$currency);
+
+            if ($currency === '') {
+                continue;
+            }
+
+            if (!isset($result[$currency])) {
+                $result[$currency] = 0;
+            }
+
+            $result[$currency] += (int)$value;
+        }
+    }
+
+    ksort($result);
+
+    return $result;
 }
 
 function build_goal_progress(int $earnedGbpMinor, int $targetGbpMinor): array {
