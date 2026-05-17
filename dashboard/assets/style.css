@@ -735,6 +735,18 @@ a:not(.icon-btn):hover {
   list-style: none;
 }
 
+.top-studies-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.top-studies-grid .status-box {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
 .top-study-item {
   display: grid;
   gap: 3px;
@@ -772,6 +784,12 @@ a:not(.icon-btn):hover {
 .top-study-meta > * {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .top-studies-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .health-grid {
