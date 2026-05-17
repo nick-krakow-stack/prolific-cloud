@@ -51,6 +51,10 @@ const stats = {
     { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
     { date: '2026-05-02', earned: {}, pending: {} }
   ],
+  dailyStats: [
+    { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
+    { date: '2026-05-02', earned: { GBP: 180 }, pending: { GBP: 40 } }
+  ],
   serverTime: '2026-05-17T12:00:00+02:00',
   requesterStats: [
     {
@@ -287,6 +291,7 @@ const checks = [
   ['renders monthly report basis as studies not samples', statsHtml.includes('14 Studien') && !statsHtml.includes('Samples')],
   ['renders monthly report hourly in EUR with separate study and work-hour rows', statsHtml.includes('<span class="key">Stundenlohn</span>') && statsHtml.includes('<span class="value">€16,99/h</span>') && /<span class="key">Stundenlohn<\/span>[\s\S]*<span class="key">Studien<\/span>[\s\S]*<span class="value">14 Studien<\/span>[\s\S]*<span class="key">Arbeitszeit<\/span>[\s\S]*<span class="value">3 Std 30 Min<\/span>/.test(statsHtml) && !statsHtml.includes('£14,40/h &middot; 14 Studien')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
+  ['renders income history in stats tab', statsHtml.includes('<h3>Einnahmen-Verlauf</h3>') && statsHtml.includes('class="daily-chart"') && statsHtml.includes('class="daily-bar"')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['preserves exact EUR settings values after reload', /id="settingsOkHourly"[\s\S]*value="10\.00"/.test(exactEurSettingsHtml) && /id="settingsDailyGoal"[\s\S]*value="30\.00"/.test(exactEurSettingsHtml)],

@@ -1604,7 +1604,6 @@ function renderExpandedOverview(data) {
   const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
   const efficiencyStats = readEfficiencyStats(data);
   const topStudies = readTopStudies(data);
-  const dailyStats = readDailyStats(data);
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
   const statusTotal = Object.values(statusCounts).reduce((sum, value) => sum + value, 0);
   const approvedCount = statusCount(statusCounts, ['APPROVED']);
@@ -1796,7 +1795,6 @@ function renderExpandedOverview(data) {
 
   html += renderEfficiencyCard(efficiencyStats, fxRates);
   html += renderTopStudiesCard(topStudies, fxRates);
-  html += renderDailyStatsCard(dailyStats, fxRates);
 
   return html;
 }
@@ -1946,6 +1944,7 @@ function renderStats(data) {
   const reportHourly = asObject(report.hourlyRate || report.hourly_rate);
   const reportEfficiency = readEfficiencyPeriod(reportHourly);
   const reportStatusCounts = normalizeStatusCounts(report.statusCounts || report.status_counts, {});
+  const dailyStats = readDailyStats(data);
 
   const requesterRows = Array.isArray(requesters) && requesters.length
     ? requesters.slice(0, 10).map(itemRaw => {
@@ -2054,6 +2053,8 @@ function renderStats(data) {
         <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
       </div>
     </div>
+
+    ${renderDailyStatsCard(dailyStats, fxRates)}
   `;
 }
 
