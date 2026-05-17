@@ -82,6 +82,16 @@ function fmtCount(value) {
   return Math.round(numeric).toLocaleString('de-DE');
 }
 
+function fmtStudyCount(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return DASH;
+
+  const count = Math.round(numeric);
+
+  return fmtCount(count) + ' ' + (count === 1 ? 'Studie' : 'Studien');
+}
+
 function fmtPercent(value) {
   const numeric = Number(value);
 
@@ -1176,7 +1186,7 @@ function renderEfficiencyCard(efficiency) {
     </div>
     <div class="status-row">
       <span class="key">Basis</span>
-      <span class="value">${fmtCount(period.sampleCount)} Samples &middot; ${fmtDuration(period.secondsTotal)}</span>
+      <span class="value">${fmtStudyCount(period.sampleCount)} &middot; ${fmtDuration(period.secondsTotal)}</span>
     </div>
   `).join('');
 
@@ -1799,7 +1809,7 @@ function renderStats(data) {
       </div>
       <div class="status-row">
         <span class="key">Stundenlohn</span>
-        <span class="value">${fmtMetricHourly(readCurrencyMetric(reportHourly, ['byCurrency', 'by_currency', 'hourly'], ['gbp_minor', 'gbpMinor']), 'GBP')} &middot; ${fmtCount(firstNumber(reportHourly, ['sampleCount', 'sample_count', 'count']))} Samples</span>
+        <span class="value">${fmtMetricHourly(readCurrencyMetric(reportHourly, ['byCurrency', 'by_currency', 'hourly'], ['gbp_minor', 'gbpMinor']), 'GBP')} &middot; ${fmtStudyCount(firstNumber(reportHourly, ['sampleCount', 'sample_count', 'count']))}</span>
       </div>
       ${statusRows}
       ${renderTopStudyList(report.topStudies || report.top_studies, 'reward')}

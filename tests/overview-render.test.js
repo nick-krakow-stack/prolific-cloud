@@ -114,6 +114,8 @@ const checks = [
   ['renders EUR equivalent from GBP-based fxRates', html.includes('≈ €13,44')],
   ['renders top study list', html.includes('top-study-list') && html.includes('High reward study')],
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
+  ['renders efficiency basis as studies not samples', html.includes('2 Studien &middot; 30 Min') && html.includes('1 Studie') === false && !html.includes('Samples')],
+  ['formats singular study count', sandbox.fmtStudyCount(1) === '1 Studie'],
   ['renders system health grid', html.includes('health-grid') && html.includes('API')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
