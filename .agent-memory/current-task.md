@@ -4,6 +4,8 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Change global page link color from blue to warm near-white yellow.
+- [x] Deploy link color review fix to production and verify runtime files.
 - [x] Modernize settings UI with sliders, polished number fields, and autosave.
 - [x] Deploy settings autosave review fix to production and verify runtime files.
 - [x] Implement browser review: summarize the Log tab as `Sync-Status`.
@@ -44,5 +46,7 @@ Last updated: 2026-05-17
   last successful sync, last failure, and a collapsed detailed log.
 - [x] Settings tab modernized with range sliders, exact GBP fields, debounced
   autosave, and inline save status.
+- [x] Global text links now use a warm near-white/yellow link color instead of
+  blue; tabs, controls, and focus rings keep their existing interaction colors.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

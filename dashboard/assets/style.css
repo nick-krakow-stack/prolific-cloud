@@ -9,6 +9,8 @@
   --border: #e5e7eb;
   --text: #1f2937;
   --text-muted: #6b7280;
+  --link: #7c5a00;
+  --link-hover: #4f3900;
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
   --success: #166534;
@@ -33,6 +35,8 @@
     --border: #2a2f37;
     --text: #e5e7eb;
     --text-muted: #9ca3af;
+    --link: #fff7d6;
+    --link-hover: #ffffff;
     --primary: #3b82f6;
     --primary-dark: #2563eb;
     --success: #4ade80;
@@ -52,6 +56,15 @@
 html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
              background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
 body { font-size: 14px; line-height: 1.5; }
+a:not(.icon-btn) {
+  color: var(--link);
+  text-decoration-color: color-mix(in srgb, var(--link) 54%, transparent);
+  text-underline-offset: 2px;
+}
+a:not(.icon-btn):hover {
+  color: var(--link-hover);
+  text-decoration-color: var(--link-hover);
+}
 
 /* ---- Login-Page ---- */
 .login-page {
@@ -991,7 +1004,7 @@ body { font-size: 14px; line-height: 1.5; }
 .export-link:hover {
   background: var(--bg);
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
-  color: var(--primary);
+  color: var(--link-hover);
 }
 
 .note-preview {
@@ -1094,8 +1107,9 @@ body { font-size: 14px; line-height: 1.5; }
 .tag-ok       { background: var(--info-bg); color: var(--info); }
 .tag-low      { background: var(--danger-bg); color: var(--danger); }
 
-.study-card a.open-link { float: right; color: var(--primary); text-decoration: none;
+.study-card a.open-link { float: right; color: var(--link); text-decoration: none;
                           font-size: 16px; padding: 2px 6px; }
+.study-card a.open-link:hover { color: var(--link-hover); }
 
 .submission-card .status { display: inline-block; padding: 1px 6px; border-radius: 3px;
                             font-size: 11px; font-weight: 600; }

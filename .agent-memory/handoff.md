@@ -19,8 +19,10 @@ for the former `Log` tab is implemented and deployed: the tab now reads
 `Sync-Status`, shows last sync status, last successful sync, and last failure,
 and keeps the detailed event log collapsed behind `Log`. Browser review fix for
 settings is implemented and deployed: sliders, exact GBP fields, and debounced
-autosave through the existing protected settings endpoint. The production
-webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+autosave through the existing protected settings endpoint. Browser review fix
+for links is implemented and deployed: normal page links are warm near-white /
+yellow instead of blue, while tabs and controls keep their interaction colors.
+The production webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
 browser, and review feedback are persisted in .agent-memory/feedback.md.
@@ -28,12 +30,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: 9ba1f02 Modernize settings autosave UI
+- Last product commit before this snapshot: pending link color commit
 
 ## Working Tree
 
 ~~~text
-clean after commit/push except this handoff refresh
+link color changes pending commit/push
 ~~~
 
 ## Current State Summary

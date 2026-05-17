@@ -2,6 +2,7 @@ const fs = require('fs');
 const vm = require('vm');
 
 const code = fs.readFileSync('dashboard/assets/app.js', 'utf8');
+const css = fs.readFileSync('dashboard/assets/style.css', 'utf8');
 
 const sandbox = {
   console,
@@ -132,7 +133,8 @@ const checks = [
   ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],
-  ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')]
+  ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')],
+  ['styles page links with warm non-blue color', css.includes('--link:') && css.includes('a:not(.icon-btn)') && css.includes('color: var(--link)')]
 ];
 
 let failed = 0;

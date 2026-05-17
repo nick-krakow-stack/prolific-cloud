@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Text links across all pages should no longer
+  be blue; use a very light warm yellow, almost white, for links.
 - 2026-05-17 - Browser feedback: Modernize the settings form with sliders,
   nicer input fields, and automatic saving instead of a manual save row.
 - 2026-05-17 - Browser feedback: Rename `Log` to `Sync-Status`, replace the

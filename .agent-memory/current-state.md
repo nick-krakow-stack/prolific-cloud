@@ -144,6 +144,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: the settings tab uses slider controls plus exact GBP
   number inputs and saves changes automatically through the existing protected
   `/api/data.php?type=settings` POST route.
+- Browser review fix: normal page links use warm near-white/yellow `--link`
+  tokens instead of blue; active tabs, icon buttons, focus rings, and controls
+  remain on their existing interaction colors.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell
