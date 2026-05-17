@@ -1,38 +1,48 @@
 # Handoff
 
-Last updated: 2026-05-17 17:45:00 +02:00
+Last updated: 2026-05-17 18:03:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Reward/adjustment bug fixed and deployed. Effective rewards are now calculated
-centrally in `api/_rewards.php` from base reward + adjustment + bonus, with
-screened-out and raw-reward fallbacks. Dashboard aggregations, stats, requester
-analysis, top studies, CSV export, submission cards, and sync writes now use the
-effective reward path.
+Manual refresh loading feedback is implemented and deployed. The refresh button
+now contains `.icon-btn-symbol`, spins while a manual refresh is active, disables
+itself during the request, and sets `aria-busy`. The active tab receives
+`is-loading` and a subtle `Aktualisiere...` overlay until the API call completes.
+Automatic 60-second reloads and tab switches still load without the overlay.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 1e0dbf1 Fix adjusted reward totals
-- Last memory commit: current HEAD memory commit for reward fix
+- Last product commit: 56c3238 Add refresh loading feedback
+- Last memory commit: pending this task
 
 ## Working Tree
 
 ~~~text
- clean after memory commit
+ M .agent-memory/current-state.md
+ M .agent-memory/current-task.md
+ M .agent-memory/feedback.md
+ M .agent-memory/handoff.md
+ M .agent-memory/progress.md
+ M dashboard/app.php
+ M dashboard/assets/app.js
+ M dashboard/assets/style.css
+ M tests/roadmap-rest-render.test.js
 ~~~
 
 ## Verification Snapshot
 
 - `node --check dashboard/assets/app.js` passed.
-- `node tests\overview-render.test.js` passed.
 - `node tests\roadmap-rest-render.test.js` passed.
-- `php74` and `php84` lint passed for `api/_rewards.php`, `api/data.php`,
-  `api/export.php`, and `api/sync.php` on production.
+- `node tests\overview-render.test.js` passed.
+- Server `php74`/`php84 -l dashboard/app.php` passed.
+- Deploy helper uploaded runtime files to production.
+- Production asset checks confirmed refresh spinner CSS, page overlay CSS, and
+  JS loading-state helpers are present.
 - Production root returned `200`; unauthenticated overview API returned `401`.
 - Production setup files remain absent.
-- In-app browser showed `HEUTE` as `Â£1,86` plus pending amounts after reload.
+- In-app browser reload showed the wrapped refresh symbol and dashboard content.
 
 ## Current State Summary
 
@@ -40,8 +50,7 @@ See .agent-memory/current-state.md.
 
 ## Next Planned Work
 
-Owner can continue the full browser review; the next item is the next review
-note or backlog item from `.agent-memory/next-steps.md`.
+Owner can continue browser review; next work item is the next review note.
 
 ## Required Startup For Next Agent
 

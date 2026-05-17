@@ -1,9 +1,12 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 17:36:07 +02:00
+Last updated: 2026-05-17 17:56:24 +02:00
 
 ## Active Task Checklist
 
+- [x] Animate refresh button while manual refresh requests are running.
+- [x] Add page-level loading overlay for manual refresh.
+- [x] Deploy refresh loading animation and verify live assets.
 - [x] Diagnose Reward/Adjustment-Berechnung mit echten Server-Aggregaten.
 - [x] Add regression tests for effective reward totals and submission rendering.
 - [x] Implement central effective reward helper for backend reads and sync writes.
@@ -72,5 +75,6 @@ Last updated: 2026-05-17 17:36:07 +02:00
   requester, count, earnings, hourly rate, and approval rate.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In PrÃ¼fung` rendered as overview tiles below the first four earnings tiles.
+
 
 

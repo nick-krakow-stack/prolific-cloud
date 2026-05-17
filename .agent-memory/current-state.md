@@ -163,6 +163,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   runtime API.
 - Browser review fix: study cards render reward, duration, places, hourly rate,
   and seen time as responsive detail tiles instead of a compact text line.
+- Browser review fix: the manual refresh button now wraps its icon in
+  `.icon-btn-symbol`, spins while the active tab reloads, disables itself during
+  the request, and shows a subtle page-level loading overlay on the active tab.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

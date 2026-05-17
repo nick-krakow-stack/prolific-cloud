@@ -31,3 +31,6 @@ Last updated: 2026-05-17
 - 2026-05-17 - Owner reported that Prolific adjustments are Zusatzverdienst:
    an approved submission with base reward and adjustment must count both
    components, not only the adjustment value.
+- 2026-05-17 - Browser feedback: The refresh button should visibly animate
+  while manual refresh is running, and the page should show a loading animation
+  so it is clear that clicking refresh did something.

@@ -1,5 +1,8 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: manual refresh now spins the
+  refresh icon, disables double-click refresh during the request, and shows a
+  subtle page-level `Aktualisiere...` loading overlay for the active tab.
 - 2026-05-17 - Reward calculation fix deployed: dashboard totals, stats,
   requester analysis, top studies, CSV export, and submission cards now use an
   effective reward amount derived from base reward plus adjustment plus bonus,
@@ -59,3 +62,5 @@
 - 2026-05-17 17:31:57 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 17:36:07 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 17:36:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-17 17:56:24 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-17 17:56:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
