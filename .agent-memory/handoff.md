@@ -35,12 +35,12 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: pending requester table commit
+- Last product commit before this snapshot: 0b3a319 Render requester analysis as table
 
 ## Working Tree
 
 ~~~text
-requester table changes pending commit/push
+clean after commit/push except this handoff refresh
 ~~~
 
 ## Current State Summary
