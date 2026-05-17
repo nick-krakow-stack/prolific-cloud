@@ -2114,6 +2114,7 @@ function renderSystem(data) {
   }
 
   const system = asObject(data.system || data);
+  const systemHealth = readSystemHealth(data.system ? data : { ...data, system });
   const dbCounts = asObject(system.dbCounts || system.db_counts);
   const lastSync = asObject(system.lastSync || system.last_sync || system.lastSyncLog || system.last_sync_log);
   const lastError = asObject(system.lastError || system.last_error);
@@ -2139,6 +2140,7 @@ function renderSystem(data) {
         </div>
       `).join('')}
     </div>
+    ${renderSystemHealthCard(systemHealth)}
   `;
 }
 
@@ -2191,7 +2193,6 @@ function renderSettings(data) {
   const settings = asObject(data.settings);
   const goals = asObject(settings.goals);
   const thresholds = asObject(settings.thresholds);
-  const systemHealth = readSystemHealth(data);
   const fxRates = data.fxRates || data.fx_rates;
   const useEurSettings = canConvertGbpEur(fxRates);
   const settingsPrefix = useEurSettings ? '€' : '£';
@@ -2250,7 +2251,6 @@ function renderSettings(data) {
         })}
       </div>
     </form>
-    ${renderSystemHealthCard(systemHealth)}
     ${renderCurrencySettingsCard(data)}
     </div>
   `;

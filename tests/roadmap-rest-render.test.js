@@ -159,6 +159,7 @@ const events = {
 
 const eventsHtml = sandbox.renderEvents(events);
 const settingsHtml = sandbox.renderSettings(settings);
+const systemHtml = sandbox.renderSystem(settings);
 const statsHtml = sandbox.renderStats(stats);
 const accountHtml = sandbox.renderAccount({
   ok: true,
@@ -256,7 +257,7 @@ const checks = [
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
-  ['renders system health at bottom of settings', settingsHtml.includes('System-Health') && settingsHtml.includes('health-grid') && settingsHtml.indexOf('settings-form') < settingsHtml.indexOf('System-Health')],
+  ['moves system health from settings to system tab', !settingsHtml.includes('System-Health') && !settingsHtml.includes('health-grid') && systemHtml.includes('System-Health') && systemHtml.includes('health-grid')],
   ['moves currency box from account to settings', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && settingsHtml.includes('W&auml;hrungen') && settingsHtml.includes('FX-Rates') && settingsHtml.includes('Teilnahmen exportieren')],
   ['removes account tab from shell', !appShell.includes('data-tab="account"') && !appShell.includes('id="panel-account"') && !appShell.includes('accountContent')],
   ['renders modern autosave settings controls', settingsHtml.includes('class="settings-form"') && settingsHtml.includes('type="range"') && settingsHtml.includes('Automatisch gespeichert')],
