@@ -1944,6 +1944,7 @@ function renderStats(data) {
   const report = asObject(data.monthlyReport || data.monthly_report);
   const reportMonth = firstDefined(report, ['month', 'label']);
   const reportHourly = asObject(report.hourlyRate || report.hourly_rate);
+  const reportEfficiency = readEfficiencyPeriod(reportHourly);
   const reportStatusCounts = normalizeStatusCounts(report.statusCounts || report.status_counts, {});
 
   const requesterRows = Array.isArray(requesters) && requesters.length
@@ -2036,7 +2037,15 @@ function renderStats(data) {
       </div>
       <div class="status-row">
         <span class="key">Stundenlohn</span>
-        <span class="value">${fmtMetricHourly(readCurrencyMetric(reportHourly, ['byCurrency', 'by_currency', 'hourly'], ['gbp_minor', 'gbpMinor']), 'GBP')} &middot; ${fmtStudyCount(firstNumber(reportHourly, ['sampleCount', 'sample_count', 'count']))}</span>
+        <span class="value">${fmtEfficiencyHourlyEur(reportEfficiency, fxRates)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Studien</span>
+        <span class="value">${fmtStudyCount(reportEfficiency.sampleCount)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Arbeitszeit</span>
+        <span class="value">${fmtDuration(reportEfficiency.secondsTotal)}</span>
       </div>
       ${statusRows}
       ${renderTopStudyList(report.topStudies || report.top_studies, 'reward')}

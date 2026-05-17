@@ -38,6 +38,10 @@ vm.runInContext(code, sandbox);
 
 const stats = {
   ok: true,
+  fxRates: {
+    base: 'GBP',
+    rates: { EUR: 1.18, USD: 1.27 }
+  },
   monthlyComparison: {
     current: { earned: { GBP: 12298 }, submissionsCount: 18 },
     previous: { earned: { GBP: 1317 }, submissionsCount: 3 },
@@ -64,7 +68,7 @@ const stats = {
     pending: { GBP: 3583 },
     submissionsCount: 21,
     statusCounts: { APPROVED: 18, 'AWAITING REVIEW': 3 },
-    hourlyRate: { byCurrency: { GBP: 1440 }, sampleCount: 14 },
+    hourlyRate: { byCurrency: { GBP: 1440 }, rewardByCurrency: { GBP: 5040 }, sampleCount: 14, secondsTotal: 12600 },
     topStudies: [
       { studyId: 's1', name: 'Report study', rewardMinor: 850, rewardCurrency: 'GBP' }
     ]
@@ -281,6 +285,7 @@ const checks = [
   ['renders monthly report', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsbericht')],
   ['renders monthly report month in German format', statsHtml.includes('Mai 2026') && !statsHtml.includes('>2026-05<')],
   ['renders monthly report basis as studies not samples', statsHtml.includes('14 Studien') && !statsHtml.includes('Samples')],
+  ['renders monthly report hourly in EUR with separate study and work-hour rows', statsHtml.includes('<span class="key">Stundenlohn</span>') && statsHtml.includes('<span class="value">€16,99/h</span>') && /<span class="key">Stundenlohn<\/span>[\s\S]*<span class="key">Studien<\/span>[\s\S]*<span class="value">14 Studien<\/span>[\s\S]*<span class="key">Arbeitszeit<\/span>[\s\S]*<span class="value">3 Std 30 Min<\/span>/.test(statsHtml) && !statsHtml.includes('£14,40/h &middot; 14 Studien')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
