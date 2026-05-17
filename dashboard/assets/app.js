@@ -2393,7 +2393,24 @@ function renderEvents(data) {
 
 // ---- Tab-Logic ----
 
-async function loadTab(tab) {
+function setPanelLoading(panel, isLoading) {
+  if (!panel) return;
+
+  panel.classList.toggle('is-loading', Boolean(isLoading));
+  panel.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+}
+
+function setRefreshButtonLoading(isLoading) {
+  const button = $('refreshBtn');
+
+  if (!button) return;
+
+  button.classList.toggle('is-refreshing', Boolean(isLoading));
+  button.disabled = Boolean(isLoading);
+  button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+}
+
+async function loadTab(tab, options = {}) {
   const panel = $(`panel-${tab}`);
 
   if (!panel) return;
@@ -2413,10 +2430,16 @@ async function loadTab(tab) {
     events: renderEvents
   };
 
+  if (options.showPageLoader) {
+    setPanelLoading(panel, true);
+  }
+
   try {
     const data = await fetchData(tab);
 
-    if (!data) return;
+    if (!data) {
+      return;
+    }
 
     cachedData[tab] = data;
 
@@ -2436,6 +2459,10 @@ async function loadTab(tab) {
   } catch (e) {
     container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
     container.classList.remove('loading');
+  } finally {
+    if (options.showPageLoader) {
+      setPanelLoading(panel, false);
+    }
   }
 }
 
@@ -2462,11 +2489,16 @@ document.querySelectorAll('.tab').forEach(button => {
 const refreshBtn = $('refreshBtn');
 
 if (refreshBtn) {
-  refreshBtn.addEventListener('click', () => {
+  refreshBtn.addEventListener('click', async () => {
     const active = document.querySelector('.tab.is-active');
 
     if (active) {
-      loadTab(active.dataset.tab);
+      setRefreshButtonLoading(true);
+      try {
+        await loadTab(active.dataset.tab, { showPageLoader: true });
+      } finally {
+        setRefreshButtonLoading(false);
+      }
     }
   });
 }

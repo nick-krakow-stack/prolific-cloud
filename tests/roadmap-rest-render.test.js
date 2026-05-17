@@ -157,7 +157,9 @@ const checks = [
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],
   ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')],
-  ['styles page links with warm non-blue color', css.includes('--link:') && css.includes('a:not(.icon-btn)') && css.includes('color: var(--link)')]
+  ['styles page links with warm non-blue color', css.includes('--link:') && css.includes('a:not(.icon-btn)') && css.includes('color: var(--link)')],
+  ['styles refresh button spinner state', css.includes('@keyframes refresh-spin') && css.includes('.icon-btn.is-refreshing .icon-btn-symbol') && css.includes('animation: refresh-spin')],
+  ['styles page refresh loading overlay', css.includes('.tab-panel.is-loading::after') && css.includes('.tab-panel.is-loading::before') && css.includes('@keyframes loading-pulse')]
 ];
 
 let failed = 0;

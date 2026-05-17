@@ -24,7 +24,9 @@ require_login();
     <h1>🔬 Prolific Watcher</h1>
     <div class="topbar-actions">
       <span id="syncIndicator" class="sync-indicator" title="Letzter Sync"></span>
-      <button id="refreshBtn" class="icon-btn" title="Aktualisieren">↻</button>
+      <button id="refreshBtn" class="icon-btn" title="Aktualisieren" aria-label="Aktualisieren">
+        <span class="icon-btn-symbol" aria-hidden="true">↻</span>
+      </button>
       <a href="/logout.php" class="icon-btn" title="Abmelden">⎋</a>
     </div>
   </div>
