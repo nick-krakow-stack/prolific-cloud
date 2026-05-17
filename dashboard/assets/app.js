@@ -1930,6 +1930,43 @@ function renderHeatmap(days, fxRates, serverTime) {
   `;
 }
 
+function renderStatsStudiesSection(studiesData, showAll = statsShowAllStudies) {
+  if (!studiesData || !studiesData.ok) {
+    return `
+      <div class="status-box stats-studies-section">
+        <h3>Studien</h3>
+        <div class="loading">Studien konnten nicht geladen werden.</div>
+      </div>
+    `;
+  }
+
+  const activeStudies = renderStudies(studiesData, {
+    filter: 'active',
+    showPagination: false,
+    emptyText: 'Keine aktiven Studien.'
+  });
+  const toggleButton = `<button id="statsShowAllStudies" class="filter-reset studies-show-all" type="button">${showAll ? 'Studien ausblenden' : 'Alle Studien anzeigen'}</button>`;
+  const allStudies = showAll
+    ? `
+      <div class="stats-all-studies">
+        ${renderStudiesFilterBar()}
+        <div id="studiesContent">${renderStudies(studiesData)}</div>
+      </div>
+    `
+    : '';
+
+  return `
+    <div class="status-box stats-studies-section">
+      <h3>Studien</h3>
+      <div class="stats-active-studies">
+        ${activeStudies}
+      </div>
+      ${toggleButton}
+      ${allStudies}
+    </div>
+  `;
+}
+
 function renderStats(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
@@ -1947,6 +1984,7 @@ function renderStats(data) {
   const reportEfficiency = readEfficiencyPeriod(reportHourly);
   const reportStatusCounts = normalizeStatusCounts(report.statusCounts || report.status_counts, {});
   const dailyStats = readDailyStats(data);
+  const studiesData = data.studiesData || data.studies_data || cachedData.studies;
 
   const requesterRows = Array.isArray(requesters) && requesters.length
     ? requesters.slice(0, 10).map(itemRaw => {
@@ -2057,6 +2095,8 @@ function renderStats(data) {
     </div>
 
     ${renderDailyStatsCard(dailyStats, fxRates)}
+
+    ${renderStatsStudiesSection(studiesData)}
   `;
 }
 
@@ -2458,6 +2498,7 @@ function studyInDateRange(study, from, to) {
 
 const STUDIES_PAGE_SIZE = 50;
 let studiesVisibleLimit = STUDIES_PAGE_SIZE;
+let statsShowAllStudies = false;
 
 function resolveStudiesPageSize(value, total) {
   if (value === 'all') {
@@ -2512,9 +2553,61 @@ function renderStudiesPagination(visible, total) {
   `;
 }
 
+function renderStudiesFilterBar() {
+  return `
+    <div class="filter-bar studies-filter-bar">
+      <label>Sortierung:
+        <select id="studiesSort">
+          <option value="firstSeenDesc">Neueste zuerst</option>
+          <option value="firstSeenAsc">&Auml;lteste zuerst</option>
+          <option value="rewardDesc">H&ouml;chste Verg&uuml;tung</option>
+        </select>
+      </label>
+
+      <label>
+        <select id="studiesFilter">
+          <option value="all">Alle</option>
+          <option value="active">Aktive</option>
+          <option value="expired">Voll/Abgelaufen</option>
+        </select>
+      </label>
+
+      <label>
+        <select id="studiesPageSize">
+          <option value="50" selected>50</option>
+          <option value="all">Alle</option>
+        </select>
+      </label>
+
+      <fieldset class="date-filter date-filter-popover" aria-label="Zeitraum">
+        <legend>Zeitraum</legend>
+        <button id="studiesDateToggle"
+                class="filter-icon date-filter-toggle"
+                type="button"
+                aria-label="Zeitraum auswaehlen"
+                aria-expanded="false"
+                aria-controls="studiesDatePanel">&#128197;</button>
+        <div id="studiesDatePanel" class="date-filter-panel" hidden>
+          <label>Von
+            <input id="studiesDateFrom" type="date">
+          </label>
+          <label>Bis
+            <input id="studiesDateTo" type="date">
+          </label>
+          <button id="studiesDateReset" class="filter-reset" type="button">Zur&uuml;cksetzen</button>
+        </div>
+      </fieldset>
+    </div>
+  `;
+}
+
+function isStudyCurrentlyActive(study) {
+  return study?.is_active == 1 && study?.expired != 1;
+}
+
 // ---- Renderer: Studien ----
 
-function renderStudies(data) {
+function renderStudies(data, options = {}) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
   }
@@ -2526,10 +2619,10 @@ function renderStudies(data) {
   const dateFromEl = $('studiesDateFrom');
   const dateToEl = $('studiesDateTo');
 
-  const filter = filterEl ? filterEl.value : 'all';
+  const filter = options.filter || (filterEl ? filterEl.value : 'all');
 
   if (filter === 'active') {
-    studies = studies.filter(s => s.is_active == 1);
+    studies = studies.filter(isStudyCurrentlyActive);
   }
 
   if (filter === 'expired') {
@@ -2558,11 +2651,13 @@ function renderStudies(data) {
   });
 
   if (studies.length === 0) {
-    return '<div class="loading">Keine Studien.</div>';
+    return `<div class="loading">${escapeHtml(options.emptyText || 'Keine Studien.')}</div>`;
   }
 
   const totalCount = studies.length;
-  const visibleLimit = currentStudiesVisibleLimit(totalCount);
+  const visibleLimit = options.showPagination === false
+    ? totalCount
+    : currentStudiesVisibleLimit(totalCount);
   const visibleStudies = studies.slice(0, visibleLimit);
 
   const studyCards = visibleStudies.map(s => {
@@ -2611,7 +2706,7 @@ function renderStudies(data) {
     `;
   }).join('');
 
-  return studyCards + renderStudiesPagination(visibleStudies.length, totalCount);
+  return studyCards + (options.showPagination === false ? '' : renderStudiesPagination(visibleStudies.length, totalCount));
 }
 
 // ---- Renderer: Submissions ----
@@ -3021,6 +3116,12 @@ async function loadTab(tab, options = {}) {
       return;
     }
 
+    if (tab === 'stats') {
+      const studiesData = await fetchData('studies');
+      data.studiesData = studiesData;
+      cachedData.studies = studiesData;
+    }
+
     cachedData[tab] = data;
 
     const renderer = renderers[tab];
@@ -3035,6 +3136,10 @@ async function loadTab(tab, options = {}) {
 
     if (tab === 'settings') {
       bindSettingsForm();
+    }
+
+    if (tab === 'stats') {
+      bindStudiesControls();
     }
   } catch (e) {
     container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
@@ -3097,19 +3202,10 @@ function refreshStudiesList(options = {}) {
   }
 }
 
-['studiesSort', 'studiesFilter', 'studiesPageSize', 'studiesDateFrom', 'studiesDateTo'].forEach(id => {
-  const el = $(id);
-
-  if (!el) return;
-
-  el.addEventListener('change', () => refreshStudiesList({ resetPage: true }));
-  el.addEventListener('input', () => refreshStudiesList({ resetPage: true }));
-});
-
-const studiesDateToggle = $('studiesDateToggle');
-const studiesDatePanel = $('studiesDatePanel');
-
 function setStudiesDatePanelOpen(isOpen) {
+  const studiesDateToggle = $('studiesDateToggle');
+  const studiesDatePanel = $('studiesDatePanel');
+
   if (!studiesDateToggle || !studiesDatePanel) return;
 
   studiesDatePanel.hidden = !isOpen;
@@ -3121,66 +3217,105 @@ function setStudiesDatePanelOpen(isOpen) {
   }
 }
 
-if (studiesDateToggle && studiesDatePanel) {
-  studiesDateToggle.addEventListener('click', event => {
-    event.stopPropagation();
+function rerenderStatsContent() {
+  const statsContent = $('statsContent');
 
-    const shouldOpen = studiesDatePanel.hidden;
-    setStudiesDatePanelOpen(shouldOpen);
+  if (statsContent && cachedData.stats) {
+    statsContent.innerHTML = renderStats(cachedData.stats);
+    bindStudiesControls();
+  }
+}
 
-    if (shouldOpen) {
-      const studiesDateFrom = $('studiesDateFrom');
+function bindStudiesControls() {
+  ['studiesSort', 'studiesFilter', 'studiesPageSize', 'studiesDateFrom', 'studiesDateTo'].forEach(id => {
+    const el = $(id);
 
-      if (studiesDateFrom && typeof studiesDateFrom.showPicker === 'function') {
-        try {
-          studiesDateFrom.showPicker();
-        } catch (error) {
+    if (!el || el.dataset.bound === '1') return;
+
+    el.dataset.bound = '1';
+    el.addEventListener('change', () => refreshStudiesList({ resetPage: true }));
+    el.addEventListener('input', () => refreshStudiesList({ resetPage: true }));
+  });
+
+  const studiesDateToggle = $('studiesDateToggle');
+  const studiesDatePanel = $('studiesDatePanel');
+
+  if (studiesDateToggle && studiesDatePanel && studiesDateToggle.dataset.bound !== '1') {
+    studiesDateToggle.dataset.bound = '1';
+    studiesDateToggle.addEventListener('click', event => {
+      event.stopPropagation();
+
+      const shouldOpen = studiesDatePanel.hidden;
+      setStudiesDatePanelOpen(shouldOpen);
+
+      if (shouldOpen) {
+        const studiesDateFrom = $('studiesDateFrom');
+
+        if (studiesDateFrom && typeof studiesDateFrom.showPicker === 'function') {
+          try {
+            studiesDateFrom.showPicker();
+          } catch (error) {
+            studiesDateFrom.focus();
+          }
+        } else if (studiesDateFrom) {
           studiesDateFrom.focus();
         }
-      } else if (studiesDateFrom) {
-        studiesDateFrom.focus();
       }
-    }
-  });
+    });
+  }
 
-  studiesDatePanel.addEventListener('click', event => {
-    event.stopPropagation();
-  });
+  if (studiesDatePanel && studiesDatePanel.dataset.bound !== '1') {
+    studiesDatePanel.dataset.bound = '1';
+    studiesDatePanel.addEventListener('click', event => {
+      event.stopPropagation();
+    });
+  }
 
-  document.addEventListener('click', () => setStudiesDatePanelOpen(false));
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') {
-      setStudiesDatePanelOpen(false);
-    }
-  });
+  const studiesDateReset = $('studiesDateReset');
+
+  if (studiesDateReset && studiesDateReset.dataset.bound !== '1') {
+    studiesDateReset.dataset.bound = '1';
+    studiesDateReset.addEventListener('click', () => {
+      const from = $('studiesDateFrom');
+      const to = $('studiesDateTo');
+
+      if (from) from.value = '';
+      if (to) to.value = '';
+
+      refreshStudiesList({ resetPage: true });
+    });
+  }
+
+  const statsContent = $('statsContent');
+
+  if (statsContent && statsContent.dataset.studiesBound !== '1') {
+    statsContent.dataset.studiesBound = '1';
+    statsContent.addEventListener('click', event => {
+      const target = event.target;
+
+      if (!target) return;
+
+      if (target.id === 'statsShowAllStudies') {
+        statsShowAllStudies = !statsShowAllStudies;
+        resetStudiesPagination();
+        rerenderStatsContent();
+        return;
+      }
+
+      if (target.id === 'studiesLoadMore') {
+        studiesVisibleLimit += STUDIES_PAGE_SIZE;
+        refreshStudiesList();
+      }
+    });
+  }
 }
 
-const studiesDateReset = $('studiesDateReset');
-
-if (studiesDateReset) {
-  studiesDateReset.addEventListener('click', () => {
-    const from = $('studiesDateFrom');
-    const to = $('studiesDateTo');
-
-    if (from) from.value = '';
-    if (to) to.value = '';
-
-    refreshStudiesList({ resetPage: true });
-  });
-}
-
-const studiesContent = $('studiesContent');
-
-if (studiesContent) {
-  studiesContent.addEventListener('click', event => {
-    const target = event.target;
-
-    if (!target || target.id !== 'studiesLoadMore') return;
-
-    studiesVisibleLimit += STUDIES_PAGE_SIZE;
-    refreshStudiesList();
-  });
-}
+document.addEventListener('click', () => setStudiesDatePanelOpen(false));
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    setStudiesDatePanelOpen(false);
+  }
+});
 
 function refreshSubmissionsList(options = {}) {
   if (options.resetPage) {

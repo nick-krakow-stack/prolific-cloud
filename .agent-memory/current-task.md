@@ -1,8 +1,19 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 20:07:24 +02:00
+Last updated: 2026-05-18
 
 ## Active Task Checklist
+
+- [x] Remove the dedicated `Studien` navigation item and `panel-studies`.
+- [x] Add a `Studien` section at the bottom of the `Statistiken` tab.
+- [x] Show only currently active and not-expired studies in that section by default.
+- [x] Add `Alle Studien anzeigen` to expand the full study list inside `Statistiken`.
+- [x] Keep the expand button in place after opening and change its label to `Studien ausblenden`.
+- [x] Reuse the existing study filter, date range, pagination, and lazy-load controls for the expanded list.
+- [x] Make the stats tab fetch fresh study data so active studies update with normal refresh/auto-refresh.
+- [x] Deploy and verify the live navigation and stats-study behavior.
+
+## Previous Active Task Checklist
 
 - [x] Add `monthStats` to the overview API for monthly participation details.
 - [x] Convert `Heute` and `Monatsziel` into side-by-side goal cards.

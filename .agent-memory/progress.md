@@ -118,3 +118,8 @@
 - 2026-05-17 19:33:38 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 19:49:29 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-17 19:49:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 - Browser review fix deployed: removed the dedicated `Studien`
+  navigation item and moved studies to the bottom of `Statistiken`. The section
+  shows active, not-expired studies by default and expands the full study list
+  with existing filters/pagination via `Alle Studien anzeigen`; after expansion
+  the same button stays in place as `Studien ausblenden`.

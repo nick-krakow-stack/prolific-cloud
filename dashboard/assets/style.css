@@ -1389,20 +1389,20 @@ a:not(.icon-btn):hover {
   font-size: 13px;
 }
 .filter-bar input[type="date"] { color-scheme: dark; }
-#panel-studies .filter-bar,
+#panel-stats .studies-filter-bar,
 #panel-submissions .filter-bar {
   gap: 10px;
 }
-#panel-studies .date-filter,
+#panel-stats .studies-filter-bar .date-filter,
 #panel-submissions .date-filter {
   flex-wrap: nowrap;
   position: relative;
 }
-#panel-studies .date-filter input[type="date"],
+#panel-stats .studies-filter-bar .date-filter input[type="date"],
 #panel-submissions .date-filter input[type="date"] {
   width: 126px;
 }
-#panel-studies .filter-reset,
+#panel-stats .studies-filter-bar .filter-reset,
 #panel-submissions .filter-reset {
   white-space: nowrap;
 }
@@ -1496,6 +1496,19 @@ a:not(.icon-btn):hover {
   margin: 12px 0 4px;
   color: var(--text-muted);
   font-size: 12px;
+}
+
+.stats-studies-section {
+  margin-top: 18px;
+}
+.stats-active-studies {
+  margin-bottom: 12px;
+}
+.stats-all-studies {
+  margin-top: 14px;
+}
+.studies-show-all {
+  margin-top: 4px;
 }
 
 .study-card, .submission-card, .event-card {

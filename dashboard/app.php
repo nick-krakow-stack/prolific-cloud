@@ -36,7 +36,6 @@ require_login();
 
 <nav class="tabs">
   <button class="tab is-active" data-tab="overview">Übersicht</button>
-  <button class="tab" data-tab="studies">Studien</button>
   <button class="tab" data-tab="submissions">Teilnahmen</button>
   <button class="tab" data-tab="stats">Statistiken</button>
   <button class="tab" data-tab="system">System</button>
@@ -48,55 +47,6 @@ require_login();
   <!-- ÜBERSICHT -->
   <section class="tab-panel is-active" id="panel-overview">
     <div id="overviewContent" class="loading">Lade…</div>
-  </section>
-
-  <!-- STUDIEN -->
-  <section class="tab-panel" id="panel-studies">
-    <div class="filter-bar">
-      <label>Sortierung:
-        <select id="studiesSort">
-          <option value="firstSeenDesc">Neueste zuerst</option>
-          <option value="firstSeenAsc">Älteste zuerst</option>
-          <option value="rewardDesc">Höchste Vergütung</option>
-        </select>
-      </label>
-
-      <label>
-        <select id="studiesFilter">
-          <option value="all">Alle</option>
-          <option value="active">Aktive</option>
-          <option value="expired">Voll/Abgelaufen</option>
-        </select>
-      </label>
-
-      <label>
-        <select id="studiesPageSize">
-          <option value="50" selected>50</option>
-          <option value="all">Alle</option>
-        </select>
-      </label>
-
-      <fieldset class="date-filter date-filter-popover" aria-label="Zeitraum">
-        <legend>Zeitraum</legend>
-        <button id="studiesDateToggle"
-                class="filter-icon date-filter-toggle"
-                type="button"
-                aria-label="Zeitraum auswaehlen"
-                aria-expanded="false"
-                aria-controls="studiesDatePanel">&#128197;</button>
-        <div id="studiesDatePanel" class="date-filter-panel" hidden>
-        <label>Von
-          <input id="studiesDateFrom" type="date">
-        </label>
-        <label>Bis
-          <input id="studiesDateTo" type="date">
-        </label>
-        <button id="studiesDateReset" class="filter-reset" type="button">Zurücksetzen</button>
-        </div>
-      </fieldset>
-    </div>
-
-    <div id="studiesContent" class="loading">Lade…</div>
   </section>
 
   <!-- TEILNAHMEN -->

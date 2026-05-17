@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 ## Project
 
@@ -199,6 +199,13 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   remain in original currencies.
 - `/api/data.php?type=overview` now exposes `monthStats` for monthly goal-card
   participation details, including `rewardByCurrency` for EUR hourly averages.
+- Browser review fix: the dedicated `Studien` tab was removed. The `Statistiken`
+  tab now ends with a `Studien` section that shows only currently active,
+  not-expired studies by default. `Alle Studien anzeigen` stays in place as
+  `Studien ausblenden` after expansion and toggles the full study list with the
+  existing sort/filter/date/pagination controls. The stats tab fetches fresh
+  study data alongside stats data, so active studies update with normal refresh
+  and auto-refresh.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

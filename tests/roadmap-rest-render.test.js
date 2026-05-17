@@ -122,7 +122,8 @@ const studies = {
       total_places: 12,
       reward_per_hour: 1500,
       first_seen: '2026-05-10 10:00:00',
-      is_active: 1
+      is_active: 0,
+      expired: 1
     }
   ]
 };
@@ -195,7 +196,10 @@ const exactEurSettingsHtml = sandbox.renderSettings({
   }
 });
 const systemHtml = sandbox.renderSystem({ ...settings, ...events });
+stats.studiesData = studies;
 const statsHtml = sandbox.renderStats(stats);
+const studiesFilterHtml = sandbox.renderStudiesFilterBar ? sandbox.renderStudiesFilterBar() : '';
+const expandedStatsStudiesHtml = sandbox.renderStatsStudiesSection ? sandbox.renderStatsStudiesSection(studies, true) : '';
 const accountHtml = sandbox.renderAccount({
   ok: true,
   balance: {
@@ -292,6 +296,11 @@ const checks = [
   ['renders monthly report hourly in EUR with separate study and work-hour rows', statsHtml.includes('<span class="key">Stundenlohn</span>') && statsHtml.includes('<span class="value">€16,99/h</span>') && /<span class="key">Stundenlohn<\/span>[\s\S]*<span class="key">Studien<\/span>[\s\S]*<span class="value">14 Studien<\/span>[\s\S]*<span class="key">Arbeitszeit<\/span>[\s\S]*<span class="value">3 Std 30 Min<\/span>/.test(statsHtml) && !statsHtml.includes('£14,40/h &middot; 14 Studien')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
   ['renders income history in stats tab', statsHtml.includes('<h3>Einnahmen-Verlauf</h3>') && statsHtml.includes('class="daily-chart"') && statsHtml.includes('class="daily-bar"')],
+  ['moves studies into stats tab', !appShell.includes('data-tab="studies"') && !appShell.includes('id="panel-studies"') && statsHtml.includes('<h3>Studien</h3>')],
+  ['stats studies default shows only active studies', statsHtml.includes('Quality study') && !statsHtml.includes('Older study') && statsHtml.includes('Alle Studien anzeigen') && !statsHtml.includes('id="studiesSort"')],
+  ['expanded stats studies keeps the toggle button before filters', expandedStatsStudiesHtml.includes('Studien ausblenden') && expandedStatsStudiesHtml.indexOf('Studien ausblenden') < expandedStatsStudiesHtml.indexOf('id="studiesSort"')],
+  ['stats studies toggle can collapse the expanded list', code.includes("target.id === 'statsShowAllStudies'") && code.includes('statsShowAllStudies = !statsShowAllStudies;')],
+  ['stats fetches studies when loading statistics', /if \(tab === 'stats'\)[\s\S]*fetchData\('studies'\)/.test(code) && code.includes('data.studiesData = studiesData;')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && settingsHtml.includes('Monatsziel')],
   ['renders settings money controls in EUR', settingsHtml.includes('settingsDailyGoal') && settingsHtml.includes('€') && settingsHtml.includes('5.90') && !settingsHtml.includes('setting-prefix">£')],
   ['preserves exact EUR settings values after reload', /id="settingsOkHourly"[\s\S]*value="10\.00"/.test(exactEurSettingsHtml) && /id="settingsDailyGoal"[\s\S]*value="30\.00"/.test(exactEurSettingsHtml)],
@@ -307,9 +316,9 @@ const checks = [
   ['settings no longer requires manual submit', !settingsHtml.includes('type="submit"')],
   ['studies panel has date range controls', typeof sandbox.studyInDateRange === 'function' && sandbox.studyInDateRange(studies.studies[0], '2026-05-15', '2026-05-18') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-15', '2026-05-18')],
   ['studies date range handles swapped bounds', sandbox.studyInDateRange(studies.studies[0], '2026-05-18', '2026-05-15') && !sandbox.studyInDateRange(studies.studies[1], '2026-05-18', '2026-05-15')],
-  ['studies panel has page-size control', appShell.includes('id="studiesPageSize"') && appShell.includes('value="50"') && appShell.includes('value="all"')],
-  ['studies filter omits filter and page-size labels', !/Filter:\s*[\r\n\s]*<select id="studiesFilter"/.test(appShell) && !/Anzeige:\s*[\r\n\s]*<select id="studiesPageSize"/.test(appShell)],
-  ['studies date filter is compact calendar popover', appShell.includes('id="studiesDateToggle"') && appShell.includes('class="filter-icon date-filter-toggle"') && appShell.includes('aria-controls="studiesDatePanel"') && appShell.includes('id="studiesDatePanel" class="date-filter-panel" hidden') && appShell.indexOf('id="studiesDateToggle"') < appShell.indexOf('id="studiesDatePanel"') && appShell.indexOf('id="studiesDatePanel"') < appShell.indexOf('id="studiesDateFrom"')],
+  ['studies filter controls are rendered inside stats expansion', studiesFilterHtml.includes('id="studiesPageSize"') && studiesFilterHtml.includes('value="50"') && studiesFilterHtml.includes('value="all"')],
+  ['studies filter omits filter and page-size labels', !/Filter:\s*[\r\n\s]*<select id="studiesFilter"/.test(studiesFilterHtml) && !/Anzeige:\s*[\r\n\s]*<select id="studiesPageSize"/.test(studiesFilterHtml)],
+  ['studies date filter is compact calendar popover', studiesFilterHtml.includes('id="studiesDateToggle"') && studiesFilterHtml.includes('class="filter-icon date-filter-toggle"') && studiesFilterHtml.includes('aria-controls="studiesDatePanel"') && studiesFilterHtml.includes('id="studiesDatePanel" class="date-filter-panel" hidden') && studiesFilterHtml.indexOf('id="studiesDateToggle"') < studiesFilterHtml.indexOf('id="studiesDatePanel"') && studiesFilterHtml.indexOf('id="studiesDatePanel"') < studiesFilterHtml.indexOf('id="studiesDateFrom"')],
   ['studies date filter opens native picker from calendar button', code.includes("const studiesDateToggle = $('studiesDateToggle')") && code.includes('studiesDateFrom.showPicker') && code.includes("setAttribute('aria-expanded', 'true')")],
   ['studies default page size is 50 with lazy load control', (studiesHtml.match(/class="study-card"/g) || []).length === 50 && studiesHtml.includes('50 von 55') && studiesHtml.includes('Weitere 5 laden')],
   ['studies page-size helper supports all', typeof sandbox.resolveStudiesPageSize === 'function' && sandbox.resolveStudiesPageSize('all', 55) === 55 && sandbox.resolveStudiesPageSize('50', 55) === 50],
