@@ -22,5 +22,12 @@
   before being rendered in dashboard HTML.
 - 2026-05-17 - Remaining overview roadmap block deployed to All-Inkl webspace
   and verified with server lints, asset checks, HTTP checks, and DB query smoke test.
+- 2026-05-17 - Rest of roadmap implemented: stats/account/system/settings tabs,
+  calendar heatmap, monthly comparison, CSV export, monthly report, study notes,
+  requester analysis, settings, and quality tags.
+- 2026-05-17 - `study_notes` production migration applied and verified.
+- 2026-05-17 - Rest-roadmap runtime files deployed to All-Inkl and verified with
+  php74/php84 lints, authenticated CLI endpoint smoke tests, public auth checks,
+  asset checks, and setup-file absence checks.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

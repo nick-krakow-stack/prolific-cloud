@@ -4,6 +4,7 @@
 // ============================================================
 
 const API_BASE = '/api/data.php';
+const NOTES_API = '/api/notes.php';
 const DASH = '–';
 const WATCHER_ONLINE_MAX_AGE_MIN = 10;
 
@@ -11,6 +12,10 @@ let cachedData = {
   overview: null,
   studies: null,
   submissions: null,
+  stats: null,
+  account: null,
+  system: null,
+  settings: null,
   events: null
 };
 
@@ -571,6 +576,29 @@ async function fetchData(type) {
   const res = await fetch(`${API_BASE}?type=${encodeURIComponent(type)}`, {
     credentials: 'same-origin',
     cache: 'no-store'
+  });
+
+  if (res.status === 401) {
+    window.location.href = '/';
+    return null;
+  }
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+
+async function postJson(url, payload) {
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify(payload)
   });
 
   if (res.status === 401) {
@@ -1505,6 +1533,438 @@ function renderOverview(data) {
   return renderExpandedOverview(data);
 }
 
+// ---- Renderer: Roadmap-Rest ----
+
+function amountWithEur(byCurrency, fxRates) {
+  const eur = convertToEur(byCurrency, fxRates);
+  const suffix = eur == null ? '' : ` <span class="secondary">${fmtEur(eur)}</span>`;
+
+  return `${fmtMulti(byCurrency)}${suffix}`;
+}
+
+function normalizeHeatmap(data) {
+  const raw = parseJsonMaybe(data.heatmap || data.daily || data.dailyStats || []);
+
+  if (!Array.isArray(raw)) return [];
+
+  return raw
+    .map(itemRaw => {
+      const item = asObject(itemRaw);
+
+      return {
+        date: firstDefined(item, ['date', 'day']),
+        earned: readCurrencyMetric(item, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']),
+        pending: readCurrencyMetric(item, ['pending', 'pendingByCurrency', 'pending_by_currency'], ['pending_gbp_minor', 'pendingGbpMinor'])
+      };
+    })
+    .filter(item => item.date);
+}
+
+function renderHeatmap(days, fxRates) {
+  if (!days.length) {
+    return '<div class="loading">Keine Heatmap-Daten.</div>';
+  }
+
+  const maxValue = Math.max(...days.map(day => chartValueMinor(day.earned, fxRates)), 0);
+
+  return `
+    <div class="dashboard-grid">
+      ${days.map(day => {
+        const value = chartValueMinor(day.earned, fxRates);
+        const intensity = maxValue > 0 ? Math.max(8, Math.round((value / maxValue) * 100)) : 0;
+        const date = new Date(day.date);
+        const label = Number.isNaN(date.getTime())
+          ? String(day.date).slice(-2)
+          : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+        const title = `${day.date}: ${fmtMulti(day.earned)}`;
+
+        return `
+          <div class="metric-card" title="${escapeHtml(title)}">
+            <div class="metric-title">${escapeHtml(label)}</div>
+            <div class="metric-value">${fmtMulti(day.earned)}</div>
+            <div class="progress-bar" style="height:6px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:8px;">
+              <div class="progress-fill" style="height:100%;width:${intensity}%;background:var(--primary);"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderStats(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  const fxRates = data.fxRates || data.fx_rates;
+  const comparison = asObject(data.monthlyComparison || data.monthly_comparison);
+  const current = asObject(comparison.current);
+  const previous = asObject(comparison.previous);
+  const delta = asObject(comparison.delta);
+  const requesters = parseJsonMaybe(data.requesterStats || data.requester_stats) || [];
+  const report = asObject(data.monthlyReport || data.monthly_report);
+  const reportHourly = asObject(report.hourlyRate || report.hourly_rate);
+  const reportStatusCounts = normalizeStatusCounts(report.statusCounts || report.status_counts, {});
+
+  const requesterRows = Array.isArray(requesters) && requesters.length
+    ? requesters.slice(0, 10).map(itemRaw => {
+        const item = asObject(itemRaw);
+        const name = firstDefined(item, ['requester', 'requesterName', 'requester_name', 'name']) || DASH;
+        const total = readCurrencyMetric(item, ['totalReward', 'total_reward', 'earned', 'reward'], ['total_reward_gbp_minor', 'totalRewardGbpMinor']);
+        const hourly = readCurrencyMetric(item, ['averageHourlyRate', 'average_hourly_rate', 'hourlyRate', 'hourly_rate'], ['average_hourly_gbp_minor', 'averageHourlyGbpMinor']);
+
+        return `
+          <div class="status-row">
+            <span class="key">${escapeHtml(name)}</span>
+            <span class="value">${fmtCount(firstNumber(item, ['submissionsCount', 'submissions_count', 'count']))} &middot; ${fmtMulti(total)} &middot; ${fmtMetricHourly(hourly, 'GBP')} &middot; ${fmtPercent(firstNumeric(item, ['approvalRate', 'approval_rate']))}</span>
+          </div>
+        `;
+      }).join('')
+    : '<div class="loading">Keine Requester-Daten.</div>';
+
+  const statusRows = Object.entries(reportStatusCounts)
+    .map(([status, count]) => `
+      <div class="status-row">
+        <span class="key">${renderStatusTag(status)}</span>
+        <span class="value">${fmtCount(count)}</span>
+      </div>
+    `)
+    .join('');
+
+  return `
+    <div class="status-box">
+      <h3>Kalender-Heatmap</h3>
+      ${renderHeatmap(normalizeHeatmap(data), fxRates)}
+    </div>
+
+    <div class="status-box">
+      <h3>Monatsvergleich</h3>
+      <div class="status-row">
+        <span class="key">Dieser Monat</span>
+        <span class="value">${amountWithEur(readCurrencyMetric(current, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Vormonat</span>
+        <span class="value">${amountWithEur(readCurrencyMetric(previous, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Ver&auml;nderung</span>
+        <span class="value">${fmtMulti(readCurrencyMetric(delta, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']))} / ${fmtPercent(firstNumeric(delta, ['percent', 'percentage', 'earnedPercent', 'earned_percent']))}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Teilnahmen</span>
+        <span class="value">${fmtCount(firstNumber(current, ['submissionsCount', 'submissions_count', 'count']))} / ${fmtCount(firstNumber(previous, ['submissionsCount', 'submissions_count', 'count']))}</span>
+      </div>
+    </div>
+
+    <div class="status-box">
+      <h3>Requester-Analyse</h3>
+      ${requesterRows}
+    </div>
+
+    <div class="status-box">
+      <h3>Monatsbericht</h3>
+      <div class="status-row">
+        <span class="key">Monat</span>
+        <span class="value">${escapeHtml(firstDefined(report, ['month', 'label']) || DASH)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Verdient</span>
+        <span class="value">${amountWithEur(readCurrencyMetric(report, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Pending</span>
+        <span class="value">${amountWithEur(readCurrencyMetric(report, ['pending', 'pendingByCurrency', 'pending_by_currency'], ['pending_gbp_minor', 'pendingGbpMinor']), fxRates)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Teilnahmen</span>
+        <span class="value">${fmtCount(firstNumber(report, ['submissionsCount', 'submissions_count', 'count']))}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Stundenlohn</span>
+        <span class="value">${fmtMetricHourly(readCurrencyMetric(reportHourly, ['byCurrency', 'by_currency', 'hourly'], ['gbp_minor', 'gbpMinor']), 'GBP')} &middot; ${fmtCount(firstNumber(reportHourly, ['sampleCount', 'sample_count', 'count']))} Samples</span>
+      </div>
+      ${statusRows}
+      ${renderTopStudyList(report.topStudies || report.top_studies, 'reward')}
+      <div class="status-row">
+        <span class="key">CSV Export</span>
+        <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
+      </div>
+    </div>
+  `;
+}
+
+function renderAccount(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  const balance = asObject(data.balance);
+  const fxRates = data.fxRates || data.fx_rates;
+  const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
+  const total = {};
+
+  for (const [currency, value] of Object.entries(availableByCurrency)) {
+    total[currency] = (total[currency] || 0) + value;
+  }
+
+  for (const [currency, value] of Object.entries(pendingByCurrency)) {
+    total[currency] = (total[currency] || 0) + value;
+  }
+
+  const fx = readFxRates(fxRates);
+  const fxStatus = fxRateFor(fx.rates, 'EUR')
+    ? `aktiv (${escapeHtml(fx.base)} &rarr; EUR)`
+    : 'nicht verf&uuml;gbar';
+
+  return `
+    <div class="earnings-grid">
+      <div class="earning-tile">
+        <div class="label">Auszahlbar</div>
+        <div class="value">${amountWithEur(availableByCurrency, fxRates)}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">In Pr&uuml;fung</div>
+        <div class="value">${amountWithEur(pendingByCurrency, fxRates)}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">Gesamt offen</div>
+        <div class="value">${amountWithEur(total, fxRates)}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">Letztes Update</div>
+        <div class="value">${fmtTimeAgo(balance.fetchedAt || balance.fetched_at || data.serverTime)}</div>
+      </div>
+    </div>
+
+    <div class="status-box">
+      <h3>W&auml;hrungen</h3>
+      <div class="status-row">
+        <span class="key">FX-Rates</span>
+        <span class="value">${fxStatus}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Serverzeit</span>
+        <span class="value">${fmtDateTime(data.serverTime)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">CSV Export</span>
+        <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
+      </div>
+    </div>
+  `;
+}
+
+function renderSystem(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  const system = asObject(data.system || data);
+  const dbCounts = asObject(system.dbCounts || system.db_counts);
+  const lastSync = asObject(system.lastSync || system.last_sync || system.lastSyncLog || system.last_sync_log);
+  const lastError = asObject(system.lastError || system.last_error);
+  const fields = [
+    ['API', firstDefined(system, ['api', 'status']) || (data.ok ? 'ok' : DASH)],
+    ['Letzter Sync', fmtDateTime(firstDefined(system, ['lastSyncAt', 'last_sync_at']) || firstDefined(lastSync, ['timestamp', 'created_at', 'synced_at']))],
+    ['Letzter erfolgreicher Sync', fmtDateTime(firstDefined(system, ['lastSuccessfulSyncAt', 'last_successful_sync_at']))],
+    ['Letzter Fehler', firstDefined(lastError, ['message', 'error', 'detail']) || firstDefined(system, ['lastErrorMessage', 'last_error_message']) || 'keiner'],
+    ['Cron', firstDefined(system, ['cron', 'cronStatus', 'cron_status']) || DASH],
+    ['Studien in DB', firstNumber(dbCounts, ['studies', 'study_count', 'studyCount'])],
+    ['Teilnahmen in DB', firstNumber(dbCounts, ['submissions', 'submission_count', 'submissionCount'])],
+    ['Events in DB', firstNumber(dbCounts, ['events', 'event_count', 'eventCount'])],
+    ['Serverzeit', fmtDateTime(firstDefined(system, ['serverTime', 'server_time']) || data.serverTime)]
+  ];
+
+  return `
+    <div class="status-box">
+      <h3>Systemstatus</h3>
+      ${fields.map(([label, value]) => `
+        <div class="status-row">
+          <span class="key">${escapeHtml(label)}</span>
+          <span class="value">${escapeHtml(value == null ? DASH : value)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function moneyMinorToInput(minor) {
+  const numeric = Number(minor);
+
+  if (!Number.isFinite(numeric)) return '';
+
+  return (numeric / 100).toFixed(2);
+}
+
+function inputToMinor(value) {
+  const numeric = Number(String(value || '').replace(',', '.'));
+
+  return Number.isFinite(numeric) ? Math.round(numeric * 100) : null;
+}
+
+function renderSettings(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  const settings = asObject(data.settings);
+  const goals = asObject(settings.goals);
+  const thresholds = asObject(settings.thresholds);
+
+  return `
+    <form id="settingsForm" class="status-box">
+      <h3>Einstellungen</h3>
+      <div class="status-row">
+        <label class="key" for="settingsDailyGoal">Tagesziel</label>
+        <span class="value"><input id="settingsDailyGoal" name="daily_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(goals.daily_gbp_minor))}"></span>
+      </div>
+      <div class="status-row">
+        <label class="key" for="settingsMonthlyGoal">Monatsziel</label>
+        <span class="value"><input id="settingsMonthlyGoal" name="monthly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(goals.monthly_gbp_minor))}"></span>
+      </div>
+      <div class="status-row">
+        <label class="key" for="settingsGreatHourly">Sehr guter Stundenlohn</label>
+        <span class="value"><input id="settingsGreatHourly" name="great_hourly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(thresholds.great_hourly_gbp_minor))}"></span>
+      </div>
+      <div class="status-row">
+        <label class="key" for="settingsOkHourly">Okay-Stundenlohn</label>
+        <span class="value"><input id="settingsOkHourly" name="ok_hourly_gbp" type="number" min="0" step="0.01" value="${escapeHtml(moneyMinorToInput(thresholds.ok_hourly_gbp_minor))}"></span>
+      </div>
+      <div class="status-row">
+        <span class="key">Speichern</span>
+        <span class="value"><button type="submit">Speichern</button></span>
+      </div>
+      <div id="settingsMessage" class="study-time"></div>
+    </form>
+  `;
+}
+
+function bindSettingsForm() {
+  const form = $('settingsForm');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const message = $('settingsMessage');
+    const payload = {
+      settings: {
+        goals: {
+          daily_gbp_minor: inputToMinor(form.daily_gbp.value),
+          monthly_gbp_minor: inputToMinor(form.monthly_gbp.value)
+        },
+        thresholds: {
+          great_hourly_gbp_minor: inputToMinor(form.great_hourly_gbp.value),
+          ok_hourly_gbp_minor: inputToMinor(form.ok_hourly_gbp.value)
+        }
+      }
+    };
+
+    try {
+      const data = await postJson(`${API_BASE}?type=settings`, payload);
+
+      if (data && data.ok) {
+        cachedData.settings = data;
+        const container = $('settingsContent');
+
+        if (container) {
+          container.innerHTML = renderSettings(data);
+          bindSettingsForm();
+        }
+      } else if (message) {
+        message.textContent = 'Speichern fehlgeschlagen.';
+      }
+    } catch (e) {
+      if (message) {
+        message.textContent = 'Speichern fehlgeschlagen: ' + e.message;
+      }
+    }
+  });
+}
+
+function qualityThresholds() {
+  const settings = asObject(asObject(cachedData.settings).settings);
+  const thresholds = asObject(settings.thresholds);
+
+  return {
+    great: firstNumber(thresholds, ['great_hourly_gbp_minor', 'greatHourlyGbpMinor']) ?? 1200,
+    ok: firstNumber(thresholds, ['ok_hourly_gbp_minor', 'okHourlyGbpMinor']) ?? 800
+  };
+}
+
+function renderStudyQualityTag(study) {
+  const hourly = Number(study.reward_per_hour);
+
+  if (!Number.isFinite(hourly)) return '';
+
+  const thresholds = qualityThresholds();
+
+  if (hourly > thresholds.great) {
+    return '<span class="tag tag-active">Sehr gut</span>';
+  }
+
+  if (hourly >= thresholds.ok) {
+    return '<span class="tag tag-expired">Okay</span>';
+  }
+
+  return '<span class="tag tag-inactive">Niedrig</span>';
+}
+
+function renderStudyNotes(study) {
+  const notes = Array.isArray(study.notes) ? study.notes : [];
+  const latest = notes.length ? asObject(notes[0]) : {};
+  const note = firstDefined(latest, ['note', 'text', 'body']) || '';
+  const noteId = firstDefined(latest, ['id', 'note_id']);
+  const updatedAt = firstDefined(latest, ['updated_at', 'updatedAt']);
+  const studyId = study.id || study.study_id || '';
+
+  return `
+    <div class="study-notes">
+      ${note ? `<div class="study-time">Notiz: ${escapeHtml(note)}${updatedAt ? ` &middot; ${fmtTimestamp(updatedAt)}` : ''}</div>` : ''}
+      <textarea data-study-note="${escapeHtml(studyId)}" data-note-id="${escapeHtml(noteId || '')}" rows="2">${escapeHtml(note)}</textarea>
+      <button type="button" data-save-study-note="${escapeHtml(studyId)}">Notiz speichern</button>
+    </div>
+  `;
+}
+
+function bindStudyNoteControls() {
+  document.querySelectorAll('[data-save-study-note]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const studyId = button.getAttribute('data-save-study-note');
+      let textarea = null;
+
+      document.querySelectorAll('[data-study-note]').forEach(candidate => {
+        if (candidate.getAttribute('data-study-note') === studyId) {
+          textarea = candidate;
+        }
+      });
+
+      if (!textarea) return;
+
+      const original = button.textContent;
+      button.textContent = 'Speichere...';
+
+      try {
+        await postJson(NOTES_API, {
+          study_id: studyId,
+          note_id: textarea.getAttribute('data-note-id') || null,
+          note: textarea.value
+        });
+        button.textContent = 'Gespeichert';
+      } catch (e) {
+        button.textContent = 'Nicht gespeichert';
+      }
+
+      setTimeout(() => {
+        button.textContent = original;
+      }, 1800);
+    });
+  });
+}
+
 // ---- Renderer: Studien ----
 
 function renderStudies(data) {
@@ -1560,6 +2020,12 @@ function renderStudies(data) {
       tags.push(`<span class="tag tag-times">${escapeHtml(s.times_notified)}× gesehen</span>`);
     }
 
+    const qualityTag = renderStudyQualityTag(s);
+
+    if (qualityTag) {
+      tags.push(qualityTag);
+    }
+
     const meta = [];
 
     if (s.reward_minor != null) {
@@ -1590,6 +2056,7 @@ function renderStudies(data) {
         <div class="meta">${meta.join(' · ')}</div>
         <div class="study-time">🕒 ${fmtTimestamp(s.first_seen)}</div>
         <div class="tags">${tags.join('')}</div>
+        ${renderStudyNotes(s)}
       </div>
     `;
   }).join('');
@@ -1605,10 +2072,19 @@ function renderSubmissions(data) {
   const subs = data.submissions || [];
 
   if (subs.length === 0) {
-    return '<div class="loading">Keine Teilnahmen.</div>';
+    return `
+      <div class="status-box">
+        <h3>Export</h3>
+        <div class="status-row">
+          <span class="key">CSV Export</span>
+          <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
+        </div>
+      </div>
+      <div class="loading">Keine Teilnahmen.</div>
+    `;
   }
 
-  return subs.map(s => {
+  const rows = subs.map(s => {
     const statusKey = (s.status || '')
       .replace(/[\s-]/g, '')
       .substring(0, 8)
@@ -1634,6 +2110,17 @@ function renderSubmissions(data) {
       </div>
     `;
   }).join('');
+
+  return `
+    <div class="status-box">
+      <h3>Export</h3>
+      <div class="status-row">
+        <span class="key">CSV Export</span>
+        <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
+      </div>
+    </div>
+    ${rows}
+  `;
 }
 
 // ---- Renderer: Events ----
@@ -1672,6 +2159,17 @@ async function loadTab(tab) {
 
   if (!container) return;
 
+  const renderers = {
+    overview: renderOverview,
+    studies: renderStudies,
+    submissions: renderSubmissions,
+    stats: renderStats,
+    account: renderAccount,
+    system: renderSystem,
+    settings: renderSettings,
+    events: renderEvents
+  };
+
   try {
     const data = await fetchData(tab);
 
@@ -1679,21 +2177,21 @@ async function loadTab(tab) {
 
     cachedData[tab] = data;
 
-    let html = '';
+    const renderer = renderers[tab];
+    const html = renderer ? renderer(data) : '<div class="error">Unbekannter Tab.</div>';
 
     if (tab === 'overview') {
-      html = renderOverview(data);
       updateSyncIndicator(data.lastSyncAt);
-    } else if (tab === 'studies') {
-      html = renderStudies(data);
-    } else if (tab === 'submissions') {
-      html = renderSubmissions(data);
-    } else if (tab === 'events') {
-      html = renderEvents(data);
     }
 
     container.innerHTML = html;
     container.classList.remove('loading');
+
+    if (tab === 'settings') {
+      bindSettingsForm();
+    } else if (tab === 'studies') {
+      bindStudyNoteControls();
+    }
   } catch (e) {
     container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
     container.classList.remove('loading');
@@ -1743,6 +2241,7 @@ if (refreshBtn) {
 
       if (studiesContent) {
         studiesContent.innerHTML = renderStudies(cachedData.studies);
+        bindStudyNoteControls();
       }
     }
   });

@@ -604,6 +604,348 @@ body { font-size: 14px; line-height: 1.5; }
   }
 }
 
+/* ---- Rest-Roadmap-Komponenten ---- */
+.report-card,
+.report-section {
+  min-width: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.report-card {
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.report-section {
+  padding: 12px;
+}
+
+.report-card > *,
+.report-section > * {
+  min-width: 0;
+}
+
+.report-actions,
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.report-actions {
+  justify-content: flex-start;
+}
+
+.heatmap {
+  min-width: 0;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  min-width: 0;
+  margin-top: 12px;
+}
+
+.heatmap-day {
+  display: grid;
+  align-content: space-between;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 58%, var(--bg-card));
+}
+
+.heatmap-day.is-empty {
+  opacity: 0.45;
+  background: transparent;
+}
+
+.heatmap-day.level-0 { background: color-mix(in srgb, var(--bg) 70%, var(--bg-card)); }
+.heatmap-day.level-1 { background: color-mix(in srgb, var(--success-bg) 34%, var(--bg-card)); }
+.heatmap-day.level-2 { background: color-mix(in srgb, var(--success-bg) 58%, var(--bg-card)); }
+.heatmap-day.level-3 { background: color-mix(in srgb, var(--success) 18%, var(--bg-card)); }
+.heatmap-day.level-4 { background: color-mix(in srgb, var(--success) 30%, var(--bg-card)); }
+
+.heatmap-date,
+.heatmap-value {
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.heatmap-date {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.heatmap-value {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 750;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.monthly-comparison,
+.comparison-grid {
+  min-width: 0;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.comparison-item {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 48%, var(--bg-card));
+}
+
+.comparison-item .label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.comparison-item .value {
+  display: block;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.requester-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requester-item {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.requester-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.requester-name {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requester-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.requester-meta > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+
+.settings-form input,
+.settings-form select,
+.settings-form textarea,
+.study-note textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  font: inherit;
+}
+
+.settings-form input:focus,
+.settings-form select:focus,
+.settings-form textarea:focus,
+.study-note textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.settings-form textarea,
+.study-note textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.inline-save-status {
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.study-note {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 10px;
+}
+
+.study-note button,
+.settings-form button,
+.report-actions button,
+.export-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  max-width: 100%;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.study-note button:hover,
+.settings-form button:hover,
+.report-actions button:hover,
+.export-link:hover {
+  background: var(--bg);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  color: var(--primary);
+}
+
+.note-preview {
+  min-width: 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 55%, var(--bg-card));
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.account-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  min-width: 0;
+  margin-top: 12px;
+}
+
+.fx-rate-note {
+  min-width: 0;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 520px) {
+  .comparison-grid,
+  .form-grid,
+  .account-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 760px) {
+  .comparison-grid,
+  .account-detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .heatmap-grid {
+    gap: 4px;
+  }
+
+  .heatmap-day {
+    min-height: 42px;
+    padding: 5px;
+  }
+
+  .heatmap-value {
+    font-size: 10px;
+  }
+
+  .report-actions,
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .study-note button,
+  .settings-form button,
+  .report-actions button,
+  .export-link {
+    width: 100%;
+  }
+}
+
 /* ---- Studien-Liste ---- */
 .filter-bar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .filter-bar label { font-size: 12px; color: var(--text-muted); display: flex;
@@ -629,6 +971,9 @@ body { font-size: 14px; line-height: 1.5; }
 .tag-expired  { background: var(--warn-bg); color: var(--warn); }
 .tag-inactive { background: var(--border); color: var(--text-muted); }
 .tag-times    { background: var(--border); color: var(--text-muted); }
+.tag-good     { background: var(--success-bg); color: var(--success); }
+.tag-ok       { background: var(--info-bg); color: var(--info); }
+.tag-low      { background: var(--danger-bg); color: var(--danger); }
 
 .study-card a.open-link { float: right; color: var(--primary); text-decoration: none;
                           font-size: 16px; padding: 2px 6px; }

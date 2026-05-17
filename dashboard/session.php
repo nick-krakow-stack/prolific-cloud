@@ -50,7 +50,7 @@ function require_login(): void {
         return;
     }
 
-    if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) {
+    if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([

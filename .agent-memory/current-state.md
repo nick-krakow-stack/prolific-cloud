@@ -128,6 +128,16 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - A final read-only review found one P2 hardening issue; `fmtAmount()` now
   sanitizes unknown currency codes before rendering, covered by the overview
   render contract test.
+- The remaining roadmap items are implemented and deployed: stats/account/system/settings
+  tabs, calendar heatmap, monthly comparison, CSV export, monthly report,
+  study notes, requester analysis, settings for goals/quality thresholds, and
+  study quality tags.
+- `study_notes` was migrated on production with
+  `migrations/2026-05-17-create-study-notes.sql`; `install.php` includes the
+  table for future reinstall backup, but setup and migration files are still not
+  uploaded by normal deploys.
+- New session write endpoints are hardened with `X-Requested-With`/same-origin
+  checks, and CSV export neutralizes spreadsheet formula prefixes.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

@@ -12,7 +12,9 @@ red when the Watcher appears inactive. The overview no longer shows the old
 below the first four earnings tiles. The remaining overview roadmap block is
 implemented and deployed: efficiency, top studies, daily chart, system health,
 and EUR equivalents from the `prolific-watcher` Frankfurter.app `fxRates`
-structure. The production webroot is
+structure. The rest of the roadmap is also implemented and deployed: stats,
+account, system, settings, heatmap, monthly comparison, CSV export, monthly
+report, study notes, requester analysis, and quality tags. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -28,13 +30,20 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ~~~text
  M .agent-memory/current-state.md
  M .agent-memory/current-task.md
- M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/_common.php
  M api/data.php
+ M dashboard/app.php
  M dashboard/assets/app.js
  M dashboard/assets/style.css
-?? tests/
+ M dashboard/session.php
+ M install.php
+ M scripts/deploy-webspace.ps1
+?? api/export.php
+?? api/notes.php
+?? migrations/
+?? tests/roadmap-rest-render.test.js
 ~~~
 
 ## Current State Summary

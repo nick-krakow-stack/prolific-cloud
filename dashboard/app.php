@@ -34,6 +34,10 @@ require_login();
   <button class="tab is-active" data-tab="overview">Übersicht</button>
   <button class="tab" data-tab="studies">Studien</button>
   <button class="tab" data-tab="submissions">Teilnahmen</button>
+  <button class="tab" data-tab="stats">Statistiken</button>
+  <button class="tab" data-tab="account">Konto</button>
+  <button class="tab" data-tab="system">System</button>
+  <button class="tab" data-tab="settings">Einstellungen</button>
   <button class="tab" data-tab="events">Log</button>
 </nav>
 
@@ -70,6 +74,26 @@ require_login();
   <!-- TEILNAHMEN -->
   <section class="tab-panel" id="panel-submissions">
     <div id="submissionsContent" class="loading">Lade…</div>
+  </section>
+
+  <!-- STATISTIKEN -->
+  <section class="tab-panel" id="panel-stats">
+    <div id="statsContent" class="loading">Lade…</div>
+  </section>
+
+  <!-- KONTO -->
+  <section class="tab-panel" id="panel-account">
+    <div id="accountContent" class="loading">Lade…</div>
+  </section>
+
+  <!-- SYSTEM -->
+  <section class="tab-panel" id="panel-system">
+    <div id="systemContent" class="loading">Lade…</div>
+  </section>
+
+  <!-- EINSTELLUNGEN -->
+  <section class="tab-panel" id="panel-settings">
+    <div id="settingsContent" class="loading">Lade…</div>
   </section>
 
   <!-- LOG -->

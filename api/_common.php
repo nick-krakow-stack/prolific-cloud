@@ -62,7 +62,7 @@ function safe_equals(string $a, string $b): bool {
 function require_api_key(): void {
     global $config;
     $expected = $config['api_key'] ?? '';
-    if (empty($expected) || str_contains($expected, 'HIER_')) {
+    if (empty($expected) || strpos($expected, 'HIER_') !== false) {
         json_error('API-Key nicht konfiguriert.', 500);
     }
 
@@ -76,6 +76,34 @@ function require_api_key(): void {
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '?',
         ]);
         json_error('Ungültiger API-Key.', 401);
+    }
+}
+
+/**
+ * Minimaler CSRF-Schutz fuer sessionbasierte Dashboard-Schreibrequests.
+ * Same-Origin-Fetches senden den X-Requested-With Header aus dem Frontend.
+ */
+function require_dashboard_write_request(): void {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if (!in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+        return;
+    }
+
+    $requestedWith = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    if ($requestedWith !== 'XMLHttpRequest') {
+        json_error('Ungueltiger Schreibrequest.', 403);
+    }
+
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $header) {
+        if (empty($_SERVER[$header])) {
+            continue;
+        }
+
+        $requestHost = parse_url($_SERVER[$header], PHP_URL_HOST);
+        if (!is_string($requestHost) || strcasecmp($requestHost, $host) !== 0) {
+            json_error('Ungueltige Request-Herkunft.', 403);
+        }
     }
 }
 

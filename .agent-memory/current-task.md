@@ -4,16 +4,15 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
-- [x] Move Prolific account values into overview tiles.
-- [x] Deploy account tile adjustment to production.
-- [x] Verify production after deployment.
-- [x] Add render contract test for remaining overview roadmap block.
-- [x] Extend overview backend with efficiency, top studies, daily stats, and system health.
-- [x] Extend overview frontend with EUR equivalents, efficiency, top studies, daily chart, and system health.
-- [x] Add styling for top studies, daily bars, health grid, and EUR sublines.
-- [x] Deploy remaining overview roadmap block to production.
-- [x] Verify production after full overview deployment.
-- [ ] Ask owner to visually verify dashboard after login.
+- [x] Add failing render contract for remaining roadmap UI.
+- [x] Add backend stats, account, system, and settings endpoints.
+- [x] Add CSV export and study notes API.
+- [x] Add study notes schema to install backup and live migration.
+- [x] Add stats/account/system/settings tabs and renderers.
+- [x] Add heatmap/monthly report/requester/settings/note styling.
+- [x] Deploy completed roadmap block to production.
+- [x] Verify production after completed roadmap deployment.
+- [ ] Ask owner to visually verify full roadmap implementation after login.
 
 ## Completed Task Steps
 

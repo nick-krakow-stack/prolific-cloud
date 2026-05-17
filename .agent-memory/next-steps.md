@@ -4,9 +4,9 @@ Last updated: 2026-05-17
 
 ## Immediate
 
-- Owner should log in at `https://prolific.nickkrakow.de/` and visually verify the overview cards with real data.
-- After visual verification, collect review notes as a batch before starting the
-  next implementation block.
+- Owner should log in at `https://prolific.nickkrakow.de/` and do a full
+  browser review across all tabs with real data.
+- Collect review notes as a batch before starting the next fix pass.
 
 ## Phase 1 + Phase 2 Work Split
 
@@ -40,9 +40,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps
 
 ## Backlog
 
-- Calendar heatmap.
-- Monthly comparison.
-- CSV export and monthly report after the dashboard foundation is stable.
-- Personal study notes.
-- Requester analysis.
-- Settings page for goals and thresholds.
+- Review fixes from owner feedback.
+- Optional hardening: stronger CSRF token, if the private dashboard later gets
+  broader exposure.
+- Optional polish: split large `dashboard/assets/app.js` after the review pass.
+- Optional future features beyond the current roadmap.
