@@ -157,6 +157,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   but renders them in German display format such as `Mai 2026`.
 - Browser review fix: study notes are no longer part of the dashboard UI or
   runtime API.
+- Browser review fix: study cards render reward, duration, places, hourly rate,
+  and seen time as responsive detail tiles instead of a compact text line.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

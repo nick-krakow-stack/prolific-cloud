@@ -2,6 +2,9 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: Study list rows should use small detail
+  tiles/cards instead of one compact text line for reward, duration, places,
+  hourly rate, and seen time.
 - 2026-05-17 - Browser feedback: Study notes are not needed; remove note
   fields/buttons from study cards and remove the notes runtime path.
 - 2026-05-17 - Browser feedback: Month values in the monthly report should be

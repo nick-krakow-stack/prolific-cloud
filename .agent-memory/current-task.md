@@ -4,6 +4,8 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Replace compact study meta line with responsive detail tiles.
+- [x] Deploy study detail tile review fix to production and verify runtime files.
 - [x] Remove study note fields and save buttons from study cards.
 - [x] Remove notes API from runtime deploy and production webspace.
 - [x] Deploy study-notes removal and verify runtime files.

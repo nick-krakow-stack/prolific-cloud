@@ -31,7 +31,10 @@ monthly report is implemented and deployed: month labels render in German
 format such as `Mai 2026` while API values stay machine-readable. Browser
 review fix for study notes is implemented and deployed: study cards no longer
 render notes, `api/notes.php` is removed from runtime deploys and the server,
-and the existing DB table was left untouched. The production webroot is
+and the existing DB table was left untouched. Browser review fix for study
+cards is implemented and deployed: reward, duration, places, hourly rate, and
+seen time now render as responsive detail tiles instead of one compact meta
+line. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -40,7 +43,7 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last product commit before this snapshot: a60056f Remove study notes feature
+- Last product commit before this snapshot: 671d3f7 Render study details as tiles
 
 ## Working Tree
 

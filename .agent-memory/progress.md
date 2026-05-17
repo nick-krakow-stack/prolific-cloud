@@ -1,5 +1,8 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: study cards now render reward,
+  duration, places, hourly rate, and seen time as responsive detail tiles
+  instead of a compact dot-separated meta line.
 - 2026-05-17 - Browser review fix deployed: study notes were removed from the
   dashboard runtime. Study cards no longer render note fields/buttons, the
   notes API is no longer deployed, and the old server `api/notes.php` was
