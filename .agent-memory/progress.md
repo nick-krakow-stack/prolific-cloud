@@ -12,5 +12,6 @@
 - 2026-05-17 - Roadmap Phase 1 + Phase 2 overview metrics implemented.
 - 2026-05-17 - Runtime files deployed to All-Inkl webspace.
 - 2026-05-17 - Server PHP lint and live unauthenticated HTTP checks passed after deploy.
+- 2026-05-17 - Topbar sync lamp changed to green for fresh Watcher sync and red otherwise.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

@@ -4,7 +4,6 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
-- [ ] Commit and push roadmap Phase 1 + Phase 2 product changes.
 - [ ] Ask owner to visually verify dashboard after login.
 
 ## Completed Task Steps
@@ -26,3 +25,5 @@ Last updated: 2026-05-17
 - [x] Runtime files deployed to production webspace.
 - [x] Server PHP lint passed after deploy.
 - [x] Live unauthenticated HTTP checks passed.
+- [x] Sync lamp changed to green for fresh Watcher sync and red otherwise.
+- [x] Sync lamp change deployed and verified.

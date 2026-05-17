@@ -87,6 +87,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - `dashboard/assets/app.js` renders account, goals, forecast, today, pending, and status cards.
 - `dashboard/assets/style.css` adds overview card/progress/status UI components.
 - `config.example.php` documents optional `goals` defaults; live `config.php` was not changed.
+- The topbar sync lamp is green only when the last Watcher sync is fresh
+  (10 minutes or newer) and red when no fresh sync is available.
 
 ## Operating Model
 
@@ -105,6 +107,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - `node` availability should be checked before JS syntax verification.
 - Server PHP lint passed after Phase 1 + Phase 2 deploy.
 - Live HTTP checks after deploy: `/` returns login page, unauthenticated `/api/data.php?type=overview` returns `401`.
+- Sync lamp change verified with `node --check`, a JS state test, deploy, server
+  PHP lint, and live unauthenticated HTTP checks.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

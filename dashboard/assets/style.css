@@ -96,7 +96,7 @@ body { font-size: 14px; line-height: 1.5; }
                   background: var(--text-muted); transition: background 0.2s; }
 .sync-indicator.is-fresh { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 .sync-indicator.is-stale { background: #f59e0b; }
-.sync-indicator.is-old { background: #ef4444; }
+.sync-indicator.is-old { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
 
 /* ---- Tabs ---- */
 .tabs { background: var(--bg-card); border-bottom: 1px solid var(--border);

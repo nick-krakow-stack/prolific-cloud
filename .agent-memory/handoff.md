@@ -6,7 +6,9 @@ Update mode: Stop
 ## Latest Notes
 
 Roadmap Phase 1 + Phase 2 has been implemented and deployed to the All-Inkl
-webspace. The production webroot is `/www/htdocs/w021974e/prolific.nickkrakow.de`.
+webspace. The topbar sync lamp now shows green only for a fresh Watcher sync and
+red when the Watcher appears inactive. The production webroot is
+`/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
 browser, and review feedback are persisted in .agent-memory/feedback.md.
@@ -14,7 +16,7 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 5484681 Clarify setup file deployment policy
+- Last commit: 0672716 Implement overview dashboard metrics
 
 ## Working Tree
 
@@ -22,10 +24,7 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
  M .agent-memory/current-state.md
  M .agent-memory/current-task.md
  M .agent-memory/handoff.md
- M .agent-memory/next-steps.md
  M .agent-memory/progress.md
- M api/data.php
- M config.example.php
  M dashboard/assets/app.js
  M dashboard/assets/style.css
 ~~~

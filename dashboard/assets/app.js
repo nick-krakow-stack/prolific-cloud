@@ -5,6 +5,7 @@
 
 const API_BASE = '/api/data.php';
 const DASH = '–';
+const WATCHER_ONLINE_MAX_AGE_MIN = 10;
 
 let cachedData = {
   overview: null,
@@ -538,28 +539,32 @@ function updateSyncIndicator(lastSyncAt) {
   el.classList.remove('is-fresh', 'is-stale', 'is-old');
 
   if (!lastSyncAt) {
-    el.title = 'Noch kein Sync';
+    el.classList.add('is-old');
+    el.title = 'Prolific Watcher läuft nicht: noch kein Sync';
+    el.setAttribute('aria-label', el.title);
     return;
   }
 
   const lastSyncDate = new Date(lastSyncAt);
 
   if (Number.isNaN(lastSyncDate.getTime())) {
-    el.title = 'Letzter Sync unbekannt';
+    el.classList.add('is-old');
+    el.title = 'Prolific Watcher läuft nicht: letzter Sync unbekannt';
+    el.setAttribute('aria-label', el.title);
     return;
   }
 
   const ageMin = (new Date() - lastSyncDate) / 60000;
 
-  el.title = 'Letzter Sync: ' + fmtTimeAgo(lastSyncAt);
-
-  if (ageMin < 10) {
+  if (ageMin <= WATCHER_ONLINE_MAX_AGE_MIN) {
     el.classList.add('is-fresh');
-  } else if (ageMin < 60) {
-    el.classList.add('is-stale');
+    el.title = 'Prolific Watcher läuft: letzter Sync ' + fmtTimeAgo(lastSyncAt);
   } else {
     el.classList.add('is-old');
+    el.title = 'Prolific Watcher läuft nicht: letzter Sync ' + fmtTimeAgo(lastSyncAt);
   }
+
+  el.setAttribute('aria-label', el.title);
 }
 
 // ---- Overview Helpers ----
