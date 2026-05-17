@@ -1440,7 +1440,7 @@ a:not(.icon-btn):hover {
   gap: 10px;
 }
 @media (min-width: 720px) {
-  .submission-summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .submission-summary-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 .submission-summary-tile,
 .submission-chart-card {
@@ -1484,6 +1484,9 @@ a:not(.icon-btn):hover {
   align-items: center;
   gap: 16px;
   padding: 14px;
+}
+.submission-chart-card.summary-wide {
+  grid-column: span 2;
 }
 .submission-pie {
   position: relative;

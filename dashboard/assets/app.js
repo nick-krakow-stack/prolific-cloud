@@ -2759,12 +2759,14 @@ function renderSubmissionSummary(submissions) {
 
   return `
     <div class="submission-summary-block">
-      <div class="submission-summary-grid">${tiles}</div>
-      <div class="submission-chart-card">
-        <div class="submission-pie" style="${pieStyle}" aria-label="Status-Verteilung der Teilnahmen">
-          <span>${fmtCount(total)}</span>
+      <div class="submission-summary-grid">
+        ${tiles}
+        <div class="submission-chart-card summary-wide">
+          <div class="submission-pie" style="${pieStyle}" aria-label="Status-Verteilung der Teilnahmen">
+            <span>${fmtCount(total)}</span>
+          </div>
+          <div class="submission-pie-legend">${legend}</div>
         </div>
-        <div class="submission-pie-legend">${legend}</div>
       </div>
     </div>
   `;
