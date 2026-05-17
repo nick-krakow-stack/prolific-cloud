@@ -1727,7 +1727,7 @@ function renderExpandedOverview(data) {
       </div>
 
       <div class="status-row">
-        <span class="key">Gesamt pending</span>
+        <span class="key">Offene Summen</span>
         <span class="value">${fmtMulti(pendingStats.total)}</span>
       </div>
 
