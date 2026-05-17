@@ -213,6 +213,24 @@ const submissionsFilterHtml = sandbox.renderSubmissions({
       time_taken_seconds: 480,
       started_at: '2026-05-10 11:00:00',
       completed_at: '2026-05-10 11:08:00'
+    },
+    {
+      study_name: 'Pending study',
+      status: 'AWAITING REVIEW',
+      effective_reward_amount_minor: 300,
+      reward_currency: 'GBP',
+      time_taken_seconds: 300,
+      started_at: '2026-05-16 10:00:00',
+      completed_at: '2026-05-16 10:05:00'
+    },
+    {
+      study_name: 'Screened study',
+      status: 'SCREENED OUT',
+      effective_reward_amount_minor: 100,
+      reward_currency: 'GBP',
+      time_taken_seconds: 120,
+      started_at: '2026-05-15 10:00:00',
+      completed_at: '2026-05-15 10:02:00'
     }
   ]
 });
@@ -243,6 +261,7 @@ const checks = [
   ['submissions panel has matching filter controls and csv icon', appShell.includes('id="submissionsSort"') && appShell.includes('id="submissionsFilter"') && appShell.includes('id="submissionsPageSize"') && appShell.includes('id="submissionsDateFrom"') && appShell.includes('id="submissionsDateTo"') && appShell.includes('class="filter-icon export-icon"')],
   ['submissions date range handles swapped bounds', typeof sandbox.submissionInDateRange === 'function' && sandbox.submissionInDateRange({ completed_at: '2026-05-17 12:10:00' }, '2026-05-18', '2026-05-15') && !sandbox.submissionInDateRange({ completed_at: '2026-05-10 11:08:00' }, '2026-05-18', '2026-05-15')],
   ['submissions render without export status box', !submissionsFilterHtml.includes('<h3>Export</h3>') && !submissionsFilterHtml.includes('CSV Export') && submissionsFilterHtml.includes('Recent approved')],
+  ['submissions render four summary tiles and pie chart', submissionsFilterHtml.includes('class="submission-summary-grid"') && (submissionsFilterHtml.match(/class="submission-summary-tile/g) || []).length === 4 && submissionsFilterHtml.includes('class="submission-pie"') && submissionsFilterHtml.includes('Approved') && submissionsFilterHtml.includes('In Prüfung') && submissionsFilterHtml.includes('Screened Out') && submissionsFilterHtml.includes('Returned / Timed-Out')],
   ['submissions render effective reward amount when present', submissionsHtml.includes('1,86') && !submissionsHtml.includes('0,36')],
   ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
   ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],

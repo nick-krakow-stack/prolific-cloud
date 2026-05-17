@@ -2665,6 +2665,86 @@ function renderSubmissionsPagination(visible, total) {
   `;
 }
 
+function submissionSummaryBuckets(submissions) {
+  const buckets = [
+    { key: 'approved', label: 'Approved', className: 'approved', count: 0, statuses: ['APPROVED'] },
+    { key: 'pending', label: 'In Prüfung', className: 'pending', count: 0, statuses: ['AWAITING REVIEW', 'PENDING'] },
+    { key: 'screened', label: 'Screened Out', className: 'screened', count: 0, statuses: ['SCREENED OUT'] },
+    { key: 'returned', label: 'Returned / Timed-Out', className: 'returned', count: 0, statuses: ['RETURNED', 'REJECTED', 'TIMED OUT', 'TIMEDOUT'] }
+  ];
+
+  for (const submission of submissions) {
+    const status = normalizedSubmissionStatus(submission.status);
+    const bucket = buckets.find(item => item.statuses.includes(status));
+
+    if (bucket) {
+      bucket.count++;
+    }
+  }
+
+  return buckets;
+}
+
+function renderSubmissionSummary(submissions) {
+  const total = submissions.length;
+  const buckets = submissionSummaryBuckets(submissions);
+  let offset = 0;
+  const fallbackColor = 'var(--border)';
+  const colorMap = {
+    approved: 'var(--success)',
+    pending: 'var(--warn)',
+    screened: '#22c55e',
+    returned: 'var(--danger)'
+  };
+
+  const segments = buckets
+    .filter(bucket => bucket.count > 0)
+    .map(bucket => {
+      const start = offset;
+      const end = offset + (bucket.count / total) * 100;
+
+      offset = end;
+
+      return `${colorMap[bucket.key]} ${start}% ${end}%`;
+    });
+
+  const pieStyle = total > 0
+    ? `background: conic-gradient(${segments.join(', ')});`
+    : `background: ${fallbackColor};`;
+
+  const tiles = buckets.map(bucket => {
+    const percent = total > 0 ? (bucket.count / total) * 100 : 0;
+
+    return `
+      <div class="submission-summary-tile ${bucket.className}">
+        <span class="summary-label">${escapeHtml(bucket.label)}</span>
+        <strong>${fmtCount(bucket.count)}</strong>
+        <span class="summary-share">${fmtPercent(percent)}</span>
+      </div>
+    `;
+  }).join('');
+
+  const legend = buckets.map(bucket => `
+    <div class="submission-pie-legend-item ${bucket.className}">
+      <span class="legend-dot"></span>
+      <span>${escapeHtml(bucket.label)}</span>
+      <strong>${fmtCount(bucket.count)}</strong>
+    </div>
+  `).join('');
+
+  return `
+    <div class="submission-summary-block">
+      <div class="submission-summary-grid">${tiles}</div>
+      <div class="submission-chart-card">
+        <div class="submission-pie" style="${pieStyle}" aria-label="Status-Verteilung der Teilnahmen">
+          <span>${fmtCount(total)}</span>
+        </div>
+        <div class="submission-pie-legend">${legend}</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderSubmissions(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
@@ -2745,7 +2825,7 @@ function renderSubmissions(data) {
     `;
   }).join('');
 
-  return rows + renderSubmissionsPagination(visibleSubs.length, totalCount);
+  return renderSubmissionSummary(subs) + rows + renderSubmissionsPagination(visibleSubs.length, totalCount);
 }
 
 // ---- Renderer: Events ----
