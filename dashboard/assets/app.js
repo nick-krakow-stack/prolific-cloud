@@ -2125,13 +2125,53 @@ function renderSubmissions(data) {
 
 // ---- Renderer: Events ----
 
-function renderEvents(data) {
-  if (!data || !data.ok) {
-    return '<div class="error">Daten konnten nicht geladen werden.</div>';
-  }
+function normalizeSyncRecord(record) {
+  const obj = asObject(record);
 
-  const events = data.events || [];
+  if (!Object.keys(obj).length) return null;
 
+  return {
+    status: firstDefined(obj, ['status', 'state']),
+    type: firstDefined(obj, ['type', 'eventType', 'event_type']),
+    message: firstDefined(obj, ['message', 'label']),
+    timestamp: firstDefined(obj, ['timestamp', 'created_at', 'synced_at', 'at'])
+  };
+}
+
+function syncRecordFromEvent(event) {
+  const obj = asObject(event);
+  const type = String(obj.type || '');
+
+  if (!['sync_ok', 'sync_error'].includes(type)) return null;
+
+  return normalizeSyncRecord({
+    status: type === 'sync_error' ? 'error' : 'ok',
+    type,
+    message: obj.message,
+    timestamp: obj.timestamp
+  });
+}
+
+function syncStatusText(record) {
+  if (!record) return 'Nie';
+
+  const status = String(record.status || '').toLowerCase();
+  const type = String(record.type || '').toLowerCase();
+
+  if (status === 'error' || type === 'sync_error') return 'Fehlgeschlagen';
+  if (status === 'ok' || type === 'sync_ok' || type === 'sync_log') return 'OK';
+
+  return record.message || record.type || DASH;
+}
+
+function renderSyncState(record) {
+  const label = syncStatusText(record);
+  const className = label === 'OK' ? 'ok' : label === 'Fehlgeschlagen' ? 'error' : 'neutral';
+
+  return `<span class="sync-state ${className}">${escapeHtml(label)}</span>`;
+}
+
+function renderEventCards(events) {
   if (events.length === 0) {
     return '<div class="loading">Keine Ereignisse.</div>';
   }
@@ -2146,6 +2186,46 @@ function renderEvents(data) {
       <time>${fmtTimestamp(e.timestamp)}</time>
     </div>
   `).join('');
+}
+
+function renderEvents(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  const events = Array.isArray(data.events) ? data.events : [];
+  const syncStatus = asObject(data.syncStatus || data.sync_status);
+  const syncEvents = events
+    .map(syncRecordFromEvent)
+    .filter(Boolean);
+  const fallbackLastSync = syncEvents[0] || null;
+  const fallbackLastSuccess = syncEvents.find(event => event.type === 'sync_ok') || null;
+  const fallbackLastFailure = syncEvents.find(event => event.type === 'sync_error') || null;
+  const lastSync = normalizeSyncRecord(firstDefined(syncStatus, ['lastSync', 'last_sync'])) || fallbackLastSync;
+  const lastSuccess = normalizeSyncRecord(firstDefined(syncStatus, ['lastSuccess', 'last_success'])) || fallbackLastSuccess;
+  const lastFailure = normalizeSyncRecord(firstDefined(syncStatus, ['lastFailure', 'last_failure'])) || fallbackLastFailure;
+
+  return `
+    <div class="status-box sync-status-card">
+      <h3>Sync-Status</h3>
+      <div class="status-row">
+        <span class="key">Letzter Sync</span>
+        <span class="value">${renderSyncState(lastSync)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Letzter erfolgreicher Sync</span>
+        <span class="value">${lastSuccess ? fmtTimestamp(lastSuccess.timestamp) : 'Nie'}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Letzter Fehlschlag</span>
+        <span class="value">${lastFailure ? fmtTimestamp(lastFailure.timestamp) : 'Nie'}</span>
+      </div>
+    </div>
+    <details class="log-details">
+      <summary>Log</summary>
+      <div class="log-list">${renderEventCards(events)}</div>
+    </details>
+  `;
 }
 
 // ---- Tab-Logic ----

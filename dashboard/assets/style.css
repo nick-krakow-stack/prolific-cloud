@@ -992,3 +992,33 @@ body { font-size: 14px; line-height: 1.5; }
                     text-transform: uppercase; }
 .event-card .message { flex: 1; }
 .event-card time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+.sync-status-card .value { display: flex; justify-content: flex-end; }
+.sync-state {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.sync-state.ok { background: var(--success-bg); color: var(--success); }
+.sync-state.error { background: var(--danger-bg); color: var(--danger); }
+.sync-state.neutral { background: var(--neutral-bg); color: var(--neutral); }
+
+.log-details {
+  background: var(--bg-card); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 16px; overflow: hidden;
+}
+.log-details summary {
+  cursor: pointer; list-style: none; padding: 12px 14px;
+  font-size: 13px; font-weight: 700; color: var(--text);
+  border-bottom: 1px solid transparent;
+}
+.log-details summary::-webkit-details-marker { display: none; }
+.log-details summary::after {
+  content: '+'; float: right; color: var(--text-muted); font-weight: 700;
+}
+.log-details[open] summary {
+  border-bottom-color: var(--border);
+}
+.log-details[open] summary::after { content: '-'; }
+.log-list { padding: 8px; }
+.log-list .event-card:last-child { margin-bottom: 0; }

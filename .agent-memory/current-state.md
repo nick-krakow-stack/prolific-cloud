@@ -138,6 +138,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   uploaded by normal deploys.
 - New session write endpoints are hardened with `X-Requested-With`/same-origin
   checks, and CSV export neutralizes spreadsheet formula prefixes.
+- Browser review fix: the former `Log` tab is now labelled `Sync-Status`.
+  `/api/data.php?type=events` returns a `syncStatus` summary, and the detailed
+  event log is hidden behind a collapsed `Log` disclosure by default.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

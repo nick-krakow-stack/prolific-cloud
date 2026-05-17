@@ -38,7 +38,7 @@ require_login();
   <button class="tab" data-tab="account">Konto</button>
   <button class="tab" data-tab="system">System</button>
   <button class="tab" data-tab="settings">Einstellungen</button>
-  <button class="tab" data-tab="events">Log</button>
+  <button class="tab" data-tab="events">Sync-Status</button>
 </nav>
 
 <main class="container">
@@ -96,7 +96,7 @@ require_login();
     <div id="settingsContent" class="loading">Lade…</div>
   </section>
 
-  <!-- LOG -->
+  <!-- SYNC-STATUS -->
   <section class="tab-panel" id="panel-events">
     <div id="eventsContent" class="loading">Lade…</div>
   </section>

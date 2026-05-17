@@ -62,6 +62,7 @@ try {
 
             json_response([
                 'ok' => true,
+                'syncStatus' => build_sync_status($pdo),
                 'events' => $stmt->fetchAll(),
             ]);
 
@@ -740,6 +741,71 @@ function build_settings_response(): array {
         'ok' => true,
         'settings' => load_dashboard_settings(),
         'serverTime' => date('c'),
+    ];
+}
+
+function build_sync_status(PDO $pdo): array {
+    $lastSync = fetch_sync_event($pdo, ['sync_ok', 'sync_error']);
+    $lastSuccess = fetch_sync_event($pdo, ['sync_ok']);
+    $lastFailure = fetch_sync_event($pdo, ['sync_error']);
+
+    if (!$lastSuccess) {
+        $lastSyncLog = $pdo
+            ->query("SELECT * FROM sync_log ORDER BY timestamp DESC, id DESC LIMIT 1")
+            ->fetch();
+
+        if ($lastSyncLog) {
+            $lastSuccess = [
+                'status' => 'ok',
+                'type' => 'sync_log',
+                'message' => 'Sync abgeschlossen',
+                'timestamp' => $lastSyncLog['timestamp'] ?? null,
+            ];
+        }
+    }
+
+    if (!$lastSync && $lastSuccess) {
+        $lastSync = $lastSuccess;
+    }
+
+    return [
+        'lastSync' => $lastSync,
+        'lastSuccess' => $lastSuccess,
+        'lastFailure' => $lastFailure,
+    ];
+}
+
+function fetch_sync_event(PDO $pdo, array $types): ?array {
+    $types = array_values(array_filter($types, static function ($type): bool {
+        return is_string($type) && $type !== '';
+    }));
+
+    if (empty($types)) {
+        return null;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($types), '?'));
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM events
+        WHERE type IN ($placeholders)
+        ORDER BY timestamp DESC, id DESC
+        LIMIT 1
+    ");
+    $stmt->execute($types);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        return null;
+    }
+
+    $type = (string)($row['type'] ?? '');
+
+    return [
+        'status' => $type === 'sync_error' ? 'error' : 'ok',
+        'type' => $type,
+        'message' => $row['message'] ?? '',
+        'timestamp' => $row['timestamp'] ?? null,
     ];
 }
 

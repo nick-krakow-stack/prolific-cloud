@@ -4,6 +4,9 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Implement browser review: summarize the Log tab as `Sync-Status`.
+- [x] Keep the detailed event log available in a collapsed `Log` disclosure.
+- [x] Deploy Sync-Status review fix to production and verify runtime files.
 - [x] Add failing render contract for remaining roadmap UI.
 - [x] Add backend stats, account, system, and settings endpoints.
 - [x] Add CSV export and study notes API.
@@ -35,5 +38,7 @@ Last updated: 2026-05-17
 - [x] Live unauthenticated HTTP checks passed.
 - [x] Sync lamp changed to green for fresh Watcher sync and red otherwise.
 - [x] Sync lamp change deployed and verified.
+- [x] `Log` tab renamed to `Sync-Status`; it now shows last sync status,
+  last successful sync, last failure, and a collapsed detailed log.
 - [x] Prolific account status box removed from overview.
 - [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

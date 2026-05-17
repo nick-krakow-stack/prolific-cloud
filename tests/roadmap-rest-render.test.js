@@ -91,6 +91,34 @@ const studies = {
   ]
 };
 
+const events = {
+  ok: true,
+  syncStatus: {
+    lastSync: {
+      status: 'ok',
+      type: 'sync_ok',
+      message: 'Sync abgeschlossen',
+      timestamp: '2026-05-17 16:00:00'
+    },
+    lastSuccess: {
+      status: 'ok',
+      type: 'sync_ok',
+      message: 'Sync abgeschlossen',
+      timestamp: '2026-05-17 16:00:00'
+    },
+    lastFailure: null
+  },
+  events: [
+    {
+      type: 'sync_ok',
+      message: 'Sync abgeschlossen',
+      timestamp: '2026-05-17 16:00:00'
+    }
+  ]
+};
+
+const eventsHtml = sandbox.renderEvents(events);
+
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Kalender-Heatmap')],
   ['renders monthly comparison', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsvergleich')],
@@ -98,7 +126,10 @@ const checks = [
   ['renders monthly report', typeof sandbox.renderStats === 'function' && sandbox.renderStats(stats).includes('Monatsbericht')],
   ['renders settings form', typeof sandbox.renderSettings === 'function' && sandbox.renderSettings(settings).includes('Monatsziel')],
   ['renders note control', sandbox.renderStudies(studies).includes('data-study-note')],
-  ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')]
+  ['renders quality tag', sandbox.renderStudies(studies).includes('Sehr gut')],
+  ['renders sync status summary', eventsHtml.includes('Sync-Status') && eventsHtml.includes('Letzter erfolgreicher Sync')],
+  ['renders missing sync failure as never', eventsHtml.includes('Letzter Fehlschlag') && eventsHtml.includes('Nie')],
+  ['renders collapsed log details', eventsHtml.includes('<details class="log-details">') && eventsHtml.includes('<summary>Log</summary>')]
 ];
 
 let failed = 0;
