@@ -4,6 +4,9 @@ Last updated: 2026-05-17
 
 ## Active Task Checklist
 
+- [x] Move Prolific account values into overview tiles.
+- [x] Deploy account tile adjustment to production.
+- [x] Verify production after deployment.
 - [ ] Ask owner to visually verify dashboard after login.
 
 ## Completed Task Steps
@@ -27,3 +30,5 @@ Last updated: 2026-05-17
 - [x] Live unauthenticated HTTP checks passed.
 - [x] Sync lamp changed to green for fresh Watcher sync and red otherwise.
 - [x] Sync lamp change deployed and verified.
+- [x] Prolific account status box removed from overview.
+- [x] `Auszahlbar` and `In Prüfung` rendered as overview tiles below the first four earnings tiles.

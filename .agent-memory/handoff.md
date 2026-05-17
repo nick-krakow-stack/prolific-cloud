@@ -1,13 +1,15 @@
 ﻿# Handoff
 
-Last updated: 2026-05-17 14:14:58 +02:00
-Update mode: Stop
+Last updated: 2026-05-17
+Update mode: Manual
 
 ## Latest Notes
 
 Roadmap Phase 1 + Phase 2 has been implemented and deployed to the All-Inkl
 webspace. The topbar sync lamp now shows green only for a fresh Watcher sync and
-red when the Watcher appears inactive. The production webroot is
+red when the Watcher appears inactive. The overview no longer shows the old
+`Prolific-Konto` status box; `Auszahlbar` and `In Prüfung` now render as tiles
+below the first four earnings tiles. The production webroot is
 `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner,
@@ -16,17 +18,17 @@ browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 0672716 Implement overview dashboard metrics
+- Last product commit before this snapshot: f62e8fb Make watcher status lamp binary
 
 ## Working Tree
 
 ~~~text
  M .agent-memory/current-state.md
  M .agent-memory/current-task.md
+ M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
  M dashboard/assets/app.js
- M dashboard/assets/style.css
 ~~~
 
 ## Current State Summary

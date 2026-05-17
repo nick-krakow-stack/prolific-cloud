@@ -84,11 +84,14 @@ implementation target is Phase 1 + Phase 2:
 Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 
 - `api/data.php` adds `goals`, `forecast`, `pendingStats`, `statusStats`, and `todayStats`.
-- `dashboard/assets/app.js` renders account, goals, forecast, today, pending, and status cards.
+- `dashboard/assets/app.js` renders earnings, two Prolific account tiles
+  (`Auszahlbar`, `In Prüfung`), goals, forecast, today, pending, and status cards.
 - `dashboard/assets/style.css` adds overview card/progress/status UI components.
 - `config.example.php` documents optional `goals` defaults; live `config.php` was not changed.
 - The topbar sync lamp is green only when the last Watcher sync is fresh
   (10 minutes or newer) and red when no fresh sync is available.
+- The old `Prolific-Konto` status box, `Gesamt offen`, and balance update row
+  are no longer shown in the overview.
 
 ## Operating Model
 
@@ -109,6 +112,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Live HTTP checks after deploy: `/` returns login page, unauthenticated `/api/data.php?type=overview` returns `401`.
 - Sync lamp change verified with `node --check`, a JS state test, deploy, server
   PHP lint, and live unauthenticated HTTP checks.
+- Account tile adjustment verified with `node --check`, a JS render-state test,
+  deploy, server PHP lint, and live unauthenticated HTTP checks.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

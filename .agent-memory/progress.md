@@ -13,5 +13,7 @@
 - 2026-05-17 - Runtime files deployed to All-Inkl webspace.
 - 2026-05-17 - Server PHP lint and live unauthenticated HTTP checks passed after deploy.
 - 2026-05-17 - Topbar sync lamp changed to green for fresh Watcher sync and red otherwise.
+- 2026-05-17 - Prolific account overview simplified: `Auszahlbar` and
+  `In Prüfung` now render as overview tiles; the old account status box was removed.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

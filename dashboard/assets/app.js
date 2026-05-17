@@ -181,24 +181,6 @@ function hasCurrencyAmounts(byCurrency) {
   });
 }
 
-function combineCurrencyMaps(...maps) {
-  const result = {};
-
-  for (const mapRaw of maps) {
-    const map = asObject(mapRaw);
-
-    for (const [currency, value] of Object.entries(map)) {
-      const numeric = Number(value);
-
-      if (!Number.isFinite(numeric)) continue;
-
-      result[currency.toUpperCase()] = (result[currency.toUpperCase()] || 0) + Math.round(numeric);
-    }
-  }
-
-  return result;
-}
-
 function fmtDateTime(iso) {
   if (!iso) return DASH;
 
@@ -918,13 +900,6 @@ function renderExpandedOverview(data) {
   const monthEarnedGbp = currencyMinor(month.earned, 'GBP');
   const balance = asObject(data.balance);
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
-  const totalOpenByCurrency = combineCurrencyMaps(availableByCurrency, pendingByCurrency);
-  const balanceFetchedAt =
-    balance.fetchedAt ??
-    balance.fetched_at ??
-    balance.updatedAt ??
-    balance.updated_at ??
-    data.balanceFetchedAt;
   const todayStats = readTodayStats(data, today);
   const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
@@ -973,6 +948,8 @@ function renderExpandedOverview(data) {
   html += tile('Diese Woche', week.earned, week.pending);
   html += tile('Dieser Monat', month.earned, month.pending);
   html += tile('Gesamt', allTime.earned, allTime.pending);
+  html += tile('Auszahlbar', availableByCurrency);
+  html += tile('In Prüfung', pendingByCurrency);
   html += '</div>';
 
   if (Object.keys(lastMonth.earned || {}).length) {
@@ -986,32 +963,6 @@ function renderExpandedOverview(data) {
       </div>
     `;
   }
-
-  html += `
-    <div class="status-box">
-      <h3>Prolific-Konto</h3>
-
-      <div class="status-row">
-        <span class="key">Auszahlbar</span>
-        <span class="value">${fmtMulti(availableByCurrency)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">In Prüfung</span>
-        <span class="value">${fmtMulti(pendingByCurrency)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Gesamt offen</span>
-        <span class="value">${fmtMulti(totalOpenByCurrency)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Letztes Balance-Update</span>
-        <span class="value">${balanceFetchedAt ? fmtTimeAgo(balanceFetchedAt) : DASH}</span>
-      </div>
-    </div>
-  `;
 
   html += renderGoalCard('Tagesziel', todayEarnedGbp, dailyGoalMinor);
   html += renderGoalCard('Monatsziel', monthEarnedGbp, monthlyGoalMinor);
