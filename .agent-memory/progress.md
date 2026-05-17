@@ -1,5 +1,9 @@
 # Progress
 
+- 2026-05-17 - Browser review fix deployed: the top overview comparison tile
+  is now labelled `Vormonat`, shows previous month sums without a repeated
+  prefix, and color-codes the comparison percentage: red below 95%, yellow from
+  95% through 105%, green above 105%.
 - 2026-05-17 - Browser review fix deployed: `System-Health` was removed from
   the overview dashboard and moved to the bottom of the settings tab. The
   settings endpoint now includes the same system health payload used by the

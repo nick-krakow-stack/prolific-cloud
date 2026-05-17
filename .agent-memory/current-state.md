@@ -187,6 +187,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Browser review fix: `System-Health` is no longer rendered in the overview.
   `/api/data.php?type=settings` now includes `system` data, and the settings
   renderer places the System-Health card below the settings form.
+- Browser review fix: the top overview comparison tile is labelled `Vormonat`,
+  shows only the previous month sums below the percentage, and color-codes the
+  percentage via `comparisonPercentClass()`: below 95 red, 95 through 105
+  yellow, above 105 green.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

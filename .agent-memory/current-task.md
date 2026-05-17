@@ -1,9 +1,13 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-17 18:55:35 +02:00
+Last updated: 2026-05-17 19:01:53 +02:00
 
 ## Active Task Checklist
 
+- [x] Rename the top comparison tile label from `Vergleich` to `Vormonat`.
+- [x] Remove the duplicate `Vormonat:` prefix from the comparison tile subline.
+- [x] Color-code the comparison percentage: `<95` red, `95-105` yellow, `>105` green.
+- [x] Deploy and verify the updated comparison tile on production.
 - [x] Remove `System-Health` from the overview dashboard.
 - [x] Add `System-Health` to the bottom of the settings tab.
 - [x] Include system health data in the settings API response.

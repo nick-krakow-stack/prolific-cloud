@@ -1,18 +1,18 @@
 # Handoff
 
-Last updated: 2026-05-17 18:55:35 +02:00
+Last updated: 2026-05-17 19:01:53 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-The overview no longer renders `System-Health`. The settings API response now
-includes the existing system health payload, and the settings tab renders the
-System-Health card below the settings form.
+The overview comparison tile now matches owner feedback: label `Vormonat`,
+percentage as the main value, previous month sums as the subline without a
+duplicate prefix, and percentage color classes for red/yellow/green thresholds.
 
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: 07ceb66 Move system health to settings
+- Last product commit: f1ecd8b Refine previous month comparison tile
 - Last memory commit: pending this task
 
 ## Working Tree
@@ -23,19 +23,15 @@ System-Health card below the settings form.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/data.php
  M dashboard/assets/app.js
+ M dashboard/assets/style.css
  M tests/overview-render.test.js
- M tests/roadmap-rest-render.test.js
-?? tests/settings-system-source.test.js
 ~~~
 
 ## Verification Snapshot
 
-- Red tests failed before implementation:
+- Red test failed before implementation:
   - `node tests\overview-render.test.js`
-  - `node tests\roadmap-rest-render.test.js`
-  - `node tests\settings-system-source.test.js`
 - Green checks passed:
   - `node --check dashboard/assets/app.js`
   - `node tests\overview-render.test.js`
@@ -44,15 +40,13 @@ System-Health card below the settings form.
   - `node tests\goals-progress-source.test.js`
   - `node tests\settings-goals-source.test.js`
   - `git check-ignore -v config.php`
-- Server lint passed for `api/data.php` with `php74` and `php84`.
 - Deploy helper uploaded runtime files to production.
-- Production root returned `200`; unauthenticated overview API returned `401`.
-- Production file checks confirmed `renderSystemHealthCard(systemHealth)` only
-  remains in settings rendering and `build_settings_response($pdo)` is deployed.
-- In-app browser verification confirmed the overview DOM no longer contains
-  `SYSTEM-HEALTH`. The browser automation could not trigger the settings tab
-  click in this session, so settings placement is covered by render tests and
-  production file checks.
+- Production checks passed: `php74`/`php84` lint on `api/data.php`, root `200`,
+  unauthenticated overview API `401`, and deployed file grep for comparison
+  value classes.
+- In-app browser verification showed the live tile text as `VORMONAT`,
+  `1.003,9 %`, `£13,92 + $0,15`; no `Vormonat:` prefix remained, and the value
+  used `comparison-value is-good` with computed green color.
 
 ## Current State Summary
 

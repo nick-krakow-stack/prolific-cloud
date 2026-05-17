@@ -2,6 +2,9 @@
 
 Last updated: 2026-05-17
 
+- 2026-05-17 - Browser feedback: The top comparison tile should be labelled
+  `Vormonat`, show only the previous month sums in the subline, and color the
+  percentage red below 95%, yellow from 95% through 105%, and green above 105%.
 - 2026-05-17 - Browser feedback: Move the `System-Health` box out of the
   overview dashboard and place it at the bottom of the settings tab.
 - 2026-05-17 - Browser feedback: Study list rows should use small detail
