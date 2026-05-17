@@ -1719,37 +1719,6 @@ function renderExpandedOverview(data) {
     </div>
   `;
 
-  html += `
-    <div class="status-box">
-      <h3>Pending-Übersicht</h3>
-
-      <div class="status-row">
-        <span class="key">Offene Teilnahmen</span>
-        <span class="value">${fmtCount(pendingStats.count ?? (statusTotal > 0 ? pendingCount : null))}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Offene Summen</span>
-        <span class="value">${fmtMulti(pendingStats.total)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Älteste offene Teilnahme</span>
-        <span class="value">${pendingStats.oldestAt ? fmtTimeAgo(pendingStats.oldestAt) : DASH}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Älter als 7 Tage</span>
-        <span class="value">${fmtCount(pendingStats.olderThan7)}</span>
-      </div>
-
-      <div class="status-row">
-        <span class="key">Älter als 14 Tage</span>
-        <span class="value">${fmtCount(pendingStats.olderThan14)}</span>
-      </div>
-    </div>
-  `;
-
   const statusRows = Object.entries(statusCounts)
     .sort(([a], [b]) => {
       const ai = statusSortKey(a);
@@ -1791,6 +1760,37 @@ function renderExpandedOverview(data) {
       <div class="status-row">
         <span class="key">Pending-Rate</span>
         <span class="value">${fmtPercent(pendingRate)}</span>
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="status-box">
+      <h3>Pending-Übersicht</h3>
+
+      <div class="status-row">
+        <span class="key">Offene Teilnahmen</span>
+        <span class="value">${fmtCount(pendingStats.count ?? (statusTotal > 0 ? pendingCount : null))}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Offene Summen</span>
+        <span class="value">${fmtMulti(pendingStats.total)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älteste offene Teilnahme</span>
+        <span class="value">${pendingStats.oldestAt ? fmtTimeAgo(pendingStats.oldestAt) : DASH}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älter als 7 Tage</span>
+        <span class="value">${fmtCount(pendingStats.olderThan7)}</span>
+      </div>
+
+      <div class="status-row">
+        <span class="key">Älter als 14 Tage</span>
+        <span class="value">${fmtCount(pendingStats.olderThan14)}</span>
       </div>
     </div>
   `;

@@ -167,6 +167,7 @@ const checks = [
   ['renders top studies in EUR', html.includes('€10,03') && html.includes('€40,12/h') && !html.includes('£34,00/h')],
   ['removes earned and pending rows from the today detail card', !html.includes('<span class="key">Verdient</span>') && !html.includes('<span class="key">Ausstehend</span>')],
   ['renames pending total row', html.includes('<span class="key">Offene Summen</span>') && !html.includes('<span class="key">Gesamt pending</span>')],
+  ['renders pending overview below status distribution', html.indexOf('<h3>Status-Verteilung</h3>') >= 0 && html.indexOf('<h3>Status-Verteilung</h3>') < html.indexOf('<h3>Pending-Übersicht</h3>')],
   ['orders screened out second in status distribution', html.indexOf('>APPROVED<') < html.indexOf('>SCREENED OUT<') && html.indexOf('>SCREENED OUT<') < html.indexOf('>AWAITING REVIEW<')],
   ['colors paid and negative status tags', html.includes('class="tag tag-paid">SCREENED OUT</span>') && html.includes('class="tag tag-danger">RETURNED</span>') && html.includes('class="tag tag-danger-soft">TIMED-OUT</span>')],
   ['counts returned as rejected in fallback reject rate', html.includes('<span class="key">Reject-Rate</span>') && html.includes('<span class="value">8,6 %</span>')],
