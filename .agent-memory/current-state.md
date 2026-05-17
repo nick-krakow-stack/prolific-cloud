@@ -33,6 +33,8 @@ earnings, studies, submissions, account balance, logs, and future analytics.
 - `config.example.php`: template for local/server configuration.
 - `install.php`: one-time DB setup script; remove from production after setup.
 - `hash-generator.php`: one-time helper for password hash/API key/session secret; remove from production after setup.
+- These setup files are intentionally kept in GitHub for backup/reinstallation,
+  but excluded from normal SSH deployments to the live webspace.
 
 ## Architecture Summary
 
@@ -56,6 +58,7 @@ earnings, studies, submissions, account balance, logs, and future analytics.
 - Server DB client: `MariaDB 10.6.23`.
 - Server `config.php` is present and must remain server-side.
 - `install.php`, `hash-generator.php`, and `config.example.php` are absent on production.
+- Keep setup files in GitHub, but do not upload them to production during normal operation.
 - Normal deploy command:
 
 ```powershell

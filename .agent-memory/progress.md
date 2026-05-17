@@ -8,5 +8,6 @@
 - 2026-05-17 - Production webroot confirmed as `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 - 2026-05-17 - Runtime-only deploy helper added at `scripts/deploy-webspace.ps1`.
 - 2026-05-17 - Deploy helper updated to support explicit `-IncludeConfig` config uploads.
+- 2026-05-17 - Deployment rule clarified: setup files stay in GitHub but are excluded from live webspace updates.
 - 2026-05-17 14:14:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-17 14:14:58 +02:00 - Stop hook ran and refreshed central memory snapshot.

@@ -58,3 +58,4 @@ See .agent-memory/next-steps.md.
 - Preserve root routing through / and absolute frontend paths.
 - Deploy only runtime files through scripts/deploy-webspace.ps1 by default.
 - Use scripts/deploy-webspace.ps1 -IncludeConfig only when a task explicitly changes config.php.
+- Keep setup files in GitHub for backup/reinstall, but do not upload them to the live server during normal operation.

@@ -78,6 +78,10 @@ Setup-only files:
 - `hash-generator.php`
 - `config.example.php`
 
+These setup-only files should stay in GitHub for backup and fresh
+installation/reinstallation. They must not be uploaded during normal SSH
+deployments to the live webspace after setup is complete.
+
 Local/private files:
 
 - `config.php` must never be committed or exposed.
@@ -169,6 +173,10 @@ Even then, never commit `config.php`, print its contents, or include it in broad
 staging. The helper must not upload `.env`, `.git/`, `.agent-memory/`, `.codex/`,
 roadmap/docs, SQL dumps, logs, `install.php`, `hash-generator.php`, or
 `config.example.php`.
+
+`install.php`, `hash-generator.php`, and `config.example.php` are GitHub backup
+and reinstall files only. Do not deploy them to the live server unless the owner
+explicitly asks for a fresh setup workflow.
 
 Do not create deployment packages automatically. Only prepare deployment or
 release artifacts when the owner explicitly asks.

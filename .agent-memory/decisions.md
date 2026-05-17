@@ -31,8 +31,9 @@ Last updated: 2026-05-17
 - No Cloudflare workflow applies.
 - No extension packaging workflow applies.
 - Do not create deployment artifacts unless the owner explicitly asks.
+- `install.php`, `hash-generator.php`, and `config.example.php` stay in GitHub for backup and fresh installs.
 - Use SSH alias `prolific-cloud` for All-Inkl webspace access.
 - Normal updates are file-based deployments to `/www/htdocs/w021974e/prolific.nickkrakow.de`.
 - Deploy only runtime files (`.htaccess`, `api/`, `dashboard/`) through `scripts/deploy-webspace.ps1` by default.
 - If real configuration changes are required, upload `config.php` deliberately with `scripts/deploy-webspace.ps1 -IncludeConfig`.
-- Never commit or print `config.php`; never deploy setup scripts, repo metadata, memory files, docs, logs, SQL dumps, or local secrets.
+- Never commit or print `config.php`; never deploy setup scripts to production during normal operation; never deploy repo metadata, memory files, docs, logs, SQL dumps, or local secrets.
