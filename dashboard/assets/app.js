@@ -1524,9 +1524,15 @@ function renderDailyStatsCard(dailyStats, fxRates) {
 
 function renderSystemHealthCard(systemHealth) {
   const dbCounts = asObject(systemHealth.dbCounts);
+  const countLabels = {
+    studies: 'Studies',
+    submissions: 'Submissions',
+    events: 'Events',
+    syncLog: 'SyncLog'
+  };
   const countRows = ['studies', 'submissions', 'events', 'syncLog'].map(key => `
     <div class="health-item">
-      <span>${escapeHtml(key)}</span>
+      <span>${escapeHtml(countLabels[key] || key)}</span>
       <span>${fmtCount(dbCounts[key])}</span>
     </div>
   `).join('');

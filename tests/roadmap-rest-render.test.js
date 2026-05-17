@@ -279,6 +279,7 @@ const checks = [
   ['preserves exact EUR settings values after reload', /id="settingsOkHourly"[\s\S]*value="10\.00"/.test(exactEurSettingsHtml) && /id="settingsDailyGoal"[\s\S]*value="30\.00"/.test(exactEurSettingsHtml)],
   ['settings save payload carries exact EUR values', code.includes('ok_hourly_eur_minor: inputToDisplayMinor') && apiData.includes("'ok_hourly_eur_minor'")],
   ['moves system health from settings to system tab', !settingsHtml.includes('System-Health') && !settingsHtml.includes('health-grid') && systemHtml.includes('System-Health') && systemHtml.includes('health-grid')],
+  ['capitalizes system health count labels', systemHtml.includes('<span>Submissions</span>') && !systemHtml.includes('<span>submissions</span>')],
   ['moves sync status from tab to system tab', !appShell.includes('data-tab="events"') && !appShell.includes('id="panel-events"') && !appShell.includes('eventsContent') && systemHtml.includes('Sync-Status') && systemHtml.includes('Letzter erfolgreicher Sync') && systemHtml.includes('<details class="log-details">')],
   ['moves currency box from settings to system tab', !accountHtml.includes('W&auml;hrungen') && !accountHtml.includes('FX-Rates') && !settingsHtml.includes('W&auml;hrungen') && !settingsHtml.includes('FX-Rates') && systemHtml.includes('W&auml;hrungen') && systemHtml.includes('FX-Rates') && systemHtml.includes('Teilnahmen exportieren')],
   ['system endpoint provides fx rates for currency box', /'fxRates'\s*=>\s*decode_setting_value\(get_setting\('fxRates'\)\)/.test(systemResponseSource)],
