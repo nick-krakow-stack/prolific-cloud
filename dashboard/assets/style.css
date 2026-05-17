@@ -1345,6 +1345,18 @@ a:not(.icon-btn):hover {
   font-size: 13px;
 }
 .filter-bar input[type="date"] { color-scheme: dark; }
+#panel-submissions .filter-bar {
+  gap: 10px;
+}
+#panel-submissions .date-filter {
+  flex-wrap: nowrap;
+}
+#panel-submissions .date-filter input[type="date"] {
+  width: 126px;
+}
+#panel-submissions .filter-reset {
+  white-space: nowrap;
+}
 .date-filter {
   display: flex;
   align-items: center;

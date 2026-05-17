@@ -95,8 +95,8 @@ require_login();
       <label>Sortierung:
         <select id="submissionsSort">
           <option value="completedDesc">Neueste zuerst</option>
-          <option value="completedAsc">Ã„lteste zuerst</option>
-          <option value="rewardDesc">HÃ¶chste VergÃ¼tung</option>
+          <option value="completedAsc">Älteste zuerst</option>
+          <option value="rewardDesc">Höchste Vergütung</option>
         </select>
       </label>
 
@@ -126,13 +126,12 @@ require_login();
         <label>Bis
           <input id="submissionsDateTo" type="date">
         </label>
-        <button id="submissionsDateReset" class="filter-reset" type="button">ZurÃ¼cksetzen</button>
+        <button id="submissionsDateReset" class="filter-reset" type="button">Zurücksetzen</button>
+        <a class="filter-icon export-icon"
+           href="/api/export.php?type=submissions&amp;format=csv"
+           title="Teilnahmen als CSV exportieren"
+           aria-label="Teilnahmen als CSV exportieren">&#8681;</a>
       </fieldset>
-
-      <a class="filter-icon export-icon"
-         href="/api/export.php?type=submissions&amp;format=csv"
-         title="Teilnahmen als CSV exportieren"
-         aria-label="Teilnahmen als CSV exportieren">&#8681;</a>
     </div>
     <div id="submissionsContent" class="loading">Lade…</div>
   </section>
