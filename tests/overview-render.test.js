@@ -143,6 +143,7 @@ const html = sandbox.renderExpandedOverview(sampleOverview);
 const checks = [
   ['renders EUR equivalent from GBP-based fxRates', html.includes('≈ €13,44')],
   ['renders top study list', html.includes('top-study-list') && html.includes('High reward study')],
+  ['renders top studies as two separate sections', html.includes('<h3>Top-Studien nach Gesamtvergütung</h3>') && html.includes('<h3>Top-Studien nach Stundenlohn</h3>') && !html.includes('<h3>Top-Studien</h3>') && !html.includes('Top nach Verg&uuml;tung')],
   ['renders daily chart', html.includes('daily-chart') && html.includes('daily-bar')],
   ['renders efficiency basis as studies not samples', html.includes('2 Studien &middot; 30 Min') && html.includes('1 Studie') === false && !html.includes('Samples')],
   ['renders efficiency as four metric tiles', html.includes('class="efficiency-grid"') && (html.match(/class="efficiency-tile"/g) || []).length === 4 && html.includes('<div class="efficiency-label">Heute</div>') && html.includes('<div class="efficiency-label">Gesamt</div>')],

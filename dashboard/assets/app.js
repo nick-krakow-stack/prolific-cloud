@@ -1475,16 +1475,11 @@ function renderTopStudyList(items, mode, fxRates) {
 function renderTopStudiesCard(topStudies, fxRates) {
   return `
     <div class="status-box">
-      <h3>Top-Studien</h3>
-      <div class="status-row">
-        <span class="key">Top nach Verg&uuml;tung</span>
-        <span class="value"></span>
-      </div>
+      <h3>Top-Studien nach Gesamtvergütung</h3>
       ${renderTopStudyList(topStudies.byReward, 'reward', fxRates)}
-      <div class="status-row">
-        <span class="key">Top nach Stundenlohn</span>
-        <span class="value"></span>
-      </div>
+    </div>
+    <div class="status-box">
+      <h3>Top-Studien nach Stundenlohn</h3>
       ${renderTopStudyList(topStudies.byHourly, 'hourly', fxRates)}
     </div>
   `;
