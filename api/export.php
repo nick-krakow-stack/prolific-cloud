@@ -71,7 +71,7 @@ function export_submissions_csv(PDO $pdo): void {
         'Study ID',
         'Submission ID',
         'Researcher/Institution',
-    ], ';');
+    ], ';', '"', '');
 
     foreach ($stmt->fetchAll() as $row) {
         $rewardMinor = nullable_int($row['effective_reward_amount_minor'] ?? null);
@@ -99,7 +99,7 @@ function export_submissions_csv(PDO $pdo): void {
 }
 
 function safe_fputcsv($handle, array $row): void {
-    fputcsv($handle, array_map('neutralize_csv_cell', $row), ';');
+    fputcsv($handle, array_map('neutralize_csv_cell', $row), ';', '"', '');
 }
 
 function neutralize_csv_cell($value): string {

@@ -19,7 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (do_login($username, $password)) {
+    if (!assert_login_rate_limit($username)) {
+        $error = 'Zu viele fehlgeschlagene Versuche. Bitte versuche es in ein paar Minuten erneut.';
+        usleep(500_000);
+    } elseif (do_login($username, $password)) {
         log_event('login_ok', 'Dashboard-Login erfolgreich', [
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
         ]);
@@ -31,19 +34,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          */
         header('Location: /');
         exit;
+    } else {
+        $error = 'Benutzername oder Passwort falsch.';
+
+        record_failed_login_attempt($username);
+
+        // Kurze Verzögerung gegen Brute-Force
+        usleep(500_000);
+    }
+}
+
+function client_ip_for_login(): string {
+    return substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+}
+
+function assert_login_rate_limit(string $username): bool {
+    $ip = client_ip_for_login();
+    if ($ip === '') {
+        return true;
     }
 
-    $error = 'Benutzername oder Passwort falsch.';
+    $username = substr($username, 0, 128);
 
-    if (!empty($config['log_failed_logins'])) {
-        log_event('login_failed', 'Fehlgeschlagener Login', [
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
-            'username' => $username,
-        ]);
+    try {
+        $stmt = db()->prepare(
+            "SELECT
+                SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(data_json, '$.ip')) = ? THEN 1 ELSE 0 END) AS ip_failures,
+                SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(data_json, '$.username')) = ? THEN 1 ELSE 0 END) AS username_failures
+             FROM events
+             WHERE type = 'login_failed'
+               AND timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)"
+        );
+        $stmt->execute([$ip, $username]);
+        $row = $stmt->fetch() ?: [];
+
+        return (int)($row['ip_failures'] ?? 0) < 8
+            && (int)($row['username_failures'] ?? 0) < 8;
+    } catch (Throwable $e) {
+        return true;
     }
+}
 
-    // Kurze Verzögerung gegen Brute-Force
-    usleep(500_000);
+function record_failed_login_attempt(string $username): void {
+    log_event('login_failed', 'Fehlgeschlagener Login', [
+        'ip' => client_ip_for_login(),
+        'username' => substr($username, 0, 128),
+    ]);
 }
 ?>
 <!DOCTYPE html>

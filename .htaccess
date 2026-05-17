@@ -25,7 +25,7 @@ RewriteRule ^logout\.php$ dashboard/logout.php [L]
 RewriteRule ^favicon\.ico$ dashboard/favicon.ico [L]
 
 # config.php und andere sensible Dateien vor direktem Zugriff schützen
-<FilesMatch "^(config\.php|config\.example\.php|\.env|.*\.sql|.*\.md)$">
+<FilesMatch "^(config\.php|config\.example\.php|install\.php|hash-generator\.php|\.env|.*\.sql|.*\.md)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
@@ -37,6 +37,7 @@ AddDefaultCharset UTF-8
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'self'; frame-ancestors 'self'; form-action 'self'"
 </IfModule>
 
 DirectoryIndex index.php index.html
