@@ -2245,6 +2245,71 @@ function renderCurrencySettingsCard(data) {
   `;
 }
 
+function renderTelegramBotCard(telegram) {
+  const bot = asObject(telegram);
+  const commands = Array.isArray(bot.commands) ? bot.commands : [];
+  const lastCommand = asObject(firstDefined(bot, ['lastCommand', 'last_command']));
+  const webhookOk = firstBoolean(bot, ['webhookOk', 'webhook_ok']) === true;
+  const configured = firstBoolean(bot, ['configured']) === true;
+  const lastError = firstDefined(bot, ['lastErrorMessage', 'last_error_message', 'error']);
+  const isActive = configured && webhookOk && !lastError;
+  const statusLabel = isActive ? 'aktiv' : configured ? 'prüfen' : 'nicht eingerichtet';
+  const lastCommandName = firstDefined(lastCommand, ['command', 'text']) || DASH;
+  const lastCommandAt = firstDefined(lastCommand, ['received_at', 'receivedAt']);
+  const commandItems = commands.map(commandRaw => {
+    const command = asObject(commandRaw);
+    const name = firstDefined(command, ['command', 'name']) || DASH;
+    const description = firstDefined(command, ['description', 'label']) || '';
+
+    return `
+      <div class="telegram-command-item">
+        <span class="telegram-command-name">${escapeHtml(name)}</span>
+        <span>${escapeHtml(description)}</span>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="status-box telegram-bot-card">
+      <h3>Telegram-Bot</h3>
+      <div class="health-grid">
+        <div class="health-item">
+          <span>Bot aktiv</span>
+          <span class="${isActive ? 'status-good' : 'status-warn'}">${escapeHtml(statusLabel)}</span>
+        </div>
+        <div class="health-item">
+          <span>Webhook</span>
+          <span>${webhookOk ? 'OK' : 'prüfen'}</span>
+        </div>
+        <div class="health-item">
+          <span>Updates offen</span>
+          <span>${fmtCount(firstNumber(bot, ['pendingUpdateCount', 'pending_update_count']))}</span>
+        </div>
+        <div class="health-item">
+          <span>Befehle 24h</span>
+          <span>${fmtCount(firstNumber(bot, ['commandCount24h', 'command_count_24h']))}</span>
+        </div>
+        <div class="health-item">
+          <span>Letzter Befehl</span>
+          <span>${escapeHtml(lastCommandName)}</span>
+        </div>
+        <div class="health-item">
+          <span>Empfangen</span>
+          <span>${lastCommandAt ? fmtTimestamp(lastCommandAt) : DASH}</span>
+        </div>
+        <div class="health-item telegram-health-wide">
+          <span>Letzter Fehler</span>
+          <span>${lastError ? escapeHtml(lastError) : 'keiner'}</span>
+        </div>
+      </div>
+      <div class="telegram-command-list" aria-label="Telegram-Befehle">
+        <div class="telegram-command-list-title">Befehle</div>
+        ${commandItems || '<div class="loading">Keine Befehle verfügbar.</div>'}
+      </div>
+    </div>
+  `;
+}
+
 function renderSystem(data) {
   if (!data || !data.ok) {
     return '<div class="error">Daten konnten nicht geladen werden.</div>';
@@ -2277,6 +2342,7 @@ function renderSystem(data) {
         </div>
       `).join('')}
     </div>
+    ${renderTelegramBotCard(data.telegram || data.telegram_bot)}
     ${renderCurrencySettingsCard(data)}
     ${renderSystemHealthCard(systemHealth)}
     ${renderEvents(data)}

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
+require_once __DIR__ . '/_telegram.php';
 require_once __DIR__ . '/../dashboard/session.php';
 
 require_login();
@@ -810,6 +811,7 @@ function build_system_response(PDO $pdo): array {
     return [
         'ok' => true,
         'system' => $system,
+        'telegram' => build_telegram_system_status($pdo),
         'syncStatus' => build_sync_status($pdo),
         'events' => $eventStmt->fetchAll(),
         'lastSync' => [
@@ -824,12 +826,74 @@ function build_system_response(PDO $pdo): array {
 }
 
 function build_settings_response(PDO $pdo): array {
+    $lastSyncAt = get_setting('lastSyncAt');
+    $lastSyncRow = $pdo
+        ->query("SELECT * FROM sync_log ORDER BY id DESC LIMIT 1")
+        ->fetch();
+
     return [
         'ok' => true,
         'settings' => load_dashboard_settings(),
         'fxRates' => decode_setting_value(get_setting('fxRates')),
-        'system' => build_system_response($pdo)['system'],
+        'system' => build_system_stats($pdo, $lastSyncAt, $lastSyncRow ?: null),
         'serverTime' => date('c'),
+    ];
+}
+
+function build_telegram_system_status(PDO $pdo): array {
+    $telegram = telegram_config();
+    $configured = !empty($telegram['bot_token'])
+        && !empty($telegram['allowed_chat_id'])
+        && !empty($telegram['webhook_secret']);
+    $webhookInfo = $configured
+        ? telegram_get_webhook_info()
+        : ['ok' => false, 'error' => 'not_configured'];
+    $lastCommand = null;
+    $commandCount24h = null;
+    $dbError = null;
+
+    try {
+        $stmt = $pdo->query("
+            SELECT command, text, received_at, response_sent, response_error
+            FROM telegram_messages
+            ORDER BY received_at DESC, id DESC
+            LIMIT 1
+        ");
+        $lastCommand = $stmt->fetch() ?: null;
+
+        $countStmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM telegram_messages
+            WHERE received_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ");
+        $countStmt->execute();
+        $commandCount24h = (int)$countStmt->fetchColumn();
+    } catch (Throwable $e) {
+        $dbError = 'telegram_messages nicht lesbar';
+    }
+
+    $lastErrorMessage = $webhookInfo['lastErrorMessage'] ?? null;
+    $webhookOk = !empty($webhookInfo['ok']);
+
+    return [
+        'configured' => $configured,
+        'webhookOk' => $webhookOk,
+        'status' => $configured && $webhookOk && !$lastErrorMessage ? 'ok' : 'warning',
+        'pendingUpdateCount' => $webhookInfo['pendingUpdateCount'] ?? null,
+        'lastErrorDate' => $webhookInfo['lastErrorDate'] ?? null,
+        'lastErrorMessage' => $lastErrorMessage,
+        'maxConnections' => $webhookInfo['maxConnections'] ?? null,
+        'error' => $webhookInfo['error'] ?? $dbError,
+        'lastCommand' => $lastCommand,
+        'commandCount24h' => $commandCount24h,
+        'commands' => [
+            ['command' => '/status', 'description' => 'Aktueller Systemstatus'],
+            ['command' => '/earnings', 'description' => 'Verdienst nach Zeitraum'],
+            ['command' => '/balance', 'description' => 'Auszahlbar und in Prüfung'],
+            ['command' => '/studies', 'description' => 'Aktive Studien'],
+            ['command' => '/today', 'description' => 'Heutige Aktivität'],
+            ['command' => '/help', 'description' => 'Befehlsübersicht'],
+        ],
     ];
 }
 

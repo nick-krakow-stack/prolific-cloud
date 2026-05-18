@@ -61,13 +61,9 @@ const checks = [
       webhook.includes("case '/status':")
   ],
   [
-    'telegram phase one help only advertises implemented commands',
+    'telegram help does not advertise unimplemented quote command',
     webhook.includes('/status \\\\- aktueller Zustand') &&
-      !webhook.includes('/earnings \\\\-') &&
-      !webhook.includes('/balance \\\\-') &&
-      !webhook.includes('/studies \\\\-') &&
-      !webhook.includes('/quote \\\\-') &&
-      !webhook.includes('/today \\\\-')
+      !webhook.includes('/quote \\\\-')
   ],
   [
     'deploy script uploads telegram runtime files',

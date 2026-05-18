@@ -134,3 +134,44 @@ function send_telegram_message(int $chatId, string $text, array $options = []): 
 
     return $httpCode === 200;
 }
+
+function telegram_get_webhook_info(): array {
+    global $config;
+
+    $token = (string)($config['telegram']['bot_token'] ?? '');
+    if ($token === '' || !function_exists('curl_init')) {
+        return [
+            'ok' => false,
+            'error' => $token === '' ? 'not_configured' : 'curl_missing',
+        ];
+    }
+
+    $ch = curl_init('https://api.telegram.org/bot' . $token . '/getWebhookInfo');
+    if ($ch === false) {
+        return ['ok' => false, 'error' => 'curl_init_failed'];
+    }
+
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    $data = json_decode((string)$response, true);
+    $data = is_array($data) ? $data : [];
+    $result = is_array($data['result'] ?? null) ? $data['result'] : [];
+
+    return [
+        'ok' => $httpCode === 200 && !empty($data['ok']),
+        'httpCode' => $httpCode,
+        'pendingUpdateCount' => $result['pending_update_count'] ?? null,
+        'lastErrorDate' => $result['last_error_date'] ?? null,
+        'lastErrorMessage' => $result['last_error_message'] ?? null,
+        'maxConnections' => $result['max_connections'] ?? null,
+        'error' => $curlError ?: ($data['description'] ?? null),
+    ];
+}

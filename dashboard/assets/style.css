@@ -845,6 +845,51 @@ a:not(.icon-btn):hover {
   overflow-wrap: anywhere;
 }
 
+.status-good {
+  color: var(--success) !important;
+}
+
+.status-warn {
+  color: var(--warn) !important;
+}
+
+.telegram-health-wide {
+  grid-column: 1 / -1;
+}
+
+.telegram-command-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.telegram-command-list-title {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.telegram-command-item {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 58%, var(--bg-card));
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.telegram-command-name {
+  color: var(--link);
+  font-weight: 800;
+}
+
 @media (min-width: 520px) {
   .health-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

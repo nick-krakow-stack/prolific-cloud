@@ -13,7 +13,7 @@ const checks = [
   ],
   [
     'settings response includes system health data',
-    /function build_settings_response\(PDO \$pdo\): array \{[\s\S]*'system'\s*=>\s*build_system_response\(\$pdo\)\['system'\]/.test(source)
+    /function build_settings_response\(PDO \$pdo\): array \{[\s\S]*'system'\s*=>\s*build_system_stats\(\$pdo, \$lastSyncAt, \$lastSyncRow \?: null\)/.test(source)
   ]
 ];
 
