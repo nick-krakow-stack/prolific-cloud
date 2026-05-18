@@ -1979,3 +1979,102 @@ a:not(.icon-btn):hover {
 .log-details[open] summary::after { content: '-'; }
 .log-list { padding: 8px; }
 .log-list .event-card:last-child { margin-bottom: 0; }
+
+.extra-income-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.extra-income-timer,
+.extra-income-payout,
+.extra-income-form,
+.extra-income-session-list {
+  margin-bottom: 16px;
+}
+.extra-income-timer .form-actions,
+.extra-income-payout .form-actions,
+.extra-income-form .form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.extra-income-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.extra-income-form label,
+.extra-income-modal label {
+  min-width: 0;
+}
+.extra-income-form input,
+.extra-income-form select,
+.extra-income-modal input,
+.extra-income-modal select {
+  width: 100%;
+}
+.extra-income-session-list .event-card {
+  align-items: center;
+}
+.extra-income-session-list .meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.extra-income-session-list .actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.extra-income-session-list button {
+  min-height: 30px;
+}
+.extra-income-payout .value {
+  overflow-wrap: anywhere;
+}
+.extra-income-modal .telegram-modal {
+  max-width: 420px;
+}
+.extra-income-modal .telegram-modal-field,
+.extra-income-modal .toggle-row {
+  display: block;
+  margin-bottom: 10px;
+}
+.extra-income-modal .toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.extra-income-modal .toggle-row input {
+  width: auto;
+}
+
+@media (max-width: 900px) {
+  .extra-income-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .extra-income-form .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .extra-income-grid,
+  .extra-income-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .extra-income-session-list .event-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .extra-income-session-list .actions,
+  .extra-income-timer .form-actions,
+  .extra-income-payout .form-actions,
+  .extra-income-form .form-actions {
+    justify-content: flex-start;
+  }
+}

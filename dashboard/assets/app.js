@@ -15,6 +15,7 @@ let cachedData = {
   account: null,
   system: null,
   settings: null,
+  extraIncome: null,
   events: null
 };
 
@@ -74,6 +75,10 @@ function fmtEur(minor) {
   if (!Number.isFinite(numeric)) return '';
 
   return '≈ €' + (numeric / 100).toFixed(2).replace('.', ',');
+}
+
+function fmtEurAmount(minor) {
+  return fmtAmount(minor, 'EUR');
 }
 
 function fmtCount(value) {
@@ -1441,6 +1446,543 @@ function fmtWorktime(seconds) {
   return `${hours} h ${minutes} min`;
 }
 
+function centsValue(source, keys, fallback = null) {
+  const value = firstNumber(source, keys);
+
+  return value == null ? fallback : value;
+}
+
+function readExtraIncomeSummary(source) {
+  const obj = asObject(source);
+  const root = asObject(obj.extraIncome || obj.extra_income || obj);
+  const summary = asObject(root.summary || root.overview || root);
+  const current = asObject(root.current);
+  const week = asObject(root.thisWeek || root.this_week || root.week);
+  const today = asObject(root.today);
+  const month = asObject(root.month);
+  const openPayout = asObject(root.openPayout || root.open_payout);
+
+  return {
+    currentGrossCents: centsValue(current, ['grossCents', 'gross_cents'], centsValue(summary, ['currentGrossCents', 'current_gross_cents', 'grossCents', 'gross_cents'], 0)),
+    currentNetCents: centsValue(current, ['netCents', 'net_cents'], centsValue(summary, ['currentNetCents', 'current_net_cents', 'netCents', 'net_cents'], null)),
+    weekMessages: firstNumber(week, ['messageCount', 'message_count']) ?? firstNumber(summary, ['weekMessages', 'week_messages', 'currentWeekMessages', 'current_week_messages']) ?? 0,
+    weekGrossCents: centsValue(week, ['grossCents', 'gross_cents'], centsValue(summary, ['weekGrossCents', 'week_gross_cents', 'currentWeekGrossCents', 'current_week_gross_cents'], 0)),
+    weekHourlyCents: centsValue(week, ['hourlyGrossCents', 'hourly_gross_cents'], centsValue(summary, ['weekHourlyCents', 'week_hourly_cents', 'hourlyGrossCents', 'hourly_gross_cents'], null)),
+    openGrossCents: centsValue(openPayout, ['grossCents', 'gross_cents'], centsValue(summary, ['openGrossCents', 'open_gross_cents', 'payoutGrossCents', 'payout_gross_cents'], 0)),
+    openNetCents: centsValue(openPayout, ['netCents', 'net_cents'], centsValue(summary, ['openNetCents', 'open_net_cents', 'payoutNetCents', 'payout_net_cents'], 0)),
+    payoutStatus: firstDefined(openPayout, ['payoutStatus', 'payout_status', 'status']) || firstDefined(summary, ['payoutStatus', 'payout_status', 'status']) || 'offen',
+    todaySeconds: firstNumber(today, ['durationSeconds', 'duration_seconds']) ?? firstNumber(summary, ['todaySeconds', 'today_seconds', 'todayDurationSeconds', 'today_duration_seconds']) ?? 0,
+    todayMessages: firstNumber(today, ['messageCount', 'message_count']) ?? firstNumber(summary, ['todayMessages', 'today_messages']) ?? 0,
+    todayGrossCents: centsValue(today, ['grossCents', 'gross_cents'], centsValue(summary, ['todayGrossCents', 'today_gross_cents'], 0)),
+    monthGrossCents: centsValue(month, ['grossCents', 'gross_cents'], centsValue(summary, ['monthGrossCents', 'month_gross_cents'], 0)),
+    canMarkPaid: firstBoolean(openPayout, ['canMarkPaid', 'can_mark_paid', 'markPaidAllowed', 'mark_paid_allowed']) === true || firstBoolean(summary, ['canMarkPaid', 'can_mark_paid', 'markPaidAllowed', 'mark_paid_allowed']) === true
+  };
+}
+
+function readExtraIncomeTimer(data) {
+  const obj = asObject(data);
+  const timer = asObject(obj.activeTimer || obj.active_timer || obj.timer || obj.active);
+  const startedAt = firstDefined(timer, ['startedAt', 'started_at', 'start', 'created_at']);
+
+  return startedAt ? { startedAt } : null;
+}
+
+function readExtraIncomeSessions(data) {
+  const obj = asObject(data);
+  const sessions = parseJsonMaybe(obj.sessions || obj.items || obj.recentSessions || obj.recent_sessions || []);
+
+  return Array.isArray(sessions) ? sessions.map(asObject) : [];
+}
+
+function extraIncomeDateInputValue(value) {
+  if (!value) return '';
+
+  const date = new Date(String(value).replace(' ', 'T'));
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value).slice(0, 16).replace(' ', 'T');
+  }
+
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+
+  return `${y}-${m}-${d}T${h}:${min}`;
+}
+
+function extraIncomeStatusLabel(status) {
+  const normalized = String(status || '').toLowerCase();
+
+  if (normalized === 'auszahlungsbereit') return 'Auszahlungsbereit';
+  if (normalized === 'ausgezahlt') return 'Ausgezahlt';
+
+  return 'Offen';
+}
+
+function renderExtraIncomeOverviewTile(extraIncome) {
+  const summary = readExtraIncomeSummary(extraIncome);
+
+  if (!extraIncome || Object.keys(asObject(extraIncome)).length === 0) {
+    return '';
+  }
+
+  return `
+    <div class="earning-tile">
+      <div class="label">Zusatzverdienste</div>
+      <div class="value">${fmtEurAmount(summary.openNetCents)}</div>
+      <div class="secondary">Offen zur Auszahlung</div>
+    </div>
+  `;
+}
+
+function renderExtraIncomeGoalRow(amountCents) {
+  const numeric = Number(amountCents);
+
+  if (!Number.isFinite(numeric) || numeric <= 0) return '';
+
+  return `
+      <div class="status-row">
+        <span class="key">Zusatzverdienste</span>
+        <span class="value">${fmtEurAmount(numeric)}</span>
+      </div>
+  `;
+}
+
+function renderExtraIncomeTiles(data) {
+  const summary = readExtraIncomeSummary(data);
+  const net = summary.currentNetCents == null ? summary.openNetCents : summary.currentNetCents;
+  const hourly = summary.weekHourlyCents == null ? DASH : `${fmtEurAmount(summary.weekHourlyCents)}/h`;
+
+  return `
+    <div class="earnings-grid extra-income-grid">
+      <div class="earning-tile">
+        <div class="label">Aktueller Verdienst</div>
+        <div class="value">${fmtEurAmount(summary.currentGrossCents)}</div>
+        <div class="secondary">${fmtEurAmount(net)} nach Gebühren</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">Diese Woche</div>
+        <div class="value">${fmtCount(summary.weekMessages)} Nachrichten</div>
+        <div class="secondary">${fmtEurAmount(summary.weekGrossCents)} &middot; ${hourly}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">Offen zur Auszahlung</div>
+        <div class="value">${fmtEurAmount(summary.openNetCents)}</div>
+        <div class="secondary">${fmtEurAmount(summary.openGrossCents)} brutto &middot; ${escapeHtml(extraIncomeStatusLabel(summary.payoutStatus))}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">Heute</div>
+        <div class="value">${fmtWorktime(summary.todaySeconds)}</div>
+        <div class="secondary">${fmtCount(summary.todayMessages)} Nachrichten &middot; ${fmtEurAmount(summary.todayGrossCents)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderExtraIncomeTimer(data) {
+  const timer = readExtraIncomeTimer(data);
+
+  return `
+    <div class="status-box extra-income-timer">
+      <h3>Timer</h3>
+      <div class="status-row">
+        <span class="key">Status</span>
+        <span class="value">${timer ? `Läuft seit ${escapeHtml(fmtDateTime(timer.startedAt))}` : 'Nicht gestartet'}</span>
+      </div>
+      <div class="form-actions">
+        <button id="extraIncomeStartButton" class="filter-reset" type="button" ${timer ? 'disabled' : ''}>Start</button>
+        <button id="extraIncomeStopButton" class="filter-reset" type="button" ${timer ? '' : 'disabled'}>Stop</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExtraIncomeForm() {
+  return `
+    <form id="extraIncomeSessionForm" class="settings-form extra-income-form">
+      <input id="extraIncomeSessionId" type="hidden" value="">
+      <h3>Session nachtragen</h3>
+      <div class="form-grid">
+        <label>Start
+          <input id="extraIncomeStartedAt" name="started_at" type="datetime-local" required>
+        </label>
+        <label>Ende
+          <input id="extraIncomeEndedAt" name="ended_at" type="datetime-local" required>
+        </label>
+        <label>Bezahlte Nachrichten
+          <input id="extraIncomeMessageCount" name="message_count" type="number" min="0" step="1" required>
+        </label>
+        <label>Bonusmodus
+          <select id="extraIncomeBonusMode" name="bonus_mode">
+            <option value="none">Kein Bonus</option>
+            <option value="fixed">Einmalig</option>
+            <option value="per_message">Fortlaufend pro Nachricht</option>
+          </select>
+        </label>
+        <label>Mindestnachrichten
+          <input id="extraIncomeBonusThreshold" name="bonus_threshold_messages" type="number" min="0" step="1" value="0">
+        </label>
+        <label>Bonusbetrag
+          <input id="extraIncomeBonusAmount" name="bonus_amount_eur" type="number" min="0" step="0.01" value="0">
+        </label>
+      </div>
+      <label class="toggle-row">
+        <input id="extraIncomeNightBonus" name="night_bonus_enabled" type="checkbox" checked>
+        <span>Nachtbonus anwenden</span>
+      </label>
+      <div class="form-actions">
+        <button type="submit">Speichern</button>
+        <button id="extraIncomeFormReset" class="filter-reset" type="button">Zurücksetzen</button>
+      </div>
+    </form>
+  `;
+}
+
+function renderExtraIncomeSessions(data) {
+  const sessions = readExtraIncomeSessions(data);
+
+  if (sessions.length === 0) {
+    return `
+      <div class="status-box extra-income-session-list">
+        <h3>Letzte Sessions</h3>
+        <div class="loading">Keine Sessions.</div>
+      </div>
+    `;
+  }
+
+  const rows = sessions.slice(0, 20).map(session => {
+    const id = firstDefined(session, ['id', 'sessionId', 'session_id']);
+    const startedAt = firstDefined(session, ['startedAt', 'started_at']);
+    const endedAt = firstDefined(session, ['endedAt', 'ended_at']);
+    const messages = firstNumber(session, ['messageCount', 'message_count']) ?? 0;
+    const gross = firstNumber(session, ['grossCents', 'gross_cents', 'totalGrossCents', 'total_gross_cents']);
+
+    return `
+      <div class="event-card extra-income-session" data-extra-income-session-id="${escapeHtml(id)}">
+        <div>
+          <div class="type">${escapeHtml(fmtDateTime(startedAt))} - ${escapeHtml(fmtDateTime(endedAt))}</div>
+          <div class="message">${fmtCount(messages)} Nachrichten${gross == null ? '' : ` &middot; ${fmtEurAmount(gross)}`}</div>
+        </div>
+        <div class="form-actions">
+          <button class="filter-reset" type="button" data-extra-income-edit="${escapeHtml(id)}">Bearbeiten</button>
+          <button class="filter-reset" type="button" data-extra-income-delete="${escapeHtml(id)}">Löschen</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="status-box extra-income-session-list">
+      <h3>Letzte Sessions</h3>
+      <div class="log-list">${rows}</div>
+    </div>
+  `;
+}
+
+function renderExtraIncomePayout(data) {
+  const summary = readExtraIncomeSummary(data);
+
+  return `
+    <div class="status-box extra-income-payout">
+      <h3>Auszahlung</h3>
+      <div class="status-row">
+        <span class="key">Status</span>
+        <span class="value">${escapeHtml(extraIncomeStatusLabel(summary.payoutStatus))}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Offen brutto</span>
+        <span class="value">${fmtEurAmount(summary.openGrossCents)}</span>
+      </div>
+      <div class="status-row">
+        <span class="key">Offen netto</span>
+        <span class="value">${fmtEurAmount(summary.openNetCents)}</span>
+      </div>
+      <div class="form-actions">
+        <button id="extraIncomeMarkPaidButton" class="filter-reset" type="button" ${summary.canMarkPaid ? '' : 'disabled'}>Als ausgezahlt markieren</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderExtraIncome(data) {
+  if (!data || !data.ok) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  return `
+    ${renderExtraIncomeTiles(data)}
+    <div class="overview-split">
+      <div class="overview-stack">
+        ${renderExtraIncomeTimer(data)}
+        ${renderExtraIncomePayout(data)}
+      </div>
+      <div class="overview-stack">
+        ${renderExtraIncomeForm(data)}
+      </div>
+    </div>
+    ${renderExtraIncomeSessions(data)}
+  `;
+}
+
+async function reloadExtraIncomeAfterWrite() {
+  await loadExtraIncome({ showPageLoader: true });
+
+  if (cachedData.overview) {
+    await loadTab('overview');
+  }
+}
+
+function extraIncomeFormPayload(form) {
+  const data = new FormData(form);
+  const payload = {
+    started_at: data.get('started_at') || '',
+    ended_at: data.get('ended_at') || '',
+    message_count: Number(data.get('message_count') || 0),
+    night_bonus_enabled: Boolean(data.get('night_bonus_enabled')),
+    bonus_mode: data.get('bonus_mode') || 'none',
+    bonus_threshold_messages: Number(data.get('bonus_threshold_messages') || 0),
+    bonus_amount_cents: Math.round(Number(data.get('bonus_amount_eur') || 0) * 100)
+  };
+  const id = data.get('id') || $('extraIncomeSessionId')?.value;
+
+  if (id) {
+    payload.id = id;
+  }
+
+  return payload;
+}
+
+function ensureExtraIncomeOk(response) {
+  if (!response) return false;
+
+  if (response.ok === false) {
+    throw new Error(response.error || response.message || 'Aktion fehlgeschlagen.');
+  }
+
+  return true;
+}
+
+async function startExtraIncomeTimer() {
+  const response = await postJson(`${API_BASE}?type=extraIncomeStart`, {});
+
+  if (ensureExtraIncomeOk(response)) {
+    await reloadExtraIncomeAfterWrite();
+  }
+}
+
+function openExtraIncomeStopModal() {
+  closeExtraIncomeStopModal();
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'extraIncomeStopModal';
+  wrapper.className = 'telegram-modal-backdrop extra-income-modal';
+  wrapper.innerHTML = `
+    <div class="telegram-modal" role="dialog" aria-modal="true" aria-labelledby="extraIncomeStopTitle">
+      <div class="telegram-modal-head">
+        <h3 id="extraIncomeStopTitle">Timer stoppen</h3>
+        <button class="telegram-modal-close" type="button" data-extra-income-close aria-label="Schließen">&times;</button>
+      </div>
+      <form id="extraIncomeStopForm">
+        <label class="telegram-modal-field">Bezahlte Nachrichten
+          <input name="message_count" type="number" min="0" step="1" required>
+        </label>
+        <label class="toggle-row">
+          <input name="night_bonus_enabled" type="checkbox" checked>
+          <span>Nachtbonus anwenden</span>
+        </label>
+        <label class="telegram-modal-field">Bonusmodus
+          <select name="bonus_mode">
+            <option value="none">Kein Bonus</option>
+            <option value="fixed">Einmalig</option>
+            <option value="per_message">Fortlaufend pro Nachricht</option>
+          </select>
+        </label>
+        <label class="telegram-modal-field">Mindestnachrichten
+          <input name="bonus_threshold_messages" type="number" min="0" step="1" value="0">
+        </label>
+        <label class="telegram-modal-field">Bonusbetrag
+          <input name="bonus_amount_eur" type="number" min="0" step="0.01" value="0">
+        </label>
+        <div class="telegram-modal-actions">
+          <button type="submit">Speichern</button>
+          <button class="filter-reset" type="button" data-extra-income-close>Abbrechen</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(wrapper);
+  wrapper.querySelector('[name="message_count"]')?.focus();
+  wrapper.querySelector('#extraIncomeStopForm')?.addEventListener('submit', submitExtraIncomeStop);
+  wrapper.addEventListener('click', event => {
+    const target = event.target;
+
+    if (target === wrapper || target?.dataset?.extraIncomeClose != null) {
+      closeExtraIncomeStopModal();
+    }
+  });
+}
+
+function closeExtraIncomeStopModal() {
+  const modal = $('extraIncomeStopModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function submitExtraIncomeStop(event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  const payload = {
+    message_count: Number(data.get('message_count') || 0),
+    night_bonus_enabled: Boolean(data.get('night_bonus_enabled')),
+    bonus_mode: data.get('bonus_mode') || 'none',
+    bonus_threshold_messages: Number(data.get('bonus_threshold_messages') || 0),
+    bonus_amount_cents: Math.round(Number(data.get('bonus_amount_eur') || 0) * 100)
+  };
+  const response = await postJson(`${API_BASE}?type=extraIncomeStop`, payload);
+
+  if (ensureExtraIncomeOk(response)) {
+    closeExtraIncomeStopModal();
+    await reloadExtraIncomeAfterWrite();
+  }
+}
+
+async function submitExtraIncomeSession(event) {
+  event.preventDefault();
+
+  const response = await postJson(`${API_BASE}?type=extraIncomeSave`, extraIncomeFormPayload(event.currentTarget));
+
+  if (ensureExtraIncomeOk(response)) {
+    event.currentTarget.reset();
+    const idField = $('extraIncomeSessionId');
+
+    if (idField) {
+      idField.value = '';
+    }
+
+    await reloadExtraIncomeAfterWrite();
+  }
+}
+
+async function deleteExtraIncomeSession(id) {
+  if (!id || !window.confirm('Diese Session wirklich löschen?')) return;
+
+  const response = await postJson(`${API_BASE}?type=extraIncomeDelete`, { id });
+
+  if (ensureExtraIncomeOk(response)) {
+    await reloadExtraIncomeAfterWrite();
+  }
+}
+
+async function markExtraIncomePaid() {
+  if (!window.confirm('Abgeschlossene auszahlungsbereite Wochen als ausgezahlt markieren?')) return;
+
+  const response = await postJson(`${API_BASE}?type=extraIncomeMarkPaid`, {});
+
+  if (ensureExtraIncomeOk(response)) {
+    await reloadExtraIncomeAfterWrite();
+  }
+}
+
+function prefillExtraIncomeSessionForm(id) {
+  const session = readExtraIncomeSessions(cachedData.extraIncome)
+    .find(item => String(firstDefined(item, ['id', 'sessionId', 'session_id'])) === String(id));
+
+  if (!session) return;
+
+  const setValue = (fieldId, value) => {
+    const field = $(fieldId);
+
+    if (field) {
+      field.value = value == null ? '' : String(value);
+    }
+  };
+
+  setValue('extraIncomeSessionId', firstDefined(session, ['id', 'sessionId', 'session_id']));
+  setValue('extraIncomeStartedAt', extraIncomeDateInputValue(firstDefined(session, ['startedAt', 'started_at'])));
+  setValue('extraIncomeEndedAt', extraIncomeDateInputValue(firstDefined(session, ['endedAt', 'ended_at'])));
+  setValue('extraIncomeMessageCount', firstNumber(session, ['messageCount', 'message_count']) ?? 0);
+  setValue('extraIncomeBonusMode', firstDefined(session, ['bonusMode', 'bonus_mode']) || 'none');
+  setValue('extraIncomeBonusThreshold', firstNumber(session, ['bonusThresholdMessages', 'bonus_threshold_messages']) ?? 0);
+  setValue('extraIncomeBonusAmount', ((firstNumber(session, ['bonusAmountCents', 'bonus_amount_cents']) ?? 0) / 100).toFixed(2));
+
+  const night = $('extraIncomeNightBonus');
+  const nightEnabled = firstBoolean(session, ['nightBonusEnabled', 'night_bonus_enabled']);
+
+  if (night) {
+    night.checked = nightEnabled !== false;
+  }
+}
+
+function resetExtraIncomeSessionForm() {
+  const form = $('extraIncomeSessionForm');
+
+  if (form) {
+    form.reset();
+  }
+
+  const id = $('extraIncomeSessionId');
+
+  if (id) {
+    id.value = '';
+  }
+}
+
+function bindExtraIncomeControls() {
+  const root = $('extraIncomeContent');
+
+  if (!root || root.dataset.bound === '1') return;
+
+  root.dataset.bound = '1';
+  root.addEventListener('submit', event => {
+    if (event.target?.id === 'extraIncomeSessionForm') {
+      submitExtraIncomeSession(event).catch(error => alert(error.message));
+    }
+  });
+  root.addEventListener('click', event => {
+    const target = event.target;
+
+    if (!target) return;
+
+    if (target.id === 'extraIncomeStartButton') {
+      startExtraIncomeTimer().catch(error => alert(error.message));
+      return;
+    }
+
+    if (target.id === 'extraIncomeStopButton') {
+      openExtraIncomeStopModal();
+      return;
+    }
+
+    if (target.id === 'extraIncomeMarkPaidButton') {
+      markExtraIncomePaid().catch(error => alert(error.message));
+      return;
+    }
+
+    if (target.id === 'extraIncomeFormReset') {
+      resetExtraIncomeSessionForm();
+      return;
+    }
+
+    const editButton = target.closest ? target.closest('[data-extra-income-edit]') : null;
+    if (editButton) {
+      prefillExtraIncomeSessionForm(editButton.dataset.extraIncomeEdit);
+      return;
+    }
+
+    const deleteButton = target.closest ? target.closest('[data-extra-income-delete]') : null;
+    if (deleteButton) {
+      deleteExtraIncomeSession(deleteButton.dataset.extraIncomeDelete).catch(error => alert(error.message));
+    }
+  });
+}
+
 function totalPositiveMinor(byCurrency) {
   return positiveCurrencyEntries(byCurrency)
     .reduce((sum, [, value]) => sum + value, 0);
@@ -1942,6 +2484,7 @@ function renderExpandedOverview(data) {
   html += tile('Gesamt', allTime.earned, allTime.pending, null, { includePending: true });
   html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
+  html += renderExtraIncomeOverviewTile(data.extraIncome || data.extra_income);
   if (Object.keys(lastMonth.earned || {}).length) {
     html += comparisonTile();
   }
@@ -1949,8 +2492,9 @@ function renderExpandedOverview(data) {
   html += renderWorktimeCards(worktimeStats);
   html += renderEffectiveHourlyKpis(e, worktimeStats, fxRates);
 
-  const todayDetailRows = renderGoalDetailRows(todayStats, fxRates);
-  const monthDetailRows = renderGoalDetailRows(monthStats, fxRates);
+  const extraIncomeSummary = readExtraIncomeSummary(data.extraIncome || data.extra_income);
+  const todayDetailRows = renderGoalDetailRows(todayStats, fxRates) + renderExtraIncomeGoalRow(extraIncomeSummary.todayGrossCents);
+  const monthDetailRows = renderGoalDetailRows(monthStats, fxRates) + renderExtraIncomeGoalRow(extraIncomeSummary.monthGrossCents);
 
   html += `
     <div class="goal-card-grid">
@@ -3846,14 +4390,51 @@ function setRefreshButtonLoading(isLoading) {
   button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
 }
 
+async function loadExtraIncome(options = {}) {
+  const panel = $('panel-extra-income');
+  const container = $('extraIncomeContent');
+
+  if (!container) return;
+
+  if (options.showPageLoader) {
+    setPanelLoading(panel, true);
+  }
+
+  try {
+    const data = await fetchData('extraIncome');
+
+    if (!data) return;
+
+    cachedData.extraIncome = data;
+    container.innerHTML = renderExtraIncome(data);
+    container.classList.remove('loading');
+    bindExtraIncomeControls();
+  } catch (e) {
+    container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
+    container.classList.remove('loading');
+  } finally {
+    if (options.showPageLoader) {
+      setPanelLoading(panel, false);
+    }
+  }
+}
+
 async function loadTab(tab, options = {}) {
   const panel = $(`panel-${tab}`);
 
   if (!panel) return;
 
-  const container = panel.querySelector(`#${tab}Content`);
+  const contentIds = {
+    'extra-income': 'extraIncomeContent'
+  };
+  const container = panel.querySelector(`#${contentIds[tab] || `${tab}Content`}`);
 
   if (!container) return;
+
+  if (tab === 'extra-income') {
+    await loadExtraIncome(options);
+    return;
+  }
 
   const renderers = {
     overview: renderOverview,
@@ -3862,7 +4443,8 @@ async function loadTab(tab, options = {}) {
     stats: renderStats,
     account: renderAccount,
     system: renderSystem,
-    settings: renderSettings
+    settings: renderSettings,
+    'extra-income': renderExtraIncome
   };
 
   if (options.showPageLoader) {
@@ -4100,6 +4682,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     setStudiesDatePanelOpen(false);
     closeTelegramCommandModal();
+    closeExtraIncomeStopModal();
   }
 });
 

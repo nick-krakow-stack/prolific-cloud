@@ -146,6 +146,44 @@ $statements = [
     INDEX `idx_chat_id` (`chat_id`),
     INDEX `idx_command` (`command`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+// === extra_income_sessions: manuell erfasste Chatmoderator-Arbeitszeiten ===
+"CREATE TABLE IF NOT EXISTS `extra_income_sessions` (
+    `id`                       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `started_at`               DATETIME NOT NULL,
+    `ended_at`                 DATETIME NOT NULL,
+    `message_count`            INT NOT NULL DEFAULT 0,
+    `night_bonus_enabled`      TINYINT(1) NOT NULL DEFAULT 1,
+    `bonus_mode`               VARCHAR(20) NOT NULL DEFAULT 'none',
+    `bonus_threshold_messages` INT NOT NULL DEFAULT 0,
+    `bonus_amount_cents`       INT NOT NULL DEFAULT 0,
+    `created_at`               DATETIME NOT NULL,
+    `updated_at`               DATETIME NOT NULL,
+    INDEX `idx_extra_income_sessions_started_at` (`started_at`),
+    INDEX `idx_extra_income_sessions_ended_at` (`ended_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+// === extra_income_timer: aktuell laufende Zusatzeinkommen-Session ===
+"CREATE TABLE IF NOT EXISTS `extra_income_timer` (
+    `id`            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `singleton_key` TINYINT NOT NULL DEFAULT 1,
+    `started_at`    DATETIME NOT NULL,
+    `created_at`    DATETIME NOT NULL,
+    UNIQUE KEY `uq_extra_income_timer_singleton` (`singleton_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+// === extra_income_payouts: als ausgezahlt markierte Abrechnungszeiträume ===
+"CREATE TABLE IF NOT EXISTS `extra_income_payouts` (
+    `id`             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `period_start`   DATE NOT NULL,
+    `period_end`     DATE NOT NULL,
+    `gross_cents`    INT NOT NULL DEFAULT 0,
+    `fee_cents`      INT NOT NULL DEFAULT 0,
+    `net_cents`      INT NOT NULL DEFAULT 0,
+    `marked_paid_at` DATETIME NOT NULL,
+    `created_at`     DATETIME NOT NULL,
+    INDEX `idx_extra_income_payouts_period` (`period_start`, `period_end`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 ];
 
 $created = [];
@@ -197,7 +235,7 @@ while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
 <div class="box">
   <h2>📦 Tabellen</h2>
   <ul>
-    <?php foreach (['studies','submissions','settings','events','sync_log','telegram_messages'] as $t): ?>
+    <?php foreach (['studies','submissions','settings','events','sync_log','telegram_messages','extra_income_sessions','extra_income_timer','extra_income_payouts'] as $t): ?>
       <li>
         <code><?= htmlspecialchars($t) ?></code>:
         <?php if (in_array($t, $existing, true)): ?>

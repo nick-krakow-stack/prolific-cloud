@@ -15,6 +15,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
 require_once __DIR__ . '/_worktime.php';
+require_once __DIR__ . '/_extra_income.php';
 require_once __DIR__ . '/_telegram.php';
 require_once __DIR__ . '/_telegram_commands.php';
 require_once __DIR__ . '/../dashboard/session.php';
@@ -92,6 +93,44 @@ try {
             }
 
             json_response(build_settings_response($pdo));
+
+        case 'extraIncome':
+            json_response(build_extra_income_response($pdo));
+
+        case 'extraIncomeStart':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(start_extra_income_timer($pdo));
+
+        case 'extraIncomeStop':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(stop_extra_income_timer($pdo));
+
+        case 'extraIncomeSave':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(save_extra_income_session($pdo));
+
+        case 'extraIncomeDelete':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(delete_extra_income_session($pdo));
+
+        case 'extraIncomeMarkPaid':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(mark_extra_income_paid($pdo));
 
         case 'telegramCommand':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -229,6 +268,7 @@ function build_overview(PDO $pdo): array {
         ->query("SELECT * FROM sync_log ORDER BY id DESC LIMIT 1")
         ->fetch();
     $system = build_system_stats($pdo, $lastSyncAt, $lastSyncRow ?: null);
+    $extraIncome = build_extra_income_overview_summary($pdo);
 
     return [
         'ok' => true,
@@ -267,6 +307,7 @@ function build_overview(PDO $pdo): array {
         'topStudies'       => $topStudies,
         'dailyStats'       => $dailyStats,
         'worktime'        => $worktime,
+        'extraIncome'     => $extraIncome,
         'system'           => $system,
         'balance'          => $balance,
         'fxRates'          => $fxRates,
