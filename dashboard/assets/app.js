@@ -1419,6 +1419,20 @@ function fmtDuration(seconds) {
   return rest ? `${hours} Std ${rest} Min` : `${hours} Std`;
 }
 
+function fmtWorktime(seconds) {
+  const numeric = Number(seconds);
+
+  if (!Number.isFinite(numeric) || numeric < 60) return DASH;
+
+  const hours = Math.floor(numeric / 3600);
+  const minutes = Math.floor((numeric % 3600) / 60);
+
+  if (hours === 0) return `${minutes} min`;
+  if (minutes === 0) return `${hours} h`;
+
+  return `${hours} h ${minutes} min`;
+}
+
 function totalPositiveMinor(byCurrency) {
   return positiveCurrencyEntries(byCurrency)
     .reduce((sum, [, value]) => sum + value, 0);
@@ -1541,6 +1555,104 @@ function renderEfficiencyCard(efficiency, fxRates) {
       <h3>Effizienz / Stundenlohn</h3>
       <div class="efficiency-grid">
         ${tiles}
+      </div>
+    </div>
+  `;
+}
+
+function readWorktimePeriod(period) {
+  return {
+    paidSeconds: firstNumber(period, ['paid_seconds', 'paidSeconds']) ?? 0,
+    unpaidSeconds: firstNumber(period, ['unpaid_seconds', 'unpaidSeconds']) ?? 0,
+    totalSeconds: firstNumber(period, ['total_seconds', 'totalSeconds']) ?? 0,
+    countPaid: firstNumber(period, ['count_paid', 'countPaid']) ?? 0,
+    countUnpaid: firstNumber(period, ['count_unpaid', 'countUnpaid']) ?? 0,
+    countTotal: firstNumber(period, ['count_total', 'countTotal']) ?? 0
+  };
+}
+
+function readWorktimeStats(data) {
+  const worktime = asObject(data.worktime || data.workTime);
+
+  return {
+    today: readWorktimePeriod(worktime.today),
+    week: readWorktimePeriod(worktime.week),
+    month: readWorktimePeriod(worktime.month),
+    lastMonth: readWorktimePeriod(worktime.lastMonth || worktime.last_month),
+    allTime: readWorktimePeriod(worktime.allTime || worktime.all_time)
+  };
+}
+
+function renderWorktimeCards(worktime) {
+  const periods = [
+    ['ARBEITSZEIT HEUTE', worktime.today],
+    ['ARBEITSZEIT DIESE WOCHE', worktime.week],
+    ['ARBEITSZEIT DIESER MONAT', worktime.month],
+    ['ARBEITSZEIT GESAMT', worktime.allTime]
+  ];
+
+  const tiles = periods.map(([label, period]) => {
+    const unpaid = fmtWorktime(period.unpaidSeconds);
+    const unpaidLine = period.unpaidSeconds > 0 && unpaid !== DASH
+      ? `<div class="pending">Davon ${unpaid} unbezahlt</div>`
+      : '';
+
+    return `
+      <div class="earning-tile">
+        <div class="label">${label}</div>
+        <div class="value">${fmtWorktime(period.paidSeconds)}</div>
+        ${unpaidLine}
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="earnings-grid worktime-grid">${tiles}</div>`;
+}
+
+function fmtEffectiveHourlyKpi(earningsPeriod, worktimePeriod, fxRates) {
+  const paidSeconds = Number(readWorktimePeriod(worktimePeriod).paidSeconds);
+
+  if (!Number.isFinite(paidSeconds) || paidSeconds <= 0) {
+    return { rate: DASH, basis: DASH };
+  }
+
+  const earned = asObject(earningsPeriod?.earned);
+  const eurMinor = convertToEur(earned, fxRates);
+
+  if (eurMinor != null) {
+    return {
+      rate: fmtAmount(Math.round((eurMinor * 3600) / paidSeconds), 'EUR') + '/h',
+      basis: `${fmtAmount(eurMinor, 'EUR')} in ${fmtWorktime(paidSeconds)}`
+    };
+  }
+
+  const gbpMinor = currencyMinor(earned, 'GBP');
+
+  if (gbpMinor == null) {
+    return { rate: DASH, basis: DASH };
+  }
+
+  return {
+    rate: fmtAmount(Math.round((gbpMinor * 3600) / paidSeconds), 'GBP') + '/h',
+    basis: `${fmtAmount(gbpMinor, 'GBP')} in ${fmtWorktime(paidSeconds)}`
+  };
+}
+
+function renderEffectiveHourlyKpis(earnings, worktime, fxRates) {
+  const monthKpi = fmtEffectiveHourlyKpi(earnings.month, worktime.month, fxRates);
+  const allTimeKpi = fmtEffectiveHourlyKpi(earnings.allTime, worktime.allTime, fxRates);
+
+  return `
+    <div class="effective-hourly-grid">
+      <div class="earning-tile">
+        <div class="label">EFFEKTIVER STUNDENLOHN MONAT</div>
+        <div class="value">${monthKpi.rate}</div>
+        <div class="secondary">${monthKpi.basis}</div>
+      </div>
+      <div class="earning-tile">
+        <div class="label">EFFEKTIVER STUNDENLOHN GESAMT</div>
+        <div class="value">${allTimeKpi.rate}</div>
+        <div class="secondary">${allTimeKpi.basis}</div>
       </div>
     </div>
   `;
@@ -1734,6 +1846,7 @@ function renderExpandedOverview(data) {
   const todayStats = readTodayStats(data, today);
   const monthStats = readMonthStats(data, month);
   const pendingStats = readPendingStats(data, allTime.pending, pendingByCurrency);
+  const worktimeStats = readWorktimeStats(data);
   const efficiencyStats = readEfficiencyStats(data);
   const topStudies = readTopStudies(data);
   const statusCounts = normalizeStatusCounts(data.statusStats, data.submissionCounts);
@@ -1825,6 +1938,8 @@ function renderExpandedOverview(data) {
     html += comparisonTile();
   }
   html += '</div>';
+  html += renderWorktimeCards(worktimeStats);
+  html += renderEffectiveHourlyKpis(e, worktimeStats, fxRates);
 
   const todayDetailRows = renderGoalDetailRows(todayStats, fxRates);
   const monthDetailRows = renderGoalDetailRows(monthStats, fxRates);

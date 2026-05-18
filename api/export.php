@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
+require_once __DIR__ . '/_worktime.php';
 require_once __DIR__ . '/../dashboard/session.php';
 
 require_login();
@@ -76,6 +77,7 @@ function export_submissions_csv(PDO $pdo): void {
     foreach ($stmt->fetchAll() as $row) {
         $rewardMinor = nullable_int($row['effective_reward_amount_minor'] ?? null);
         $seconds = nullable_int($row['time_taken_seconds'] ?? null);
+        $effectiveSeconds = effective_time_seconds($row);
 
         safe_fputcsv($out, [
             first_non_empty($row['study_name'] ?? null, $row['stored_study_name'] ?? null),
@@ -85,8 +87,8 @@ function export_submissions_csv(PDO $pdo): void {
             (string)($row['started_at'] ?? ''),
             (string)($row['completed_at'] ?? ''),
             $seconds !== null ? format_duration($seconds) : '',
-            ($rewardMinor !== null && $seconds !== null && $seconds > 0)
-                ? format_minor_amount((int)round(($rewardMinor * 3600) / $seconds))
+            $rewardMinor !== null
+                ? format_minor_amount((int)round(($rewardMinor * 3600) / $effectiveSeconds))
                 : '',
             (string)($row['study_id'] ?? ''),
             (string)($row['submission_id'] ?? ''),

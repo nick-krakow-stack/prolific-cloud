@@ -13,9 +13,9 @@ const css = read('dashboard/assets/style.css');
 
 const approvedCommands = [
   '/start', '/help', '/status', '/balance', '/studies', '/earnings', '/quote', '/today',
-  '/pending', '/month', '/goals', '/top', '/stats', '/sync', '/export', '/active', '/last',
-  '/compare', '/heatmap', '/week', '/setgoal', '/sethourly', '/report', '/mute', '/unmute',
-  '/delete_logs'
+  '/worktime', '/effective', '/pending', '/month', '/goals', '/top', '/stats', '/sync',
+  '/export', '/active', '/last', '/compare', '/heatmap', '/week', '/setgoal', '/sethourly',
+  '/report', '/mute', '/unmute', '/delete_logs'
 ];
 
 const checks = [

@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/_rewards.php';
+require_once __DIR__ . '/_worktime.php';
 require_once __DIR__ . '/_telegram.php';
 
 function telegram_parse_command_text(string $text): array {
@@ -41,6 +42,8 @@ function telegram_command_definitions(): array {
     return [
         ['command' => '/status', 'description' => 'Aktueller Systemstatus', 'input' => 'none'],
         ['command' => '/earnings', 'description' => 'Verdienst nach Zeitraum', 'input' => 'none'],
+        ['command' => '/worktime', 'description' => 'Arbeitszeit nach Zeitraum', 'input' => 'none'],
+        ['command' => '/effective', 'description' => 'Effektiver Stundenlohn', 'input' => 'none'],
         ['command' => '/balance', 'description' => 'Auszahlbar und in Pruefung', 'input' => 'none'],
         ['command' => '/studies', 'description' => 'Aktive Studien', 'input' => 'none'],
         ['command' => '/quote', 'description' => 'Erfolgs- und Verdienst-Quote', 'input' => 'none'],
@@ -132,6 +135,10 @@ function telegram_dispatch_command(array $parsed, ?PDO $pdo = null, ?int $curren
             return telegram_studies_message($pdo, 10);
         case '/earnings':
             return telegram_earnings_message($pdo);
+        case '/worktime':
+            return telegram_worktime_message($pdo);
+        case '/effective':
+            return telegram_effective_message($pdo);
         case '/quote':
             return telegram_quote_message($pdo);
         case '/today':
@@ -347,6 +354,93 @@ function telegram_earnings_message(PDO $pdo): string {
         'Vormonat: ' . telegram_fmt_money_map(telegram_sum_by_period($pdo, $earnedStatuses, $periods['lastMonthStart'], $periods['monthStart'])),
         'Gesamt: ' . telegram_fmt_money_map(telegram_sum_by_period($pdo, $earnedStatuses, null, null)),
     ]);
+}
+
+function telegram_worktime_message(PDO $pdo): string {
+    $worktime = telegram_worktime_periods($pdo);
+
+    return implode("\n", [
+        '*Arbeitszeit*',
+        '',
+        telegram_worktime_line('Heute', $worktime['today']),
+        telegram_worktime_line('Diese Woche', $worktime['week']),
+        telegram_worktime_line('Dieser Monat', $worktime['month']),
+        telegram_worktime_line('Vormonat', $worktime['lastMonth']),
+        telegram_worktime_line('Gesamt', $worktime['allTime']),
+    ]);
+}
+
+function telegram_effective_message(PDO $pdo): string {
+    $periods = telegram_current_periods();
+    $earnedStatuses = telegram_earned_statuses();
+    $monthEarned = telegram_sum_by_period($pdo, $earnedStatuses, $periods['monthStart'], null);
+    $allTimeEarned = telegram_sum_by_period($pdo, $earnedStatuses, null, null);
+    $worktime = telegram_worktime_periods($pdo);
+
+    return implode("\n", [
+        '*Effektiver Stundenlohn*',
+        '',
+        telegram_effective_period_line('Dieser Monat', $monthEarned, $worktime['month']),
+        '',
+        telegram_effective_period_line('Gesamt', $allTimeEarned, $worktime['allTime']),
+    ]);
+}
+
+function telegram_worktime_periods(PDO $pdo): array {
+    $periods = telegram_current_periods();
+
+    return [
+        'today' => sum_worktime_by_period($pdo, $periods['today'], null),
+        'week' => sum_worktime_by_period($pdo, $periods['weekStart'], null),
+        'month' => sum_worktime_by_period($pdo, $periods['monthStart'], null),
+        'lastMonth' => sum_worktime_by_period($pdo, $periods['lastMonthStart'], $periods['monthStart']),
+        'allTime' => sum_worktime_by_period($pdo, null, null),
+    ];
+}
+
+function telegram_worktime_line(string $label, array $bucket): string {
+    $paidSeconds = (int)($bucket['paid_seconds'] ?? 0);
+    $unpaidSeconds = (int)($bucket['unpaid_seconds'] ?? 0);
+    $line = tg_escape($label) . ': ' . tg_escape(telegram_fmt_worktime_de($paidSeconds));
+
+    if ($unpaidSeconds > 0) {
+        $line .= "\n" . '   Davon ' . tg_escape(telegram_fmt_worktime_de($unpaidSeconds)) . ' unbezahlt';
+    }
+
+    return $line;
+}
+
+function telegram_effective_period_line(string $label, array $earned, array $worktime): string {
+    $paidSeconds = (int)($worktime['paid_seconds'] ?? 0);
+    if ($paidSeconds <= 0) {
+        return tg_escape($label) . ': Noch keine bezahlte Arbeitszeit';
+    }
+
+    $earnedGbpMinor = telegram_currency_map_to_gbp_minor($earned, telegram_normalize_fx_rates(get_setting('fxRates')));
+    if ($earnedGbpMinor === null) {
+        return tg_escape($label) . ': nicht berechenbar \\(FX\\-Rate fehlt\\)';
+    }
+
+    $hourlyMinor = (int)round(($earnedGbpMinor * 3600) / $paidSeconds);
+
+    return tg_escape($label) . ': ' . telegram_fmt_amount($hourlyMinor, 'GBP') . '/h'
+        . "\n" . '   \\(' . telegram_fmt_money_map($earned) . ' in ' . tg_escape(telegram_fmt_worktime_de($paidSeconds)) . '\\)';
+}
+
+function telegram_fmt_worktime_de(int $seconds): string {
+    if ($seconds < 60) {
+        return '0 min';
+    }
+
+    $h = intdiv($seconds, 3600);
+    $m = intdiv($seconds % 3600, 60);
+    if ($h === 0) {
+        return "{$m}min";
+    }
+    if ($m === 0) {
+        return "{$h}h";
+    }
+    return "{$h}h {$m}min";
 }
 
 function telegram_today_message(PDO $pdo): string {
@@ -1133,27 +1227,50 @@ function telegram_top_rows(PDO $pdo, string $sort): array {
     $statuses = telegram_earned_statuses();
     $placeholders = implode(',', array_fill(0, count($statuses), '?'));
     $rewardExpr = effective_reward_amount_sql('s');
-    $timeFilter = $sort === 'hourly' ? 'AND s.time_taken_seconds > 0' : '';
-    $orderBy = $sort === 'hourly' ? "({$rewardExpr} * 3600 / s.time_taken_seconds) DESC" : "{$rewardExpr} DESC";
+    $limitSql = $sort === 'hourly' ? '' : 'LIMIT 5';
     $stmt = $pdo->prepare("
         SELECT COALESCE(NULLIF(s.study_name, ''), s.study_id) name,
+               s.status,
                s.reward_currency,
                {$rewardExpr} reward_minor,
                s.time_taken_seconds
         FROM submissions s
         WHERE s.status IN ($placeholders)
           AND {$rewardExpr} > 0
-          $timeFilter
-        ORDER BY $orderBy
-        LIMIT 5
+        ORDER BY {$rewardExpr} DESC
+        $limitSql
     ");
     $stmt->execute($statuses);
-    return $stmt->fetchAll();
+    $rows = $stmt->fetchAll();
+
+    if ($sort !== 'hourly') {
+        return $rows;
+    }
+
+    foreach ($rows as &$row) {
+        // Owner rule: raw <=0 oder SCREENED OUT raw<60 => 60 Sekunden.
+        $row['effective_time_seconds'] = effective_time_seconds($row);
+    }
+    unset($row);
+
+    usort($rows, static function (array $a, array $b): int {
+        $aSeconds = max(1, (int)($a['effective_time_seconds'] ?? 0));
+        $bSeconds = max(1, (int)($b['effective_time_seconds'] ?? 0));
+        $aHourly = ((int)($a['reward_minor'] ?? 0) * 3600) / $aSeconds;
+        $bHourly = ((int)($b['reward_minor'] ?? 0) * 3600) / $bSeconds;
+
+        return $bHourly <=> $aHourly;
+    });
+
+    return array_slice($rows, 0, 5);
 }
 
 function telegram_top_row_line(int $index, array $row): string {
     $reward = telegram_fmt_amount((int)($row['reward_minor'] ?? 0), (string)($row['reward_currency'] ?? 'GBP'));
-    $seconds = (int)($row['time_taken_seconds'] ?? 0);
+    $seconds = (int)($row['effective_time_seconds'] ?? null);
+    if ($seconds <= 0) {
+        $seconds = effective_time_seconds($row);
+    }
     $hourly = $seconds > 0
         ? telegram_fmt_amount((int)round(((int)$row['reward_minor'] * 3600) / $seconds), (string)($row['reward_currency'] ?? 'GBP')) . '/h'
         : '\\-';

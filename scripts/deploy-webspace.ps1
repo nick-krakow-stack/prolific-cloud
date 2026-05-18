@@ -15,6 +15,7 @@ $runtimeFiles = @(
   ".htaccess",
   "api/_common.php",
   "api/_rewards.php",
+  "api/_worktime.php",
   "api/_telegram.php",
   "api/_telegram_commands.php",
   "api/data.php",

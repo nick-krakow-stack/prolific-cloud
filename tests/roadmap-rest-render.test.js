@@ -36,6 +36,41 @@ const sandbox = {
 vm.createContext(sandbox);
 vm.runInContext(code, sandbox);
 
+const worktimeOverview = {
+  ok: true,
+  earnings: {
+    today: { earned: { GBP: 0 }, pending: {} },
+    week: { earned: { GBP: 0 }, pending: {} },
+    month: { earned: { GBP: 12000 }, pending: {} },
+    lastMonth: { earned: {}, pending: {} },
+    allTime: { earned: { GBP: 24000 }, pending: {} }
+  },
+  worktime: {
+    today: { paid_seconds: 45, unpaid_seconds: 0, total_seconds: 45, count_paid: 1, count_unpaid: 0, count_total: 1 },
+    week: { paidSeconds: 3720, unpaidSeconds: 120, totalSeconds: 3840, countPaid: 2, countUnpaid: 1, countTotal: 3 },
+    month: { paid_seconds: 14400, unpaid_seconds: 0, total_seconds: 14400, count_paid: 4, count_unpaid: 0, count_total: 4 },
+    allTime: { paidSeconds: 28800, unpaidSeconds: 360, totalSeconds: 29160, countPaid: 8, countUnpaid: 1, countTotal: 9 }
+  },
+  fxRates: {
+    base: 'GBP',
+    rates: { EUR: 1.18, USD: 1.27 }
+  },
+  goals: {
+    daily_gbp_minor: 500,
+    monthly_gbp_minor: 15000
+  },
+  forecast: {},
+  pendingStats: {},
+  todayStats: {},
+  monthStats: {},
+  statusStats: { counts: {} },
+  efficiency: {},
+  topStudies: {},
+  dailyStats: [],
+  serverTime: '2026-05-17T12:00:00Z'
+};
+const worktimeOverviewHtml = sandbox.renderExpandedOverview(worktimeOverview);
+
 const stats = {
   ok: true,
   fxRates: {
@@ -289,6 +324,8 @@ const submissionsFilterHtml = sandbox.renderSubmissions({
 
 const checks = [
   ['renders stats tab content', typeof sandbox.renderStats === 'function' && statsHtml.includes('Kalender-Heatmap')],
+  ['overview supports worktime snake and camel fields', worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT HEUTE</div>') && worktimeOverviewHtml.includes(`<div class="value">\u2013</div>`) && worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT DIESE WOCHE</div>') && worktimeOverviewHtml.includes('<div class="value">1 h 2 min</div>') && worktimeOverviewHtml.includes('Davon 2 min unbezahlt') && worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT GESAMT</div>') && worktimeOverviewHtml.includes('<div class="value">8 h</div>')],
+  ['overview renders effective hourly KPI and dash for zero paid seconds', worktimeOverviewHtml.includes('<div class="label">EFFEKTIVER STUNDENLOHN MONAT</div>') && worktimeOverviewHtml.includes(`<div class="value">\u20ac35,40/h</div>`) && worktimeOverviewHtml.includes('<div class="label">EFFEKTIVER STUNDENLOHN GESAMT</div>') && worktimeOverviewHtml.includes(`<div class="value">\u20ac35,40/h</div>`) && typeof sandbox.fmtEffectiveHourlyKpi === 'function' && sandbox.fmtEffectiveHourlyKpi({ earned: { GBP: 500 } }, { paid_seconds: 0 }, settings.fxRates).rate === '\u2013'],
   ['renders monthly comparison', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsvergleich')],
   ['renders requester analysis', typeof sandbox.renderStats === 'function' && statsHtml.includes('ABC Research')],
   ['renders requester analysis as table columns', statsHtml.includes('class="requester-table"') && statsHtml.includes('<span>Requester</span>') && statsHtml.includes('<span>Anzahl</span>') && statsHtml.includes('<span>Verdienst</span>') && statsHtml.includes('<span>Stundenlohn</span>') && statsHtml.includes('<span>Approval-Rate</span>')],

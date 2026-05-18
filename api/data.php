@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
+require_once __DIR__ . '/_worktime.php';
 require_once __DIR__ . '/_telegram.php';
 require_once __DIR__ . '/_telegram_commands.php';
 require_once __DIR__ . '/../dashboard/session.php';
@@ -209,6 +210,13 @@ function build_overview(PDO $pdo): array {
     $efficiency = build_efficiency_stats($pdo, $earnedStatuses, $today, $weekStart, $monthStart);
     $topStudies = build_top_studies($pdo, $earnedStatuses);
     $dailyStats = build_daily_stats($pdo, $earnedStatuses, $pendingStatuses, $today);
+    $worktime = [
+        'today'     => sum_worktime_by_period($pdo, $today, null),
+        'week'      => sum_worktime_by_period($pdo, $weekStart, null),
+        'month'     => sum_worktime_by_period($pdo, $monthStart, null),
+        'lastMonth' => sum_worktime_by_period($pdo, $lastMonthStart, $lastMonthEnd),
+        'allTime'   => sum_worktime_by_period($pdo, null, null),
+    ];
 
     $balanceRaw   = get_setting('balance');
     $fxRatesRaw   = get_setting('fxRates');
@@ -258,6 +266,7 @@ function build_overview(PDO $pdo): array {
         'efficiency'       => $efficiency,
         'topStudies'       => $topStudies,
         'dailyStats'       => $dailyStats,
+        'worktime'        => $worktime,
         'system'           => $system,
         'balance'          => $balance,
         'fxRates'          => $fxRates,
@@ -533,6 +542,7 @@ function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, stri
 function build_period_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $periodStartSql): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
     $rewardExpr = effective_reward_amount_sql();
+    $worktimeExpr = worktime_seconds_sql();
     $params = $earnedStatuses;
     $params[] = $periodStartSql;
     $params[] = $periodStartSql;
@@ -541,11 +551,10 @@ function build_period_effective_hourly_rate(PDO $pdo, array $earnedStatuses, str
         SELECT reward_currency,
                COUNT(*) sample_count,
                SUM({$rewardExpr}) reward_total,
-               SUM(time_taken_seconds) seconds_total
+               SUM({$worktimeExpr}) seconds_total
         FROM submissions
         WHERE status IN ($placeholders)
           AND {$rewardExpr} > 0
-          AND time_taken_seconds > 0
           AND (completed_at >= ? OR started_at >= ?)
         GROUP BY reward_currency
     ");
@@ -600,16 +609,16 @@ function build_efficiency_stats(
 function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $from): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
     $rewardExpr = effective_reward_amount_sql();
+    $worktimeExpr = worktime_seconds_sql();
 
     $sql = "
         SELECT reward_currency,
                COUNT(*) sample_count,
                SUM({$rewardExpr}) reward_total,
-               SUM(time_taken_seconds) seconds_total
+               SUM({$worktimeExpr}) seconds_total
         FROM submissions
         WHERE status IN ($placeholders)
           AND {$rewardExpr} > 0
-          AND time_taken_seconds > 0
     ";
 
     $params = $earnedStatuses;
@@ -665,9 +674,9 @@ function build_top_studies(PDO $pdo, array $earnedStatuses): array {
 function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
     $rewardExpr = effective_reward_amount_sql('s');
-    $timeFilter = $sortMode === 'hourly' ? 'AND s.time_taken_seconds > 0' : '';
+    $worktimeExpr = worktime_seconds_sql('s');
     $orderBy = $sortMode === 'hourly'
-        ? "({$rewardExpr} * 3600 / s.time_taken_seconds) DESC, {$rewardExpr} DESC"
+        ? "({$rewardExpr} * 3600 / {$worktimeExpr}) DESC, {$rewardExpr} DESC"
         : "{$rewardExpr} DESC, s.completed_at DESC";
 
     $stmt = $pdo->prepare("
@@ -682,7 +691,6 @@ function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode)
         LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
           AND {$rewardExpr} > 0
-          $timeFilter
         ORDER BY $orderBy
         LIMIT 5
     ");
@@ -693,6 +701,7 @@ function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode)
     foreach ($stmt->fetchAll() as $row) {
         $rewardMinor = (int)$row['effective_reward_amount_minor'];
         $seconds = (int)$row['time_taken_seconds'];
+        $effectiveSeconds = effective_time_seconds($row);
 
         $items[] = [
             'studyId' => $row['study_id'],
@@ -701,7 +710,7 @@ function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode)
             'rewardMinor' => $rewardMinor,
             'rewardCurrency' => $row['reward_currency'],
             'timeTakenSeconds' => $seconds,
-            'hourlyRateMinor' => $seconds > 0 ? (int)round(($rewardMinor * 3600) / $seconds) : null,
+            'hourlyRateMinor' => (int)round(($rewardMinor * 3600) / $effectiveSeconds),
             'completedAt' => $row['completed_at'],
         ];
     }
@@ -1266,6 +1275,7 @@ function build_monthly_report(
 
 function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from = null, ?DateTime $to = null, int $limit = 10): array {
     $rewardExpr = effective_reward_amount_sql();
+    $worktimeExpr = worktime_seconds_sql();
     $sql = "
         SELECT COALESCE(NULLIF(researcher_name, ''), NULLIF(institution, ''), 'Unbekannt') requester,
                status,
@@ -1273,7 +1283,7 @@ function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from 
                COUNT(*) submission_count,
                SUM({$rewardExpr}) reward_total,
                SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN {$rewardExpr} ELSE 0 END) hourly_reward_total,
-               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN time_taken_seconds ELSE 0 END) seconds_total,
+               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN {$worktimeExpr} ELSE 0 END) seconds_total,
                SUM(CASE
                    WHEN status = 'APPROVED'
                     AND completed_at IS NOT NULL
@@ -1461,6 +1471,7 @@ function build_top_studies_for_period(PDO $pdo, array $earnedStatuses, DateTime 
     foreach ($stmt->fetchAll() as $row) {
         $rewardMinor = (int)$row['effective_reward_amount_minor'];
         $seconds = (int)$row['time_taken_seconds'];
+        $effectiveSeconds = effective_time_seconds($row);
         $items[] = [
             'studyId' => $row['study_id'],
             'name' => $row['display_name'],
@@ -1468,7 +1479,7 @@ function build_top_studies_for_period(PDO $pdo, array $earnedStatuses, DateTime 
             'rewardMinor' => $rewardMinor,
             'rewardCurrency' => $row['reward_currency'],
             'timeTakenSeconds' => $seconds,
-            'hourlyRateMinor' => $seconds > 0 ? (int)round(($rewardMinor * 3600) / $seconds) : null,
+            'hourlyRateMinor' => (int)round(($rewardMinor * 3600) / $effectiveSeconds),
             'completedAt' => $row['completed_at'],
         ];
     }

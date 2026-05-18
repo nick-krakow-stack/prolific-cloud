@@ -42,6 +42,48 @@ const sampleOverview = {
     lastMonth: { earned: { GBP: 2500, USD: 150 }, pending: {} },
     allTime: { earned: { GBP: 15000 }, pending: { GBP: 500, USD: 1270 } }
   },
+  worktime: {
+    today: {
+      paid_seconds: 9300,
+      unpaid_seconds: 720,
+      total_seconds: 10020,
+      count_paid: 5,
+      count_unpaid: 1,
+      count_total: 6
+    },
+    week: {
+      paidSeconds: 3660,
+      unpaidSeconds: 59,
+      totalSeconds: 3719,
+      countPaid: 3,
+      countUnpaid: 1,
+      countTotal: 4
+    },
+    month: {
+      paid_seconds: 7200,
+      unpaid_seconds: 0,
+      total_seconds: 7200,
+      count_paid: 14,
+      count_unpaid: 0,
+      count_total: 14
+    },
+    lastMonth: {
+      paid_seconds: 5400,
+      unpaid_seconds: 0,
+      total_seconds: 5400,
+      count_paid: 7,
+      count_unpaid: 0,
+      count_total: 7
+    },
+    allTime: {
+      paidSeconds: 30000,
+      unpaidSeconds: 1860,
+      totalSeconds: 31860,
+      countPaid: 28,
+      countUnpaid: 4,
+      countTotal: 32
+    }
+  },
   balance: {
     approved_per_currency: { GBP: 1139 },
     pending_per_currency: { GBP: 2465, USD: 1562 }
@@ -179,6 +221,11 @@ const checks = [
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
   ['period tiles include awaiting review in the main amount', html.includes(`<div class="value">${gbp800} + ${usd127}</div>`) && html.includes(`<div class="value">${gbp2500} + ${usd635}</div>`) && html.includes(`<div class="value">${gbp8750} + ${usd1270}</div>`) && html.includes(`<div class="value">${gbp15500} + ${usd1270}</div>`)],
   ['period tiles label pending as included share', html.includes(`Davon ${gbp300} + ${usd127} ausstehend`) && html.includes(`Davon ${usd635} ausstehend`) && html.includes(`Davon ${gbp1250} + ${usd1270} ausstehend`) && html.includes(`Davon ${gbp500} + ${usd1270} ausstehend`) && !html.includes(`+ ${gbp300} ausstehend`)],
+  ['renders worktime cards directly after earnings cards', html.includes('class="earnings-grid worktime-grid"') && html.indexOf('ARBEITSZEIT HEUTE') > html.indexOf('</div>') && html.indexOf('ARBEITSZEIT HEUTE') < html.indexOf('class="goal-card-grid"')],
+  ['renders four worktime cards with worktime formatting', (html.match(/ARBEITSZEIT /g) || []).length === 4 && html.includes('<div class="label">ARBEITSZEIT HEUTE</div>') && html.includes('<div class="value">2 h 35 min</div>') && html.includes('<div class="label">ARBEITSZEIT DIESE WOCHE</div>') && html.includes('<div class="value">1 h 1 min</div>') && html.includes('<div class="label">ARBEITSZEIT GESAMT</div>') && html.includes('<div class="value">8 h 20 min</div>')],
+  ['renders unpaid worktime subline only when unpaid seconds are at least one minute', html.includes('Davon 12 min unbezahlt') && html.includes('Davon 31 min unbezahlt') && !html.includes('Davon 0 min unbezahlt') && !html.includes('ohne Verg&uuml;tung')],
+  ['formats worktime below one minute as dash', typeof sandbox.fmtWorktime === 'function' && sandbox.fmtWorktime(59) === '\u2013' && sandbox.fmtWorktime(60) === '1 min' && sandbox.fmtWorktime(3600) === '1 h'],
+  ['renders effective hourly KPI cards from EUR earnings and paid worktime', html.includes('class="effective-hourly-grid"') && html.includes('<div class="label">EFFEKTIVER STUNDENLOHN MONAT</div>') && html.includes(`<div class="value">\u20ac44,25/h</div>`) && html.includes(`\u20ac88,50 in 2 h`) && html.includes('<div class="label">EFFEKTIVER STUNDENLOHN GESAMT</div>') && html.includes(`<div class="value">\u20ac21,24/h</div>`) && html.includes(`\u20ac177,00 in 8 h 20 min`)],
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
   ['daily goal includes pending rewards', html.includes('€10,62 von €11,80') && html.includes('90 %')],
   ['monthly goal includes pending rewards', html.includes('€115,05 von €118,00') && html.includes('97,5 %')],
