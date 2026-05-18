@@ -145,6 +145,14 @@ function goalOverflowPercent(percent) {
   return Math.max(0, Math.min(100, Math.round((numeric - 100) * 10) / 10));
 }
 
+function goalStrokeOffset(percent) {
+  const clamped = clampPercent(percent) ?? 0;
+  const offset = Math.max(0, Math.min(100, 100 - clamped));
+  const rounded = Math.round(offset * 10) / 10;
+
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded);
+}
+
 function monthComparisonPercent(currentEarned, previousEarned, fxRates) {
   const currentValue = convertToEur(currentEarned, fxRates) ?? currencyMinor(currentEarned, 'GBP');
   const previousValue = convertToEur(previousEarned, fxRates) ?? currencyMinor(previousEarned, 'GBP');
@@ -279,6 +287,23 @@ function sumCurrencyMinor(currency, ...maps) {
   return found ? total : null;
 }
 
+function sumCurrencyMaps(...maps) {
+  const result = {};
+
+  for (const map of maps) {
+    for (const [currencyRaw, valueRaw] of Object.entries(asObject(map))) {
+      const currency = String(currencyRaw || '').toUpperCase();
+      const value = Number(valueRaw);
+
+      if (!currency || !Number.isFinite(value)) continue;
+
+      result[currency] = (result[currency] || 0) + Math.round(value);
+    }
+  }
+
+  return result;
+}
+
 function positiveCurrencyEntries(byCurrency) {
   return Object.entries(asObject(byCurrency))
     .map(([currency, value]) => [String(currency).toUpperCase(), Number(value)])
@@ -360,6 +385,37 @@ function convertEurToGbpMinor(minor, fxRates) {
   }
 
   return Math.round(numeric / eurRate);
+}
+
+function convertToGbpMinor(byCurrency, fxRates) {
+  const entries = positiveCurrencyEntries(byCurrency);
+
+  if (entries.length === 0) return null;
+
+  const fx = readFxRates(fxRates);
+
+  if (fx.base !== 'GBP') {
+    return entries.every(([currency]) => currency === 'GBP')
+      ? entries.reduce((sum, [, minor]) => sum + Math.round(minor), 0)
+      : null;
+  }
+
+  let gbpMinor = 0;
+
+  for (const [currency, minor] of entries) {
+    if (currency === 'GBP') {
+      gbpMinor += Math.round(minor);
+      continue;
+    }
+
+    const currencyRate = fxRateFor(fx.rates, currency);
+
+    if (!currencyRate) return null;
+
+    gbpMinor += Math.round(minor / currencyRate);
+  }
+
+  return gbpMinor > 0 ? gbpMinor : null;
 }
 
 function canConvertGbpEur(fxRates) {
@@ -1169,42 +1225,54 @@ function statusSortKey(status) {
 }
 
 function inferMonthlyForecast(forecast, monthEarnedMinor, monthlyGoalMinor, serverTime) {
-  const current = firstNumber(forecast, [
+  const combinedCurrent = Number(monthEarnedMinor);
+  const fallbackCurrent = Number.isFinite(combinedCurrent) ? Math.round(combinedCurrent) : null;
+  const sourceCurrent = firstNumber(forecast, [
     'current_month_gbp_minor',
     'currentMonthGbpMinor',
     'currentMonthMinor',
     'current_gbp_minor',
     'currentMinor'
-  ]) ?? monthEarnedMinor;
-  let average = firstNumber(forecast, [
-    'average_day_gbp_minor',
-    'averagePerDayGbpMinor',
-    'averagePerDayMinor',
-    'daily_average_gbp_minor',
-    'dailyAverageGbpMinor'
   ]);
-  let projected = firstNumber(forecast, [
-    'projected_month_gbp_minor',
-    'projectedMonthGbpMinor',
-    'projectedMonthMinor',
-    'forecast_gbp_minor',
-    'forecastGbpMinor',
-    'forecastMinor'
-  ]);
-  let delta = firstNumber(forecast, [
-    'target_delta_gbp_minor',
-    'targetDeltaGbpMinor',
-    'goal_delta_gbp_minor',
-    'goalDeltaGbpMinor',
-    'difference_to_goal_gbp_minor',
-    'differenceToGoalGbpMinor'
-  ]);
-  let willReach = firstBoolean(forecast, [
-    'will_reach_goal',
-    'willReachGoal',
-    'targetWillBeReached',
-    'goalWillBeReached'
-  ]);
+  const current = fallbackCurrent ?? sourceCurrent;
+  const sourceMatchesCurrent = fallbackCurrent == null || sourceCurrent == null || sourceCurrent === fallbackCurrent;
+  let average = sourceMatchesCurrent
+    ? firstNumber(forecast, [
+      'average_day_gbp_minor',
+      'averagePerDayGbpMinor',
+      'averagePerDayMinor',
+      'daily_average_gbp_minor',
+      'dailyAverageGbpMinor'
+    ])
+    : null;
+  let projected = sourceMatchesCurrent
+    ? firstNumber(forecast, [
+      'projected_month_gbp_minor',
+      'projectedMonthGbpMinor',
+      'projectedMonthMinor',
+      'forecast_gbp_minor',
+      'forecastGbpMinor',
+      'forecastMinor'
+    ])
+    : null;
+  let delta = sourceMatchesCurrent
+    ? firstNumber(forecast, [
+      'target_delta_gbp_minor',
+      'targetDeltaGbpMinor',
+      'goal_delta_gbp_minor',
+      'goalDeltaGbpMinor',
+      'difference_to_goal_gbp_minor',
+      'differenceToGoalGbpMinor'
+    ])
+    : null;
+  let willReach = sourceMatchesCurrent
+    ? firstBoolean(forecast, [
+      'will_reach_goal',
+      'willReachGoal',
+      'targetWillBeReached',
+      'goalWillBeReached'
+    ])
+    : null;
 
   if ((average == null || projected == null || delta == null || willReach == null) && current != null) {
     const now = serverTime ? new Date(serverTime) : new Date();
@@ -1354,10 +1422,24 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
   const percent = progressPercent(currentMinor, targetMinor);
   const innerPercent = clampPercent(percent) ?? 0;
   const overflowPercent = goalOverflowPercent(percent);
+  const progressOffset = goalStrokeOffset(innerPercent);
+  const overflowOffset = goalStrokeOffset(overflowPercent);
   const remaining =
     Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
       ? Math.max(0, Number(targetMinor) - Number(currentMinor))
       : null;
+  const overflowRing = overflowPercent > 0
+    ? `
+          <circle
+            class="goal-ring-overflow"
+            cx="50"
+            cy="50"
+            r="46"
+            pathLength="100"
+            stroke-dasharray="100"
+            stroke-dashoffset="${overflowOffset}"
+          ></circle>`
+    : '';
 
   return `
     <div class="status-box goal-card">
@@ -1365,13 +1447,22 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
         <h3>${label}</h3>
         <div
           class="goal-ring-wrap${overflowPercent > 0 ? ' has-overflow' : ''}"
-          style="--goal-progress: ${innerPercent}%; --goal-overflow: ${overflowPercent}%;"
           aria-label="${escapeHtml(label)}: ${escapeHtml(fmtPercent(percent))} erreicht"
         >
-          <div class="goal-ring-overflow"></div>
-          <div class="goal-ring ${goalProgressClass(percent)}">
-            <span>${fmtPercent(percent)}</span>
-          </div>
+          <svg class="goal-ring-svg ${goalProgressClass(percent)}" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <circle class="goal-ring-track" cx="50" cy="50" r="36"></circle>
+            <circle
+              class="goal-ring-progress"
+              cx="50"
+              cy="50"
+              r="36"
+              pathLength="100"
+              stroke-dasharray="100"
+              stroke-dashoffset="${progressOffset}"
+            ></circle>
+            ${overflowRing}
+          </svg>
+          <span class="goal-ring-value">${fmtPercent(percent)}</span>
         </div>
       </div>
 
@@ -1596,11 +1687,14 @@ function renderExpandedOverview(data) {
   const month = e.month || {};
   const lastMonth = e.lastMonth || {};
   const allTime = e.allTime || {};
+  const fxRates = data.fxRates || data.fx_rates;
   const goals = asObject(data.goals);
   const dailyGoalMinor = readGoalMinor(goals, 'daily');
   const monthlyGoalMinor = readGoalMinor(goals, 'monthly');
-  const todayGoalGbp = sumCurrencyMinor('GBP', today.earned, today.pending);
-  const monthGoalGbp = sumCurrencyMinor('GBP', month.earned, month.pending);
+  const todayGoalByCurrency = sumCurrencyMaps(today.earned, today.pending);
+  const monthGoalByCurrency = sumCurrencyMaps(month.earned, month.pending);
+  const todayGoalGbp = convertToGbpMinor(todayGoalByCurrency, fxRates) ?? sumCurrencyMinor('GBP', today.earned, today.pending);
+  const monthGoalGbp = convertToGbpMinor(monthGoalByCurrency, fxRates) ?? sumCurrencyMinor('GBP', month.earned, month.pending);
   const balance = asObject(data.balance);
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
   const todayStats = readTodayStats(data, today);
@@ -1629,26 +1723,50 @@ function renderExpandedOverview(data) {
     ['pending_rate', 'pendingRate'],
     statusTotal > 0 ? (pendingCount / statusTotal) * 100 : null
   );
-  const forecast = inferMonthlyForecast(
-    asObject(data.forecast),
-    monthGoalGbp,
-    monthlyGoalMinor,
-    data.serverTime
-  );
-  const fxRates = data.fxRates || data.fx_rates;
+  const forecastEurCurrent = convertToEur(monthGoalByCurrency, fxRates);
+  const forecastEurGoal = convertGbpToEurMinor(monthlyGoalMinor, fxRates);
+  const forecast = forecastEurCurrent != null
+    ? {
+      ...inferMonthlyForecast(
+        {},
+        forecastEurCurrent,
+        forecastEurGoal,
+        data.serverTime
+      ),
+      currency: 'EUR'
+    }
+    : {
+      ...inferMonthlyForecast(
+        asObject(data.forecast),
+        monthGoalGbp,
+        monthlyGoalMinor,
+        data.serverTime
+      ),
+      currency: 'GBP'
+    };
+  const fmtForecast = (minor) => forecast.currency === 'EUR'
+    ? fmtAmount(minor, 'EUR')
+    : fmtGbpAsEur(minor, fxRates);
+  const fmtSignedForecast = (minor) => forecast.currency === 'EUR'
+    ? fmtSignedAmount(minor, 'EUR')
+    : fmtSignedGbpAsEur(minor, fxRates);
 
-  const tile = (label, earned, pending, subline) => `
-    <div class="earning-tile">
-      <div class="label">${label}</div>
-      <div class="value">${fmtMulti(earned)}</div>
-      ${
-        pending && Object.keys(pending).length > 0
-          ? `<div class="pending">+ ${fmtMulti(pending)} ausstehend</div>`
-          : ''
-      }
-      ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
-    </div>
-  `;
+  const tile = (label, earned, pending, subline, options = {}) => {
+    const displayValue = options.includePending ? sumCurrencyMaps(earned, pending) : earned;
+
+    return `
+      <div class="earning-tile">
+        <div class="label">${label}</div>
+        <div class="value">${fmtMulti(displayValue)}</div>
+        ${
+          pending && Object.keys(pending).length > 0
+            ? `<div class="pending">${options.includePending ? 'Davon ' : '+ '}${fmtMulti(pending)} ausstehend</div>`
+            : ''
+        }
+        ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
+      </div>
+    `;
+  };
   const comparisonTile = () => {
     const percent = monthComparisonPercent(month.earned, lastMonth.earned, fxRates);
 
@@ -1663,10 +1781,10 @@ function renderExpandedOverview(data) {
 
   let html = '<div class="earnings-grid">';
 
-  html += tile('Heute', today.earned, today.pending);
-  html += tile('Diese Woche', week.earned, week.pending);
-  html += tile('Dieser Monat', month.earned, month.pending);
-  html += tile('Gesamt', allTime.earned, allTime.pending);
+  html += tile('Heute', today.earned, today.pending, null, { includePending: true });
+  html += tile('Diese Woche', week.earned, week.pending, null, { includePending: true });
+  html += tile('Dieser Monat', month.earned, month.pending, null, { includePending: true });
+  html += tile('Gesamt', allTime.earned, allTime.pending, null, { includePending: true });
   html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
   if (Object.keys(lastMonth.earned || {}).length) {
@@ -1708,22 +1826,22 @@ function renderExpandedOverview(data) {
 
         <div class="status-row">
           <span class="key">Aktuell</span>
-          <span class="value">${fmtGbpAsEur(forecast.current, fxRates)}</span>
+          <span class="value">${fmtForecast(forecast.current)}</span>
         </div>
 
         <div class="status-row">
           <span class="key">Ø pro Tag</span>
-          <span class="value">${fmtGbpAsEur(forecast.average, fxRates)}</span>
+          <span class="value">${fmtForecast(forecast.average)}</span>
         </div>
 
         <div class="status-row">
           <span class="key">Prognose Monatsende</span>
-          <span class="value">${fmtGbpAsEur(forecast.projected, fxRates)}</span>
+          <span class="value">${fmtForecast(forecast.projected)}</span>
         </div>
 
         <div class="status-row">
           <span class="key">Abweichung zum Ziel</span>
-          <span class="value">${fmtSignedGbpAsEur(forecast.delta, fxRates)}</span>
+          <span class="value">${fmtSignedForecast(forecast.delta)}</span>
         </div>
 
         <div class="status-row">

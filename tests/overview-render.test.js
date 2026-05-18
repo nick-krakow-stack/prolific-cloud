@@ -36,11 +36,11 @@ vm.runInContext(code, sandbox);
 const sampleOverview = {
   ok: true,
   earnings: {
-    today: { earned: { GBP: 500 }, pending: { GBP: 300 } },
-    week: { earned: { GBP: 2500 }, pending: {} },
-    month: { earned: { GBP: 7500 }, pending: { GBP: 1250 } },
+    today: { earned: { GBP: 500 }, pending: { GBP: 300, USD: 127 } },
+    week: { earned: { GBP: 2500 }, pending: { USD: 635 } },
+    month: { earned: { GBP: 7500 }, pending: { GBP: 1250, USD: 1270 } },
     lastMonth: { earned: { GBP: 2500, USD: 150 }, pending: {} },
-    allTime: { earned: { GBP: 15000 }, pending: {} }
+    allTime: { earned: { GBP: 15000 }, pending: { GBP: 500, USD: 1270 } }
   },
   balance: {
     approved_per_currency: { GBP: 1139 },
@@ -140,6 +140,17 @@ const sampleOverview = {
 };
 
 const html = sandbox.renderExpandedOverview(sampleOverview);
+const overflowGoalHtml = sandbox.renderGoalCard('Overflow', 11000, 10000, sampleOverview.fxRates);
+const gbp800 = sandbox.fmtAmount(800, 'GBP');
+const gbp300 = sandbox.fmtAmount(300, 'GBP');
+const gbp2500 = sandbox.fmtAmount(2500, 'GBP');
+const gbp8750 = sandbox.fmtAmount(8750, 'GBP');
+const gbp1250 = sandbox.fmtAmount(1250, 'GBP');
+const gbp15500 = sandbox.fmtAmount(15500, 'GBP');
+const gbp500 = sandbox.fmtAmount(500, 'GBP');
+const usd127 = sandbox.fmtAmount(127, 'USD');
+const usd635 = sandbox.fmtAmount(635, 'USD');
+const usd1270 = sandbox.fmtAmount(1270, 'USD');
 
 const checks = [
   ['renders EUR equivalent from GBP-based fxRates', html.includes('≈ €13,44')],
@@ -152,17 +163,22 @@ const checks = [
   ['formats singular study count', sandbox.fmtStudyCount(1) === '1 Studie'],
   ['does not render system health in overview', !html.includes('System-Health') && !html.includes('health-grid')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
+  ['period tiles include awaiting review in the main amount', html.includes(`<div class="value">${gbp800} + ${usd127}</div>`) && html.includes(`<div class="value">${gbp2500} + ${usd635}</div>`) && html.includes(`<div class="value">${gbp8750} + ${usd1270}</div>`) && html.includes(`<div class="value">${gbp15500} + ${usd1270}</div>`)],
+  ['period tiles label pending as included share', html.includes(`Davon ${gbp300} + ${usd127} ausstehend`) && html.includes(`Davon ${usd635} ausstehend`) && html.includes(`Davon ${gbp1250} + ${usd1270} ausstehend`) && html.includes(`Davon ${gbp500} + ${usd1270} ausstehend`) && !html.includes(`+ ${gbp300} ausstehend`)],
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
-  ['daily goal includes pending rewards', html.includes('€9,44 von €11,80') && html.includes('80 %')],
-  ['monthly goal includes pending rewards', html.includes('€103,25 von €118,00') && html.includes('87,5 %')],
-  ['renders daily and monthly goals as paired ring cards', html.includes('class="goal-card-grid"') && html.includes('class="status-box goal-card"') && html.includes('class="goal-ring-wrap"') && html.includes('class="goal-ring')],
+  ['daily goal includes pending rewards', html.includes('€10,62 von €11,80') && html.includes('90 %')],
+  ['monthly goal includes pending rewards', html.includes('€115,05 von €118,00') && html.includes('97,5 %')],
+  ['renders daily and monthly goals as paired SVG ring cards', html.includes('class="goal-card-grid"') && html.includes('class="status-box goal-card"') && html.includes('class="goal-ring-wrap"') && html.includes('<svg class="goal-ring-svg ') && (html.match(/class="goal-ring-progress/g) || []).length === 2],
+  ['goal SVG rings render concrete stroke offsets', html.includes('stroke-dasharray="100"') && html.includes('stroke-dashoffset="10"') && html.includes('stroke-dashoffset="2.5"')],
+  ['goal overflow SVG rings render a concrete blue outer circle', overflowGoalHtml.includes('class="goal-ring-overflow"') && overflowGoalHtml.includes('stroke-dashoffset="90"') && css.includes('.goal-ring-overflow') && css.includes('var(--primary)')],
+  ['goal rings do not use conic-gradient', !html.includes('conic-gradient') && !overflowGoalHtml.includes('conic-gradient') && !/\.goal-ring[\s\S]*conic-gradient/.test(css)],
   ['renames monthly goal card to current month', html.includes('<h3>Aktueller Monat</h3>') && !html.includes('<h3>Monatsziel</h3>')],
   ['colors goal rings by threshold', typeof sandbox.goalProgressClass === 'function' && sandbox.goalProgressClass(49.9) === 'is-danger' && sandbox.goalProgressClass(50) === 'is-warn' && sandbox.goalProgressClass(94.9) === 'is-warn' && sandbox.goalProgressClass(95) === 'is-good'],
   ['supports outer progress ring above 100 percent', typeof sandbox.goalOverflowPercent === 'function' && sandbox.goalOverflowPercent(110) === 10 && sandbox.goalOverflowPercent(250) === 100],
   ['merges today stats into the daily goal card', html.includes('<span class="key">Teilnahmen</span>') && html.includes('<span class="value">5</span>') && html.includes('<span class="key">Ø pro Teilnahme</span>') && html.includes('<span class="value">€2,19</span>') && html.includes('<span class="key">Effektiver Stundenlohn</span>') && html.includes('<span class="value">€13,68/h</span>')],
   ['adds monthly participation stats to the current month card', html.includes('<span class="value">14</span>') && html.includes('<span class="value">€7,38</span>')],
   ['renders effective hourly as one combined EUR rate', html.includes('<span class="value">€25,90/h</span>') && !html.includes('$13,44/h')],
-  ['renders monthly forecast in EUR', html.includes('<span class="value">€103,25</span>') && html.includes('<span class="value">€188,33</span>')],
+  ['renders monthly forecast in EUR', html.includes('<span class="value">€115,05</span>') && html.includes('<span class="value">€209,80</span>')],
   ['renders forecast and status distribution side by side', html.includes('class="forecast-status-grid"') && /<div class="forecast-status-grid">[\s\S]*<h3>Monatsprognose<\/h3>[\s\S]*<h3>Status-Verteilung<\/h3>[\s\S]*<\/div>/.test(html) && css.includes('.forecast-status-grid') && css.includes('grid-template-columns: repeat(2, minmax(0, 1fr))')],
   ['renders efficiency hourly rates in EUR', html.includes('€14,16/h') && html.includes('€15,93/h')],
   ['renders top studies in EUR', html.includes('€10,03') && html.includes('€40,12/h') && !html.includes('£34,00/h')],

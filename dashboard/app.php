@@ -4,6 +4,16 @@ declare(strict_types=1);
 require_once __DIR__ . '/session.php';
 
 require_login();
+
+function asset_version(string $asset): string {
+    $path = __DIR__ . $asset;
+
+    if (!is_file($path)) {
+        return '1';
+    }
+
+    return (string)filemtime($path);
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -12,7 +22,7 @@ require_login();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prolific Watcher Dashboard</title>
 
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/style.css?v=<?= htmlspecialchars(asset_version('/assets/style.css'), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
 <meta name="theme-color" content="#1f2937">
@@ -121,6 +131,6 @@ require_login();
 
 </main>
 
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=<?= htmlspecialchars(asset_version('/assets/app.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

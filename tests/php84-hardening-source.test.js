@@ -4,6 +4,7 @@ const htaccess = fs.readFileSync('.htaccess', 'utf8');
 const exportSource = fs.readFileSync('api/export.php', 'utf8');
 const sessionSource = fs.readFileSync('dashboard/session.php', 'utf8');
 const loginSource = fs.readFileSync('dashboard/index.php', 'utf8');
+const appSource = fs.readFileSync('dashboard/app.php', 'utf8');
 
 const checks = [
   [
@@ -38,6 +39,13 @@ const checks = [
     /login_failed/.test(loginSource) &&
       /JSON_EXTRACT\(data_json,\s*'\$\.ip'\)/.test(loginSource) &&
       /JSON_EXTRACT\(data_json,\s*'\$\.username'\)/.test(loginSource)
+  ],
+  [
+    'dashboard assets use filemtime cache busters',
+    appSource.includes('asset_version(') &&
+      appSource.includes('filemtime($path)') &&
+      appSource.includes('/assets/app.js?v=') &&
+      appSource.includes('/assets/style.css?v=')
   ]
 ];
 

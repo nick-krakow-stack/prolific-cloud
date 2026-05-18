@@ -256,8 +256,6 @@ a:not(.icon-btn):hover {
 }
 .goal-card-head h3 { margin: 0; }
 .goal-ring-wrap {
-  --goal-progress: 0%;
-  --goal-overflow: 0%;
   position: relative;
   display: grid;
   place-items: center;
@@ -265,35 +263,37 @@ a:not(.icon-btn):hover {
   height: 88px;
   flex: 0 0 88px;
 }
-.goal-ring-overflow,
-.goal-ring {
+.goal-ring-svg,
+.goal-ring-value {
   grid-area: 1 / 1;
-  border-radius: 999px;
 }
-.goal-ring-overflow {
+.goal-ring-svg {
   width: 88px;
   height: 88px;
-  background: conic-gradient(var(--primary) var(--goal-overflow), transparent 0);
-  opacity: 0;
+  overflow: visible;
+  transform: rotate(-90deg);
 }
-.goal-ring-wrap.has-overflow .goal-ring-overflow { opacity: 1; }
-.goal-ring {
-  --goal-ring-color: var(--text-muted);
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 74px;
-  height: 74px;
-  background: conic-gradient(var(--goal-ring-color) var(--goal-progress), var(--border) 0);
+.goal-ring-svg circle {
+  fill: none;
+  stroke-linecap: round;
 }
-.goal-ring::after {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border-radius: inherit;
-  background: var(--bg-card);
+.goal-ring-track {
+  stroke: var(--border);
+  stroke-width: 10;
 }
-.goal-ring span {
+.goal-ring-progress {
+  stroke: var(--text-muted);
+  stroke-width: 10;
+}
+.goal-ring-overflow {
+  stroke: var(--primary);
+  stroke-width: 5;
+}
+.goal-ring-svg.is-danger .goal-ring-progress { stroke: var(--danger); }
+.goal-ring-svg.is-warn .goal-ring-progress { stroke: var(--warn); }
+.goal-ring-svg.is-good .goal-ring-progress { stroke: var(--success); }
+.goal-ring-svg.is-neutral .goal-ring-progress { stroke: var(--text-muted); }
+.goal-ring-value {
   position: relative;
   z-index: 1;
   max-width: 54px;
@@ -303,10 +303,6 @@ a:not(.icon-btn):hover {
   line-height: 1.1;
   text-align: center;
 }
-.goal-ring.is-danger { --goal-ring-color: var(--danger); }
-.goal-ring.is-warn { --goal-ring-color: var(--warn); }
-.goal-ring.is-good { --goal-ring-color: var(--success); }
-.goal-ring.is-neutral { --goal-ring-color: var(--text-muted); }
 
 .efficiency-grid {
   display: grid;
@@ -359,16 +355,11 @@ a:not(.icon-btn):hover {
     height: 78px;
     flex-basis: 78px;
   }
-  .goal-ring-overflow {
+  .goal-ring-svg {
     width: 78px;
     height: 78px;
   }
-  .goal-ring {
-    width: 66px;
-    height: 66px;
-  }
-  .goal-ring::after { inset: 7px; }
-  .goal-ring span {
+  .goal-ring-value {
     max-width: 48px;
     font-size: 12px;
   }
