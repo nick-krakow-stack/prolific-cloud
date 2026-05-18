@@ -282,17 +282,12 @@ a:not(.icon-btn):hover {
   stroke-width: 10;
 }
 .goal-ring-progress {
-  stroke: var(--text-muted);
   stroke-width: 10;
 }
 .goal-ring-overflow {
   stroke: var(--primary);
   stroke-width: 5;
 }
-.goal-ring-svg.is-danger .goal-ring-progress { stroke: var(--danger); }
-.goal-ring-svg.is-warn .goal-ring-progress { stroke: var(--warn); }
-.goal-ring-svg.is-good .goal-ring-progress { stroke: var(--success); }
-.goal-ring-svg.is-neutral .goal-ring-progress { stroke: var(--text-muted); }
 .goal-ring-value {
   position: relative;
   z-index: 1;

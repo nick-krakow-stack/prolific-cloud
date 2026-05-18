@@ -141,6 +141,20 @@ const sampleOverview = {
 
 const html = sandbox.renderExpandedOverview(sampleOverview);
 const overflowGoalHtml = sandbox.renderGoalCard('Overflow', 11000, 10000, sampleOverview.fxRates);
+const goalColorSamples = [0, 5, 50, 98, 100, 110].map(percent => {
+  const color = typeof sandbox.goalProgressColor === 'function'
+    ? sandbox.goalProgressColor(percent)
+    : null;
+
+  return [percent, color, sandbox.renderGoalCard(`Color ${percent}`, percent, 100, sampleOverview.fxRates)];
+});
+const intermediateGoalColors = typeof sandbox.goalProgressColor === 'function'
+  ? {
+      redYellow: sandbox.goalProgressColor(27.5),
+      yellowGreen: sandbox.goalProgressColor(74)
+    }
+  : {};
+const goalRingCssStrokeOverride = /\.goal-ring-svg\.is-(?:danger|warn|good|neutral)\s+\.goal-ring-progress\s*\{[^}]*stroke\s*:/.test(css);
 const gbp800 = sandbox.fmtAmount(800, 'GBP');
 const gbp300 = sandbox.fmtAmount(300, 'GBP');
 const gbp2500 = sandbox.fmtAmount(2500, 'GBP');
@@ -171,6 +185,17 @@ const checks = [
   ['renders daily and monthly goals as paired SVG ring cards', html.includes('class="goal-card-grid"') && html.includes('class="status-box goal-card"') && html.includes('class="goal-ring-wrap"') && html.includes('<svg class="goal-ring-svg ') && (html.match(/class="goal-ring-progress/g) || []).length === 2],
   ['goal SVG rings render concrete stroke offsets', html.includes('stroke-dasharray="100"') && html.includes('stroke-dashoffset="10"') && html.includes('stroke-dashoffset="2.5"')],
   ['goal overflow SVG rings render a concrete blue outer circle', overflowGoalHtml.includes('class="goal-ring-overflow"') && overflowGoalHtml.includes('stroke-dashoffset="90"') && css.includes('.goal-ring-overflow') && css.includes('var(--primary)')],
+  ['goal ring colors follow continuous percentage rule', typeof sandbox.goalProgressColor === 'function' && JSON.stringify(Object.fromEntries(goalColorSamples.map(([percent, color]) => [percent, color]))) === JSON.stringify({
+    0: '#ef4444',
+    5: '#ef4444',
+    50: '#facc15',
+    98: '#16a34a',
+    100: '#16a34a',
+    110: '#16a34a'
+  })],
+  ['goal ring colors interpolate real intermediate colors', intermediateGoalColors.redYellow === '#f5882d' && intermediateGoalColors.redYellow !== '#ef4444' && intermediateGoalColors.redYellow !== '#facc15' && intermediateGoalColors.yellowGreen === '#88b830' && intermediateGoalColors.yellowGreen !== '#facc15' && intermediateGoalColors.yellowGreen !== '#16a34a'],
+  ['goal ring colors render as presentation attributes and inline SVG stroke styles', goalColorSamples.every(([, color, goalHtml]) => goalHtml.includes(`class="goal-ring-progress"`) && goalHtml.includes(`stroke="${color}"`) && goalHtml.includes(`style="stroke: ${color};"`)) && overflowGoalHtml.includes('class="goal-ring-overflow"') && overflowGoalHtml.includes('stroke="var(--primary)"') && overflowGoalHtml.includes('style="stroke: var(--primary);"')],
+  ['goal ring CSS does not override calculated stroke colors', !goalRingCssStrokeOverride],
   ['goal rings do not use conic-gradient', !html.includes('conic-gradient') && !overflowGoalHtml.includes('conic-gradient') && !/\.goal-ring[\s\S]*conic-gradient/.test(css)],
   ['renames monthly goal card to current month', html.includes('<h3>Aktueller Monat</h3>') && !html.includes('<h3>Monatsziel</h3>')],
   ['colors goal rings by threshold', typeof sandbox.goalProgressClass === 'function' && sandbox.goalProgressClass(49.9) === 'is-danger' && sandbox.goalProgressClass(50) === 'is-warn' && sandbox.goalProgressClass(94.9) === 'is-warn' && sandbox.goalProgressClass(95) === 'is-good'],

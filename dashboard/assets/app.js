@@ -137,6 +137,35 @@ function goalProgressClass(percent) {
   return 'is-good';
 }
 
+function mixHexColor(fromHex, toHex, ratio) {
+  const clamped = Math.max(0, Math.min(1, Number(ratio)));
+  const from = fromHex.replace('#', '');
+  const to = toHex.replace('#', '');
+  const channels = [0, 2, 4].map(offset => {
+    const start = parseInt(from.slice(offset, offset + 2), 16);
+    const end = parseInt(to.slice(offset, offset + 2), 16);
+    const mixed = Math.round(start + (end - start) * clamped);
+
+    return mixed.toString(16).padStart(2, '0');
+  });
+
+  return `#${channels.join('')}`;
+}
+
+function goalProgressColor(percent) {
+  const numeric = Number(percent);
+  const red = '#ef4444';
+  const yellow = '#facc15';
+  const green = '#16a34a';
+
+  if (!Number.isFinite(numeric)) return '#94a3b8';
+  if (numeric <= 5) return red;
+  if (numeric < 50) return mixHexColor(red, yellow, (numeric - 5) / 45);
+  if (numeric < 98) return mixHexColor(yellow, green, (numeric - 50) / 48);
+
+  return green;
+}
+
 function goalOverflowPercent(percent) {
   const numeric = Number(percent);
 
@@ -1424,6 +1453,7 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
   const overflowPercent = goalOverflowPercent(percent);
   const progressOffset = goalStrokeOffset(innerPercent);
   const overflowOffset = goalStrokeOffset(overflowPercent);
+  const progressColor = goalProgressColor(percent);
   const remaining =
     Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
       ? Math.max(0, Number(targetMinor) - Number(currentMinor))
@@ -1436,6 +1466,8 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
             cy="50"
             r="46"
             pathLength="100"
+            stroke="var(--primary)"
+            style="stroke: var(--primary);"
             stroke-dasharray="100"
             stroke-dashoffset="${overflowOffset}"
           ></circle>`
@@ -1457,6 +1489,8 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
               cy="50"
               r="36"
               pathLength="100"
+              stroke="${progressColor}"
+              style="stroke: ${progressColor};"
               stroke-dasharray="100"
               stroke-dashoffset="${progressOffset}"
             ></circle>
