@@ -891,6 +891,7 @@ function build_telegram_system_status(PDO $pdo): array {
             ['command' => '/earnings', 'description' => 'Verdienst nach Zeitraum'],
             ['command' => '/balance', 'description' => 'Auszahlbar und in Prüfung'],
             ['command' => '/studies', 'description' => 'Aktive Studien'],
+            ['command' => '/quote', 'description' => 'Erfolgs- und Verdienst-Quote'],
             ['command' => '/today', 'description' => 'Heutige Aktivität'],
             ['command' => '/help', 'description' => 'Befehlsübersicht'],
         ],

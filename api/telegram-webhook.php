@@ -99,6 +99,8 @@ function telegram_dispatch_command(string $command, $chatId): string {
             return telegram_studies_message();
         case '/earnings':
             return telegram_earnings_message();
+        case '/quote':
+            return telegram_quote_message();
         case '/today':
             return telegram_today_message();
         default:
@@ -120,6 +122,7 @@ function telegram_help_message(bool $withGreeting): string {
     $lines[] = "/earnings \\- Verdienst\\-Übersicht";
     $lines[] = "/balance \\- Kontostand";
     $lines[] = "/studies \\- aktive Studien";
+    $lines[] = "/quote \\- Erfolgs\\- und Verdienst\\-Quote";
     $lines[] = "/today \\- heutige Aktivität";
     $lines[] = "/help \\- Hilfe";
 
@@ -206,6 +209,223 @@ function telegram_balance_message(): string {
         'Auszahlbar: ' . telegram_fmt_money_map($extracted['available']),
         'In Prüfung: ' . telegram_fmt_money_map($extracted['pending']),
     ]);
+}
+
+function telegram_quote_message(): string {
+    $stats = telegram_build_quote_stats(db());
+
+    if ((int)$stats['sampleCount'] === 0) {
+        return "🎯 *Quoten \\(letzte 30 Tage\\)*\n\nKeine passenden Studien im Auswertungszeitraum\\.";
+    }
+
+    $successDenominator = (int)$stats['accepted'] + (int)$stats['missed'];
+    $successRate = $successDenominator > 0
+        ? ((int)$stats['accepted'] / $successDenominator) * 100
+        : null;
+    $earningRate = $stats['fxComplete'] && $stats['possibleGbpMinor'] > 0
+        ? ($stats['actualGbpMinor'] / $stats['possibleGbpMinor']) * 100
+        : null;
+    $earningRateText = !$stats['fxComplete']
+        ? tg_escape('nicht berechenbar (FX-Rate fehlt)')
+        : ($stats['inconsistent']
+            ? 'Daten inkonsistent'
+            : telegram_fmt_percent($earningRate));
+    $amountLine = $stats['fxComplete']
+        ? telegram_fmt_amount((int)$stats['actualGbpMinor'], 'GBP')
+            . ' von '
+            . telegram_fmt_amount((int)$stats['possibleGbpMinor'], 'GBP')
+            . ' möglich'
+        : telegram_fmt_money_map($stats['actualByCurrency'])
+            . ' von '
+            . telegram_fmt_money_map($stats['possibleByCurrency'])
+            . ' möglich';
+
+    return implode("\n", [
+        "🎯 *Quoten \\(letzte 30 Tage\\)*",
+        '',
+        'Erfolgsquote: ' . telegram_fmt_percent($successRate),
+        tg_escape((string)$stats['accepted']) . '/' . tg_escape((string)$successDenominator) . ' Studien angenommen',
+        '\\(\\+ ' . tg_escape((string)$stats['returned']) . ' zurückgegeben\\)',
+        '',
+        'Verdienst\\-Quote: ' . $earningRateText,
+        $amountLine,
+    ]);
+}
+
+function telegram_build_quote_stats(PDO $pdo): array {
+    $from = (new DateTime('now', new DateTimeZone(date_default_timezone_get())))
+        ->modify('-30 days')
+        ->setTime(0, 0, 0);
+    $studyStmt = $pdo->prepare("
+        SELECT id, reward_minor, reward_currency
+        FROM studies
+        WHERE first_seen >= ?
+          AND reward_minor > 0
+          AND reward_minor IS NOT NULL
+        ORDER BY first_seen DESC
+    ");
+    $studyStmt->execute([$from->format('Y-m-d H:i:s')]);
+    $studies = $studyStmt->fetchAll();
+    $studyIds = array_values(array_filter(array_map(static function ($study): string {
+        return (string)($study['id'] ?? '');
+    }, $studies)));
+
+    $submissionsByStudy = telegram_quote_submissions_by_study($pdo, $studyIds);
+    $fxRates = telegram_normalize_fx_rates(get_setting('fxRates'));
+    $actualByCurrency = [];
+    $possibleByCurrency = [];
+    $accepted = 0;
+    $missed = 0;
+    $returned = 0;
+
+    foreach ($studies as $study) {
+        $studyId = (string)($study['id'] ?? '');
+        $currency = strtoupper((string)($study['reward_currency'] ?? 'GBP'));
+        $possibleMinor = (int)($study['reward_minor'] ?? 0);
+        $submission = $submissionsByStudy[$studyId] ?? null;
+        $status = $submission ? telegram_normalize_status((string)($submission['status'] ?? '')) : '';
+        $actualMinor = $submission ? (int)($submission['effective_reward_minor'] ?? 0) : 0;
+
+        if ($status === 'RETURNED') {
+            $returned++;
+            continue;
+        } elseif (in_array($status, ['REJECTED', 'TIMED OUT', 'TIMED-OUT'], true)) {
+            continue;
+        } elseif (in_array($status, ['APPROVED', 'AWAITING REVIEW', 'SCREENED OUT', 'SCREENED-OUT'], true)) {
+            $accepted++;
+        } elseif ($status === '') {
+            $missed++;
+        }
+
+        if (in_array($status, ['SCREENED OUT', 'SCREENED-OUT'], true)) {
+            $possibleMinor = $actualMinor;
+        }
+
+        $possibleByCurrency[$currency] = ($possibleByCurrency[$currency] ?? 0) + $possibleMinor;
+
+        if (in_array($status, ['APPROVED', 'SCREENED OUT', 'SCREENED-OUT'], true) && $actualMinor > 0) {
+            $actualCurrency = strtoupper((string)($submission['reward_currency'] ?? $currency));
+            $actualByCurrency[$actualCurrency] = ($actualByCurrency[$actualCurrency] ?? 0) + $actualMinor;
+        }
+    }
+
+    $actualGbpMinor = telegram_currency_map_to_gbp_minor($actualByCurrency, $fxRates);
+    $possibleGbpMinor = telegram_currency_map_to_gbp_minor($possibleByCurrency, $fxRates);
+    $fxComplete = $actualGbpMinor !== null && $possibleGbpMinor !== null;
+
+    return [
+        'sampleCount' => count($studies),
+        'accepted' => $accepted,
+        'missed' => $missed,
+        'returned' => $returned,
+        'actualByCurrency' => $actualByCurrency,
+        'possibleByCurrency' => $possibleByCurrency,
+        'actualGbpMinor' => $actualGbpMinor,
+        'possibleGbpMinor' => $possibleGbpMinor,
+        'fxComplete' => $fxComplete,
+        'inconsistent' => $fxComplete && $possibleGbpMinor > 0 && $actualGbpMinor > ($possibleGbpMinor * 2),
+    ];
+}
+
+function telegram_quote_submissions_by_study(PDO $pdo, array $studyIds): array {
+    if (empty($studyIds)) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($studyIds), '?'));
+    $rewardExpr = effective_reward_amount_sql();
+    $stmt = $pdo->prepare("
+        SELECT study_id, status, reward_currency, {$rewardExpr} AS effective_reward_minor
+        FROM submissions
+        WHERE study_id IN ($placeholders)
+    ");
+    $stmt->execute($studyIds);
+
+    $result = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $studyId = (string)($row['study_id'] ?? '');
+        $status = telegram_normalize_status((string)($row['status'] ?? ''));
+        $priority = telegram_quote_submission_priority($status);
+
+        if ($studyId === '' || $priority <= 0) {
+            continue;
+        }
+
+        $existing = $result[$studyId] ?? null;
+        $existingPriority = $existing ? telegram_quote_submission_priority((string)($existing['status'] ?? '')) : 0;
+
+        if (!$existing || $priority > $existingPriority) {
+            $row['status'] = $status;
+            $result[$studyId] = $row;
+        }
+    }
+
+    return $result;
+}
+
+function telegram_quote_submission_priority(string $status): int {
+    return match (telegram_normalize_status($status)) {
+        'APPROVED' => 40,
+        'AWAITING REVIEW' => 30,
+        'SCREENED OUT', 'SCREENED-OUT' => 20,
+        'RETURNED' => 10,
+        'REJECTED' => 5,
+        'TIMED OUT', 'TIMED-OUT' => 5,
+        default => 0,
+    };
+}
+
+function telegram_normalize_status(string $status): string {
+    return strtoupper(str_replace('_', ' ', trim($status)));
+}
+
+function telegram_normalize_fx_rates($fxRates): array {
+    if (is_string($fxRates)) {
+        $decoded = json_decode($fxRates, true);
+        $fxRates = is_array($decoded) ? $decoded : [];
+    }
+
+    if (!is_array($fxRates)) {
+        return ['base' => 'GBP', 'rates' => []];
+    }
+
+    $rates = $fxRates['rates'] ?? $fxRates;
+    return [
+        'base' => strtoupper((string)($fxRates['base'] ?? 'GBP')),
+        'rates' => is_array($rates) ? $rates : [],
+    ];
+}
+
+function telegram_currency_map_to_gbp_minor(array $amounts, array $fxRates): ?int {
+    $total = 0;
+
+    foreach ($amounts as $currency => $minor) {
+        $currency = strtoupper((string)$currency);
+        $minor = (int)$minor;
+
+        if ($currency === 'GBP') {
+            $total += $minor;
+            continue;
+        }
+
+        $rate = telegram_fx_rate($fxRates, $currency);
+        if ($rate === null || $rate <= 0) {
+            return null;
+        }
+
+        $total += (int)round($minor / $rate);
+    }
+
+    return $total;
+}
+
+function telegram_fx_rate(array $fxRates, string $currency) {
+    $currency = strtoupper($currency);
+    $rates = $fxRates['rates'] ?? [];
+    $rate = $rates[$currency] ?? $rates[strtolower($currency)] ?? null;
+    $numeric = is_numeric($rate) ? (float)$rate : null;
+
+    return $numeric && $numeric > 0 ? $numeric : null;
 }
 
 function telegram_studies_message(): string {
@@ -479,4 +699,12 @@ function telegram_fmt_amount(int $minor, string $currency): string {
     $symbol = $symbols[$currency] ?? $currency . ' ';
 
     return tg_escape($symbol . number_format($minor / 100, 2, ',', '.'));
+}
+
+function telegram_fmt_percent($value): string {
+    if (!is_numeric($value)) {
+        return 'â€“';
+    }
+
+    return tg_escape(number_format((float)$value, 0, ',', '.') . ' %');
 }
