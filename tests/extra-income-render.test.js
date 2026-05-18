@@ -6,6 +6,8 @@ const js = fs.readFileSync('dashboard/assets/app.js', 'utf8');
 
 assert(shell.includes('data-tab="extra-income"'));
 assert(shell.includes('id="panel-extra-income"'));
+assert(shell.indexOf('data-tab="settings"') < shell.indexOf('class="tabs-divider"'));
+assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="extra-income"'));
 assert(shell.includes('id="extraIncomeContent"'));
 
 for (const symbol of [
