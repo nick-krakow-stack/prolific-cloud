@@ -633,7 +633,9 @@ Geänderte Dateien:
 ## 15. Backlog: weitere sinnvolle Bot-Befehle
 
 Diese Befehle sind nicht Teil der ersten drei Telegram-Phasen, aber als naechste
-Ausbaustufe vorgemerkt.
+Ausbaustufe zur Umsetzung freigegeben. `/requester` und `/study` werden bewusst
+nicht umgesetzt, weil die aktuelle Dashboard-Auswertung diese Detailabfragen
+ausreichend abdeckt.
 
 | Befehl | Zweck |
 |--------|-------|
@@ -645,3 +647,30 @@ Ausbaustufe vorgemerkt.
 | `/sync` | Technischer Sync-Status: letzter Sync, letzter erfolgreicher Sync, letzter Fehler, Webhook-Status |
 | `/export` | Link zum CSV-Export, ohne Dateiuebertragung ueber Telegram |
 | `/active` | Kurzform von `/studies`: Anzahl und beste drei aktive Studien |
+| `/last` | Letzte Teilnahmen mit Status, Betrag und Zeitpunkt |
+| `/compare` | Entwicklung aktueller Monat gegen Vormonat |
+| `/heatmap` | Tagesuebersicht fuer den aktuellen Monat |
+| `/week` | Aktuelle Woche kompakt: verdient, pending, Teilnahmen |
+| `/setgoal day <betrag>` | Tagesziel in EUR setzen |
+| `/setgoal month <betrag>` | Monatsziel in EUR setzen |
+| `/sethourly good <betrag>` | Grenze fuer sehr guten Stundenlohn in EUR setzen |
+| `/sethourly ok <betrag>` | Grenze fuer Okay-Stundenlohn in EUR setzen |
+| `/report on <HH:MM>` | Tagesbericht als Telegram-Praeferenz aktivieren |
+| `/report off` | Tagesbericht als Telegram-Praeferenz deaktivieren |
+| `/mute <dauer>` | Telegram-Meldungen fuer eine Dauer pausieren |
+| `/unmute` | Telegram-Pause aufheben |
+| `/delete_logs` | Telegram-Nachrichtenlog loeschen |
+
+### Dashboard-Ausloesung der Telegram-Befehle
+
+Die Befehle werden im System-Tab in der Telegram-Bot-Card als anklickbare
+Buttons angezeigt:
+
+- Befehle ohne Variablen senden die entsprechende Nachricht direkt an Telegram.
+- Befehle mit Variablen oeffnen ein kleines Modal mit Befehlsname, Dropdowns bzw.
+  Eingabefeldern und Senden-Button.
+- `/delete_logs` oeffnet ein Bestaetigungsmodal.
+- Dashboard-Requests laufen ueber einen sessiongeschuetzten POST-Endpunkt in
+  `api/data.php` und verwenden denselben Dispatcher wie der Telegram-Webhook.
+- Secrets aus `config.php` werden weder im Dashboard noch in Antworten
+  ausgegeben.
