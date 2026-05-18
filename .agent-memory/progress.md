@@ -316,3 +316,10 @@
 - 2026-05-18 18:19:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-18 23:38:47 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-18 23:50:00 +02:00 - Moved `Zusatzeinkommen` to the far-right nav position after `Einstellungen` with a separator, deployed the UI change, and captured the future extension-control channel idea for Telegram pause and dashboard-triggered sync.
+- 2026-05-18 23:44:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 23:51:57 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 23:52:56 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 23:52:56 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 23:54:19 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 23:54:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 00:09:16 +02:00 - Polished dashboard review items: centered Requester-Analyse metric columns, fixed exact EUR goal display by passing saved EUR target values through overview API/UI, modernized `Zusatzeinkommen` manual session form layout, added regression/source tests, deployed runtime files, and verified production with PHP 8.4 lint and HTTP 200.

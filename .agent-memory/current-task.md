@@ -1,6 +1,6 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-18 23:50:00 +02:00
+Last updated: 2026-05-19 00:09:16 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -96,4 +96,23 @@ Last updated: 2026-05-18 23:50:00 +02:00
 - [x] Deploy the runtime UI change to production.
 - [x] Review current Telegram mute and sync direction at code level.
 - [x] Capture backend-to-extension control idea in next steps.
+
+## Active Task: Dashboard Review Polish
+
+- [x] Read required repository startup files and current git status.
+- [x] Use read-only Sub-Agents for goal conversion diagnosis and UI/CSS review.
+- [x] Center Requester-Analyse metric columns while keeping requester names left aligned.
+- [x] Stop double-converting EUR dashboard goals by returning exact EUR goal settings from the overview API.
+- [x] Render goal card target/remaining values from exact EUR settings when available.
+- [x] Modernize the `Zusatzeinkommen` manual session form with scoped field-grid classes and responsive layout.
+- [x] Add regression/source coverage for exact EUR goal display, requester alignment, and extra-income form classes.
+- [x] Run JS render/source checks, PHP 8.4 lint on the server, deploy runtime files, and verify production HTTP 200.
+
+## Active Task Checklist
+
+- [ ] Add an item.
+
+## Completed Task Steps
+
+- [x] Baseline step.
 
