@@ -627,3 +627,21 @@ Geänderte Dateien:
 - **Tagesbericht automatisch?**: Cron auf Shared-Hosting ist umständlich (kein
   Long-Running). Falls gewünscht: All-Inkl bietet im KAS Cronjobs an, dann ein
   separates `cron-daily-report.php` schreiben. Nicht Teil von Phase 1.
+
+---
+
+## 15. Backlog: weitere sinnvolle Bot-Befehle
+
+Diese Befehle sind nicht Teil der ersten drei Telegram-Phasen, aber als naechste
+Ausbaustufe vorgemerkt.
+
+| Befehl | Zweck |
+|--------|-------|
+| `/pending` | Offene Teilnahmen, offene Summen, aelteste offene Teilnahme, aelter als 7/14 Tage |
+| `/month` | Aktueller Monat kompakt: verdient, pending, Zielerreichung, Prognose Monatsende |
+| `/goals` | Tagesziel und Monatsziel: erreicht, offen, Prozent |
+| `/top` | Top-Studien nach Gesamtverguetung und Stundenlohn |
+| `/stats` | Status-Verteilung: Approved, Awaiting Review, Screened Out, Returned, Timed-Out plus Raten |
+| `/sync` | Technischer Sync-Status: letzter Sync, letzter erfolgreicher Sync, letzter Fehler, Webhook-Status |
+| `/export` | Link zum CSV-Export, ohne Dateiuebertragung ueber Telegram |
+| `/active` | Kurzform von `/studies`: Anzahl und beste drei aktive Studien |
