@@ -1821,14 +1821,27 @@ a:not(.icon-btn):hover {
   place-items: center;
   width: 112px;
   aspect-ratio: 1;
-  border-radius: 50%;
 }
-.submission-pie::after {
-  content: "";
-  position: absolute;
-  inset: 23px;
-  border-radius: 50%;
-  background: var(--bg-card);
+.submission-pie-svg,
+.submission-pie span {
+  grid-area: 1 / 1;
+}
+.submission-pie-svg {
+  width: 112px;
+  height: 112px;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+.submission-pie-svg circle {
+  fill: none;
+  stroke-linecap: butt;
+}
+.submission-pie-track {
+  stroke: var(--border);
+  stroke-width: 18;
+}
+.submission-pie-segment {
+  stroke-width: 18;
 }
 .submission-pie span {
   position: relative;

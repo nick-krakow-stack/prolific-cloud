@@ -116,6 +116,14 @@ function clampPercent(value) {
   return Math.max(0, Math.min(100, numeric));
 }
 
+function fmtSvgNumber(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric)) return '0';
+
+  return (Math.round(numeric * 1000) / 1000).toString();
+}
+
 function progressPercent(currentMinor, targetMinor) {
   const current = Number(currentMinor);
   const target = Number(targetMinor);
@@ -3562,7 +3570,6 @@ function renderSubmissionSummary(submissions) {
   const total = submissions.length;
   const buckets = submissionSummaryBuckets(submissions);
   let offset = 0;
-  const fallbackColor = 'var(--border)';
   const colorMap = {
     approved: 'var(--success)',
     pending: 'var(--warn)',
@@ -3575,15 +3582,23 @@ function renderSubmissionSummary(submissions) {
     .map(bucket => {
       const start = offset;
       const end = offset + (bucket.count / total) * 100;
+      const size = Math.max(0, end - start);
 
       offset = end;
 
-      return `${colorMap[bucket.key]} ${start}% ${end}%`;
+      return `
+        <circle
+          class="submission-pie-segment ${bucket.className}"
+          cx="50"
+          cy="50"
+          r="36"
+          pathLength="100"
+          stroke="${colorMap[bucket.key]}"
+          stroke-dasharray="${fmtSvgNumber(size)} ${fmtSvgNumber(100 - size)}"
+          stroke-dashoffset="${fmtSvgNumber(-start)}"
+        ></circle>
+      `;
     });
-
-  const pieStyle = total > 0
-    ? `background: conic-gradient(${segments.join(', ')});`
-    : `background: ${fallbackColor};`;
 
   const tiles = buckets.map(bucket => {
     const percent = total > 0 ? (bucket.count / total) * 100 : 0;
@@ -3610,7 +3625,11 @@ function renderSubmissionSummary(submissions) {
       <div class="submission-summary-grid">
         ${tiles}
         <div class="submission-chart-card summary-wide">
-          <div class="submission-pie" style="${pieStyle}" aria-label="Status-Verteilung der Teilnahmen">
+          <div class="submission-pie" aria-label="Status-Verteilung der Teilnahmen">
+            <svg class="submission-pie-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+              <circle class="submission-pie-track" cx="50" cy="50" r="36"></circle>
+              ${segments.join('')}
+            </svg>
             <span>${fmtCount(total)}</span>
           </div>
           <div class="submission-pie-legend">${legend}</div>
