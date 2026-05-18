@@ -1290,6 +1290,17 @@ a:not(.icon-btn):hover {
   border-bottom: 1px solid var(--border);
 }
 
+.requester-row > span {
+  min-width: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.requester-row > span:first-child,
+.requester-row .requester-name {
+  text-align: left;
+}
+
 .requester-row:last-child {
   border-bottom: none;
 }
@@ -1305,7 +1316,7 @@ a:not(.icon-btn):hover {
 
 .requester-number {
   min-width: 0;
-  text-align: right;
+  text-align: center;
   font-size: 12px;
   font-weight: 700;
   color: var(--text);
@@ -1585,7 +1596,7 @@ a:not(.icon-btn):hover {
   }
 
   .requester-number {
-    text-align: left;
+    text-align: center;
   }
 
   .requester-number::before {
@@ -1597,6 +1608,7 @@ a:not(.icon-btn):hover {
     font-weight: 750;
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    text-align: center;
   }
 
   .report-actions,
@@ -1995,6 +2007,12 @@ a:not(.icon-btn):hover {
 .extra-income-session-list {
   margin-bottom: 16px;
 }
+.extra-income-form {
+  gap: 16px;
+}
+.extra-income-form-head h3 {
+  margin: 0;
+}
 .extra-income-timer .form-actions,
 .extra-income-payout .form-actions,
 .extra-income-form .form-actions {
@@ -2004,20 +2022,50 @@ a:not(.icon-btn):hover {
   justify-content: flex-end;
   margin-top: 12px;
 }
-.extra-income-form .form-grid {
+.extra-income-field-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+  min-width: 0;
 }
-.extra-income-form label,
+.extra-income-field,
 .extra-income-modal label {
   min-width: 0;
 }
-.extra-income-form input,
-.extra-income-form select,
+.extra-income-field {
+  display: grid;
+  gap: 6px;
+}
+.extra-income-field > span,
+.extra-income-toggle > span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+.extra-income-field input,
+.extra-income-field select,
 .extra-income-modal input,
 .extra-income-modal select {
   width: 100%;
+  min-width: 0;
+}
+.extra-income-field input,
+.extra-income-field select {
+  min-height: 38px;
+}
+.extra-income-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+}
+.extra-income-toggle input {
+  width: auto;
+  flex: 0 0 auto;
+}
+.extra-income-actions {
+  align-items: center;
 }
 .extra-income-session-list .event-card {
   align-items: center;
@@ -2063,14 +2111,14 @@ a:not(.icon-btn):hover {
   .extra-income-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .extra-income-form .form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .extra-income-field-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 }
 
 @media (max-width: 620px) {
   .extra-income-grid,
-  .extra-income-form .form-grid {
+  .extra-income-field-grid {
     grid-template-columns: 1fr;
   }
   .extra-income-session-list .event-card {
@@ -2082,5 +2130,8 @@ a:not(.icon-btn):hover {
   .extra-income-payout .form-actions,
   .extra-income-form .form-actions {
     justify-content: flex-start;
+  }
+  .extra-income-actions button {
+    width: 100%;
   }
 }

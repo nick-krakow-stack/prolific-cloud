@@ -24,6 +24,11 @@ const checks = [
     buildOverview.includes("$dashboardGoals['monthly_gbp_minor']")
   ],
   [
+    'overview returns exact EUR goal display values',
+    buildOverview.includes("'daily_eur_minor' => $dashboardGoals['daily_eur_minor'] ?? null") &&
+      buildOverview.includes("'monthly_eur_minor' => $dashboardGoals['monthly_eur_minor'] ?? null")
+  ],
+  [
     'overview does not read config goals directly',
     !buildOverview.includes("$config['goals']")
   ]

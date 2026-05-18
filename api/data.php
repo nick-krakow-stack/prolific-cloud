@@ -237,6 +237,8 @@ function build_overview(PDO $pdo): array {
     $goals = [
         'daily_gbp_minor' => $dailyGoalGbpMinor,
         'monthly_gbp_minor' => $monthlyGoalGbpMinor,
+        'daily_eur_minor' => $dashboardGoals['daily_eur_minor'] ?? null,
+        'monthly_eur_minor' => $dashboardGoals['monthly_eur_minor'] ?? null,
         'today' => build_goal_progress($goalTodayGbp, $dailyGoalGbpMinor),
         'month' => build_goal_progress($goalMonthGbp, $monthlyGoalGbpMinor),
     ];

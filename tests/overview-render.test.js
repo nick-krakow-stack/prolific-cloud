@@ -183,6 +183,14 @@ const sampleOverview = {
 
 const html = sandbox.renderExpandedOverview(sampleOverview);
 const overflowGoalHtml = sandbox.renderGoalCard('Overflow', 11000, 10000, sampleOverview.fxRates);
+const exactEurGoalHtml = sandbox.renderGoalCard(
+  'Exact EUR',
+  2543,
+  2543,
+  sampleOverview.fxRates,
+  '',
+  { currentEurMinor: 3000, targetEurMinor: 3000 }
+);
 const goalColorSamples = [0, 5, 50, 98, 100, 110].map(percent => {
   const color = typeof sandbox.goalProgressColor === 'function'
     ? sandbox.goalProgressColor(percent)
@@ -229,6 +237,7 @@ const checks = [
   ['renames daily goal card to today', html.includes('<h3>Heute</h3>') && !html.includes('<h3>Tagesziel</h3>')],
   ['daily goal includes pending rewards', html.includes('€10,62 von €11,80') && html.includes('90 %')],
   ['monthly goal includes pending rewards', html.includes('€115,05 von €118,00') && html.includes('97,5 %')],
+  ['goal cards keep exact EUR targets instead of reconverting rounded GBP settings', exactEurGoalHtml.includes('\u20ac30,00 von \u20ac30,00') && !exactEurGoalHtml.includes('\u20ac30,01')],
   ['renders daily and monthly goals as paired SVG ring cards', html.includes('class="goal-card-grid"') && html.includes('class="status-box goal-card"') && html.includes('class="goal-ring-wrap"') && html.includes('<svg class="goal-ring-svg ') && (html.match(/class="goal-ring-progress/g) || []).length === 2],
   ['goal SVG rings render concrete stroke offsets', html.includes('stroke-dasharray="100"') && html.includes('stroke-dashoffset="10"') && html.includes('stroke-dashoffset="2.5"')],
   ['goal overflow SVG rings render a concrete blue outer circle', overflowGoalHtml.includes('class="goal-ring-overflow"') && overflowGoalHtml.includes('stroke-dashoffset="90"') && css.includes('.goal-ring-overflow') && css.includes('var(--primary)')],

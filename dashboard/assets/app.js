@@ -928,6 +928,19 @@ function readGoalMinor(goals, period) {
   return Number.isFinite(numeric) ? Math.round(numeric) : null;
 }
 
+function readGoalEurMinor(goals, period) {
+  const keys = period === 'daily'
+    ? ['daily_eur_minor', 'dailyGoalEurMinor']
+    : ['monthly_eur_minor', 'monthlyGoalEurMinor'];
+  const value = firstDefined(goals, keys);
+
+  if (value == null) return null;
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
 function readCurrencyMetric(source, mapKeys, gbpKeys = []) {
   const obj = asObject(source);
   let result = {};
@@ -1603,36 +1616,44 @@ function renderExtraIncomeForm() {
   return `
     <form id="extraIncomeSessionForm" class="settings-form extra-income-form">
       <input id="extraIncomeSessionId" type="hidden" value="">
-      <h3>Session nachtragen</h3>
-      <div class="form-grid">
-        <label>Start
+      <div class="extra-income-form-head">
+        <h3>Session nachtragen</h3>
+      </div>
+      <div class="extra-income-field-grid">
+        <label class="extra-income-field">
+          <span>Start</span>
           <input id="extraIncomeStartedAt" name="started_at" type="datetime-local" required>
         </label>
-        <label>Ende
+        <label class="extra-income-field">
+          <span>Ende</span>
           <input id="extraIncomeEndedAt" name="ended_at" type="datetime-local" required>
         </label>
-        <label>Bezahlte Nachrichten
+        <label class="extra-income-field">
+          <span>Bezahlte Nachrichten</span>
           <input id="extraIncomeMessageCount" name="message_count" type="number" min="0" step="1" required>
         </label>
-        <label>Bonusmodus
+        <label class="extra-income-field">
+          <span>Bonusmodus</span>
           <select id="extraIncomeBonusMode" name="bonus_mode">
             <option value="none">Kein Bonus</option>
             <option value="fixed">Einmalig</option>
             <option value="per_message">Fortlaufend pro Nachricht</option>
           </select>
         </label>
-        <label>Mindestnachrichten
+        <label class="extra-income-field">
+          <span>Mindestnachrichten</span>
           <input id="extraIncomeBonusThreshold" name="bonus_threshold_messages" type="number" min="0" step="1" value="0">
         </label>
-        <label>Bonusbetrag
+        <label class="extra-income-field">
+          <span>Bonusbetrag</span>
           <input id="extraIncomeBonusAmount" name="bonus_amount_eur" type="number" min="0" step="0.01" value="0">
         </label>
       </div>
-      <label class="toggle-row">
+      <label class="toggle-row extra-income-toggle">
         <input id="extraIncomeNightBonus" name="night_bonus_enabled" type="checkbox" checked>
         <span>Nachtbonus anwenden</span>
       </label>
-      <div class="form-actions">
+      <div class="form-actions extra-income-actions">
         <button type="submit">Speichern</button>
         <button id="extraIncomeFormReset" class="filter-reset" type="button">Zurücksetzen</button>
       </div>
@@ -2011,17 +2032,31 @@ function renderGoalDetailRows(stats, fxRates) {
   `;
 }
 
-function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '') {
-  const percent = progressPercent(currentMinor, targetMinor);
+function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '', display = {}) {
+  const rawTargetEurMinor = display.targetEurMinor;
+  const targetEurMinor = rawTargetEurMinor == null ? null : Number(rawTargetEurMinor);
+  const hasEurTarget = Number.isFinite(targetEurMinor);
+  const currentEurMinor = Number.isFinite(Number(display.currentEurMinor))
+    ? Math.round(Number(display.currentEurMinor))
+    : convertGbpToEurMinor(currentMinor, fxRates);
+  const percentCurrent = hasEurTarget && currentEurMinor != null ? currentEurMinor : currentMinor;
+  const percentTarget = hasEurTarget ? Math.round(targetEurMinor) : targetMinor;
+  const percent = progressPercent(percentCurrent, percentTarget);
   const innerPercent = clampPercent(percent) ?? 0;
   const overflowPercent = goalOverflowPercent(percent);
   const progressOffset = goalStrokeOffset(innerPercent);
   const overflowOffset = goalStrokeOffset(overflowPercent);
   const progressColor = goalProgressColor(percent);
   const remaining =
-    Number.isFinite(Number(currentMinor)) && Number.isFinite(Number(targetMinor))
-      ? Math.max(0, Number(targetMinor) - Number(currentMinor))
+    Number.isFinite(Number(percentCurrent)) && Number.isFinite(Number(percentTarget))
+      ? Math.max(0, Number(percentTarget) - Number(percentCurrent))
       : null;
+  const progressValue = hasEurTarget && currentEurMinor != null
+    ? `${fmtAmount(currentEurMinor, 'EUR')} von ${fmtAmount(Math.round(targetEurMinor), 'EUR')}`
+    : `${fmtGbpAsEur(currentMinor, fxRates)} von ${fmtGbpAsEur(targetMinor, fxRates)}`;
+  const remainingValue = hasEurTarget && currentEurMinor != null
+    ? fmtAmount(remaining, 'EUR')
+    : fmtGbpAsEur(remaining, fxRates);
   const overflowRing = overflowPercent > 0
     ? `
           <circle
@@ -2066,7 +2101,7 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
 
       <div class="status-row">
         <span class="key">Fortschritt</span>
-        <span class="value">${fmtGbpAsEur(currentMinor, fxRates)} von ${fmtGbpAsEur(targetMinor, fxRates)}</span>
+        <span class="value">${progressValue}</span>
       </div>
 
       <div class="status-row">
@@ -2075,7 +2110,7 @@ function renderGoalCard(label, currentMinor, targetMinor, fxRates, extraRows = '
       </div>
       <div class="status-row">
         <span class="key">Noch offen</span>
-        <span class="value">${fmtGbpAsEur(remaining, fxRates)}</span>
+        <span class="value">${remainingValue}</span>
       </div>
       ${extraRows}
     </div>
@@ -2387,10 +2422,14 @@ function renderExpandedOverview(data) {
   const goals = asObject(data.goals);
   const dailyGoalMinor = readGoalMinor(goals, 'daily');
   const monthlyGoalMinor = readGoalMinor(goals, 'monthly');
+  const dailyGoalEurMinor = readGoalEurMinor(goals, 'daily');
+  const monthlyGoalEurMinor = readGoalEurMinor(goals, 'monthly');
   const todayGoalByCurrency = sumCurrencyMaps(today.earned, today.pending);
   const monthGoalByCurrency = sumCurrencyMaps(month.earned, month.pending);
   const todayGoalGbp = convertToGbpMinor(todayGoalByCurrency, fxRates) ?? sumCurrencyMinor('GBP', today.earned, today.pending);
   const monthGoalGbp = convertToGbpMinor(monthGoalByCurrency, fxRates) ?? sumCurrencyMinor('GBP', month.earned, month.pending);
+  const todayGoalEur = convertToEur(todayGoalByCurrency, fxRates);
+  const monthGoalEur = convertToEur(monthGoalByCurrency, fxRates);
   const balance = asObject(data.balance);
   const { availableByCurrency, pendingByCurrency } = extractProlificBalance(balance);
   const todayStats = readTodayStats(data, today);
@@ -2421,7 +2460,7 @@ function renderExpandedOverview(data) {
     statusTotal > 0 ? (pendingCount / statusTotal) * 100 : null
   );
   const forecastEurCurrent = convertToEur(monthGoalByCurrency, fxRates);
-  const forecastEurGoal = convertGbpToEurMinor(monthlyGoalMinor, fxRates);
+  const forecastEurGoal = monthlyGoalEurMinor ?? convertGbpToEurMinor(monthlyGoalMinor, fxRates);
   const forecast = forecastEurCurrent != null
     ? {
       ...inferMonthlyForecast(
@@ -2498,8 +2537,8 @@ function renderExpandedOverview(data) {
 
   html += `
     <div class="goal-card-grid">
-      ${renderGoalCard('Heute', todayGoalGbp, dailyGoalMinor, fxRates, todayDetailRows)}
-      ${renderGoalCard('Aktueller Monat', monthGoalGbp, monthlyGoalMinor, fxRates, monthDetailRows)}
+      ${renderGoalCard('Heute', todayGoalGbp, dailyGoalMinor, fxRates, todayDetailRows, { currentEurMinor: todayGoalEur, targetEurMinor: dailyGoalEurMinor })}
+      ${renderGoalCard('Aktueller Monat', monthGoalGbp, monthlyGoalMinor, fxRates, monthDetailRows, { currentEurMinor: monthGoalEur, targetEurMinor: monthlyGoalEurMinor })}
     </div>
   `;
 

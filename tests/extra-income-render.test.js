@@ -35,6 +35,9 @@ assert(js.includes('type=extraIncomeDelete'));
 assert(js.includes('type=extraIncomeMarkPaid'));
 assert(js.includes('Zusatzverdienste'));
 assert(js.includes('Nachtbonus anwenden'));
+assert(js.includes('extra-income-field-grid'));
+assert(js.includes('extra-income-field'));
+assert(js.includes('extra-income-actions'));
 assert(js.includes('extraIncome'));
 assert(js.includes('openNetCents'));
 assert(js.includes('todayGrossCents'));
@@ -49,6 +52,9 @@ for (const cls of [
   '.extra-income-session-list',
   '.extra-income-modal',
   '.extra-income-payout',
+  '.extra-income-field-grid',
+  '.extra-income-field',
+  '.extra-income-actions',
 ]) {
   assert(css.includes(cls), `missing css ${cls}`);
 }
