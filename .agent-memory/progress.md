@@ -137,3 +137,160 @@
 - 2026-05-18 01:19:17 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-18 01:47:46 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-18 01:47:50 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 02:05:47 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 02:05:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 02:27:36 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 02:27:39 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 02:50:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 - Telegram command expansion backend implemented locally:
+  command parsing/dispatch moved into `api/_telegram_commands.php`, approved
+  backend commands and metadata added, `api/data.php?type=telegramCommand` added
+  behind session/write protection, and deploy script now uploads the shared
+  command file. Relevant Telegram Node source tests pass. Local PHP CLI is not
+  available in PATH, but PHP 8.4 lint passed via temporary `/tmp` upload on the
+  configured `prolific-cloud` SSH host.
+- 2026-05-18 09:05:38 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:06:08 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:06:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:06:16 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:08:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:13:25 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:17:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:19:23 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:19:55 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:20:18 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:23:26 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 09:26:38 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:26:52 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:27:13 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:28:40 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:29:08 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:30:52 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:36:06 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:38:07 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:40:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:42:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:44:56 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:47:12 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:49:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:50:40 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:52:40 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 09:55:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 - Overview pending-goal fix completed and deployed: top period
+  tiles now include pending amounts in the primary total and label the pending
+  share as `Davon ... ausstehend`; `Heute` and `Aktueller Monat` goal cards,
+  their SVG progress rings, and the monthly forecast use the same
+  earned-plus-pending basis. Added asset filemtime cache busters to prevent
+  stale dashboard assets after deploy. Full JavaScript source tests and live
+  browser verification passed.
+- 2026-05-18 - Goal-ring color progression implemented and deployed. The
+  `Heute` and `Aktueller Monat` SVG rings now use a continuous percent-based
+  stroke color: 0-5 red, 5-50 red-to-yellow, 50-98 yellow-to-green, 98-100
+  green, and over 100 keeps the existing blue overflow ring. Full JavaScript
+  tests passed and live browser DOM verification confirmed concrete SVG stroke
+  attributes with no old CSS stroke overrides.
+- 2026-05-18 10:01:47 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:40:58 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 11:41:37 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:44:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 11:45:53 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:45:59 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 11:46:04 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 11:46:04 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:47:15 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:47:19 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:47:57 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 11:49:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:53:01 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 11:54:45 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:01:02 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:03:06 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 12:05:46 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 12:08:07 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:08:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:08:51 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:12:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:13:05 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:13:19 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 - Worktime backend and effective hourly-rate update completed and
+  deployed. Added shared `api/_worktime.php` helpers, overview `worktime`
+  periods, dashboard worktime/effective-hourly cards, CSV hourly fallback,
+  Telegram `/worktime` and `/effective`, and source coverage. Hourly
+  calculations now use `time_taken_seconds` with a 60-second fallback for raw
+  zero/missing values and a 60-second minimum for screened-out submissions.
+  Full JS/source tests, remote PHP 8.4 lint, and the deployment helper passed.
+- 2026-05-18 - Corrected misleading `+ 1478 h 30 min ohne Vergütung` worktime
+  display. Root cause was stale large `time_taken_seconds` values on
+  `RETURNED`/`TIMED-OUT` rows without `completed_at`. Unpaid worktime for those
+  incomplete negative rows now uses the one-minute fallback; dashboard and
+  Telegram wording now says `Davon ... unbezahlt`.
+- 2026-05-18 - Fixed missing submissions status donut chart. Root cause was the
+  chart relying on inline `conic-gradient` styles while CSP blocks inline style
+  attributes. Replaced the submissions pie with CSP-safe SVG circle segments,
+  kept the legend/summary layout, added render coverage, and deployed.
+- 2026-05-18 12:23:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 12:23:54 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:25:31 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 12:25:37 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:32:48 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 12:55:24 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 12:56:13 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 13:01:13 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 13:02:31 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 13:04:17 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 13:07:39 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:23:11 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:24:36 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:25:54 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:26:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:27:24 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:27:39 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:30:05 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:30:17 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:50:15 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:50:34 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:54:03 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:54:27 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:56:14 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:56:27 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 15:57:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 15:57:25 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:14:51 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:15:18 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:15:49 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:16:05 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:16:44 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:18:36 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:39:58 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:40:16 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:55:32 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:56:31 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:56:50 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:57:21 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:58:11 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:58:38 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 16:59:23 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 16:59:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:00:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:01:05 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:01:27 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:01:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:03:34 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:04:08 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:04:36 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:05:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:05:16 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:05:48 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:06:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:06:46 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:07:13 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:07:47 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:16:00 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:16:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:19:57 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:21:07 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:21:37 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:22:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:23:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:33:00 +02:00 - Drafted `docs/superpowers/specs/2026-05-18-zusatzeinkommen-design.md` after owner asked to stop further upfront clarification and proceed with the agreed `Zusatzeinkommen` scope.
+- 2026-05-18 17:36:00 +02:00 - Wrote `docs/superpowers/plans/2026-05-18-zusatzeinkommen.md` with backend, API, frontend, CSS, verification, deploy, and Sub-Agent split tasks.
