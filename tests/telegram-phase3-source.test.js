@@ -1,61 +1,62 @@
 const fs = require('fs');
 
-const webhook = fs.readFileSync('api/telegram-webhook.php', 'utf8');
+const commands = fs.readFileSync('api/_telegram_commands.php', 'utf8');
 const data = fs.readFileSync('api/data.php', 'utf8');
-const quoteMessage = webhook.match(/function telegram_quote_message\(\): string[\s\S]*?\n}\n\nfunction telegram_build_quote_stats/)?.[0] || '';
+const quoteMessage = commands.match(/function telegram_quote_message\(PDO \$pdo\): string[\s\S]*?\n}\n\nfunction telegram_build_quote_stats/)?.[0] || '';
 
 const checks = [
   [
-    'webhook dispatches and advertises quote command',
-      webhook.includes("case '/quote':") &&
-      webhook.includes('return telegram_quote_message();') &&
-      webhook.includes('/quote \\\\- Erfolgs\\\\- und Verdienst\\\\-Quote')
+    'shared dispatcher dispatches and registry advertises quote command',
+      commands.includes("case '/quote':") &&
+      commands.includes('return telegram_quote_message($pdo);') &&
+      commands.includes("'command' => '/quote'") &&
+      commands.includes('Erfolgs- und Verdienst-Quote')
   ],
   [
     'quote message implements thirty day accepted missed and returned counts',
-    /function telegram_quote_message\(\): string/.test(webhook) &&
-      /function telegram_build_quote_stats\(PDO \$pdo/.test(webhook) &&
-      webhook.includes("first_seen >= ?") &&
-      webhook.includes("reward_minor > 0") &&
-      webhook.includes("'accepted'") &&
-      webhook.includes("'missed'") &&
-      webhook.includes("'returned'")
+    /function telegram_quote_message\(PDO \$pdo\): string/.test(commands) &&
+      /function telegram_build_quote_stats\(PDO \$pdo/.test(commands) &&
+      commands.includes("first_seen >= ?") &&
+      commands.includes("reward_minor > 0") &&
+      commands.includes("'accepted'") &&
+      commands.includes("'missed'") &&
+      commands.includes("'returned'")
   ],
   [
     'quote status priority follows specification',
-    /function telegram_quote_submission_priority\(string \$status\): int/.test(webhook) &&
-      webhook.includes("'APPROVED' => 40") &&
-      webhook.includes("'AWAITING REVIEW' => 30") &&
-      webhook.includes("'SCREENED OUT', 'SCREENED-OUT' => 20") &&
-      webhook.includes("'RETURNED' => 10") &&
-      webhook.includes("'REJECTED' => 5") &&
-      webhook.includes("'TIMED OUT', 'TIMED-OUT' => 5")
+    /function telegram_quote_submission_priority\(string \$status\): int/.test(commands) &&
+      commands.includes("'APPROVED' => 40") &&
+      commands.includes("'AWAITING REVIEW' => 30") &&
+      commands.includes("'SCREENED OUT', 'SCREENED-OUT' => 20") &&
+      commands.includes("'RETURNED' => 10") &&
+      commands.includes("'REJECTED' => 5") &&
+      commands.includes("'TIMED OUT', 'TIMED-OUT' => 5")
   ],
   [
     'quote calculates earning ratio in GBP equivalent with fx rates and missing-rate guard',
-    /function telegram_currency_map_to_gbp_minor\(array \$amounts/.test(webhook) &&
-      /function telegram_fx_rate\(array \$fxRates,\s*string \$currency\)/.test(webhook) &&
-      webhook.includes("get_setting('fxRates')") &&
-      webhook.includes("'inconsistent'") &&
-      webhook.includes("'fxComplete'") &&
-      webhook.includes('FX-Rate fehlt')
+    /function telegram_currency_map_to_gbp_minor\(array \$amounts/.test(commands) &&
+      /function telegram_fx_rate\(array \$fxRates,\s*string \$currency\)/.test(commands) &&
+      commands.includes("get_setting('fxRates')") &&
+      commands.includes("'fxComplete'") &&
+      commands.includes('FX\\\\-Rate fehlt')
   ],
   [
     'quote excludes pending and negative statuses from earned actuals',
-    webhook.includes("elseif (in_array($status, ['REJECTED', 'TIMED OUT', 'TIMED-OUT'], true))") &&
-      webhook.includes('continue;') &&
-      webhook.includes("if (in_array($status, ['APPROVED', 'SCREENED OUT', 'SCREENED-OUT'], true) && $actualMinor > 0)")
+    commands.includes("elseif (in_array($status, ['REJECTED', 'TIMED OUT', 'TIMED-OUT'], true))") &&
+      commands.includes('continue;') &&
+      commands.includes("if (in_array($status, ['APPROVED', 'SCREENED OUT', 'SCREENED-OUT'], true) && $actualMinor > 0)")
   ],
   [
     'quote output has readable German text',
-    !/(zurÃ¼ckgegeben|mÃ¶glich|â€“)/.test(quoteMessage) &&
-      quoteMessage.includes('zurückgegeben') &&
-      quoteMessage.includes('möglich')
+    !/(zurÃƒÂ¼ckgegeben|mÃƒÂ¶glich|Ã¢â‚¬â€œ)/.test(quoteMessage) &&
+      quoteMessage.includes('zurueckgegeben') &&
+      quoteMessage.includes('moeglich')
   ],
   [
     'system telegram command list includes quote',
-    /'command'\s*=>\s*'\/quote'/.test(data) &&
-      data.includes('Erfolgs- und Verdienst-Quote')
+    data.includes('telegram_command_definitions()') &&
+      /'command'\s*=>\s*'\/quote'/.test(commands) &&
+      commands.includes('Erfolgs- und Verdienst-Quote')
   ]
 ];
 

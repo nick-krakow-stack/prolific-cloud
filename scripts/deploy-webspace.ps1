@@ -16,6 +16,7 @@ $runtimeFiles = @(
   "api/_common.php",
   "api/_rewards.php",
   "api/_telegram.php",
+  "api/_telegram_commands.php",
   "api/data.php",
   "api/export.php",
   "api/sync.php",

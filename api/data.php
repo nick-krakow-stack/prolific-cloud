@@ -15,6 +15,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
 require_once __DIR__ . '/_telegram.php';
+require_once __DIR__ . '/_telegram_commands.php';
 require_once __DIR__ . '/../dashboard/session.php';
 
 require_login();
@@ -90,6 +91,13 @@ try {
             }
 
             json_response(build_settings_response($pdo));
+
+        case 'telegramCommand':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(telegram_execute_dashboard_command($pdo, read_json_body()));
 
         default:
             json_error('Unbekannter type-Parameter.', 400);
@@ -886,15 +894,7 @@ function build_telegram_system_status(PDO $pdo): array {
         'error' => $webhookInfo['error'] ?? $dbError,
         'lastCommand' => $lastCommand,
         'commandCount24h' => $commandCount24h,
-        'commands' => [
-            ['command' => '/status', 'description' => 'Aktueller Systemstatus'],
-            ['command' => '/earnings', 'description' => 'Verdienst nach Zeitraum'],
-            ['command' => '/balance', 'description' => 'Auszahlbar und in Prüfung'],
-            ['command' => '/studies', 'description' => 'Aktive Studien'],
-            ['command' => '/quote', 'description' => 'Erfolgs- und Verdienst-Quote'],
-            ['command' => '/today', 'description' => 'Heutige Aktivität'],
-            ['command' => '/help', 'description' => 'Befehlsübersicht'],
-        ],
+        'commands' => telegram_command_definitions(),
     ];
 }
 

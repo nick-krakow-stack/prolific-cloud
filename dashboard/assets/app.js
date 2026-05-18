@@ -18,6 +18,8 @@ let cachedData = {
   events: null
 };
 
+let telegramCommandStatus = null;
+
 // ---- Helpers ----
 
 function $(id) {
@@ -2256,18 +2258,32 @@ function renderTelegramBotCard(telegram) {
   const statusLabel = isActive ? 'aktiv' : configured ? 'prüfen' : 'nicht eingerichtet';
   const lastCommandName = firstDefined(lastCommand, ['command', 'text']) || DASH;
   const lastCommandAt = firstDefined(lastCommand, ['received_at', 'receivedAt']);
-  const commandItems = commands.map(commandRaw => {
+  let commandItems = commands.map(commandRaw => {
     const command = asObject(commandRaw);
     const name = firstDefined(command, ['command', 'name']) || DASH;
     const description = firstDefined(command, ['description', 'label']) || '';
+    const inputMode = firstDefined(command, ['input', 'inputMode', 'input_mode']) || 'none';
+    const fields = Array.isArray(command.fields) ? command.fields : [];
+    const needsInput = inputMode !== 'none' || fields.length > 0 || name === '/delete_logs';
 
     return `
-      <div class="telegram-command-item">
+      <button type="button"
+              class="telegram-command-item"
+              data-telegram-command="${escapeHtml(name)}"
+              data-telegram-input="${escapeHtml(inputMode)}"
+              aria-haspopup="${needsInput ? 'dialog' : 'false'}">
         <span class="telegram-command-name">${escapeHtml(name)}</span>
         <span>${escapeHtml(description)}</span>
-      </div>
+      </button>
     `;
   }).join('');
+  const statusHtml = telegramCommandStatus
+    ? `<div class="telegram-command-status ${telegramCommandStatus.ok ? 'is-ok' : 'is-error'}">${escapeHtml(telegramCommandStatus.message)}</div>`
+    : '';
+
+  if (statusHtml) {
+    commandItems += statusHtml;
+  }
 
   return `
     <div class="status-box telegram-bot-card">
@@ -2308,6 +2324,319 @@ function renderTelegramBotCard(telegram) {
       </div>
     </div>
   `;
+}
+
+function telegramCommandDefinitions() {
+  const telegram = asObject(asObject(cachedData.system).telegram || asObject(cachedData.system).telegram_bot);
+  return Array.isArray(telegram.commands) ? telegram.commands.map(asObject) : [];
+}
+
+function findTelegramCommandDefinition(commandName) {
+  return telegramCommandDefinitions().find(command => (
+    firstDefined(command, ['command', 'name']) === commandName
+  )) || { command: commandName };
+}
+
+function inferTelegramCommandFields(commandName) {
+  if (commandName === '/setgoal') {
+    return [
+      {
+        name: 'target',
+        label: 'Ziel',
+        type: 'select',
+        options: [
+          { value: 'day', label: 'Tagesziel' },
+          { value: 'month', label: 'Monatsziel' }
+        ]
+      },
+      { name: 'amount', label: 'Betrag', type: 'number', min: 0, step: '0.01', suffix: 'EUR' }
+    ];
+  }
+
+  if (commandName === '/sethourly') {
+    return [
+      {
+        name: 'level',
+        label: 'Grenze',
+        type: 'select',
+        options: [
+          { value: 'good', label: 'Sehr gut' },
+          { value: 'ok', label: 'Okay' }
+        ]
+      },
+      { name: 'amount', label: 'Betrag', type: 'number', min: 0, step: '0.01', suffix: 'EUR/h' }
+    ];
+  }
+
+  if (commandName === '/report') {
+    return [
+      {
+        name: 'mode',
+        label: 'Modus',
+        type: 'select',
+        options: [
+          { value: 'on', label: 'Aktivieren' },
+          { value: 'off', label: 'Deaktivieren' }
+        ]
+      },
+      { name: 'time', label: 'Uhrzeit', type: 'time', optionalWhen: { mode: 'off' } }
+    ];
+  }
+
+  if (commandName === '/mute') {
+    return [
+      {
+        name: 'duration',
+        label: 'Dauer',
+        type: 'select',
+        options: [
+          { value: '30m', label: '30 Minuten' },
+          { value: '1h', label: '1 Stunde' },
+          { value: '2h', label: '2 Stunden' },
+          { value: '4h', label: '4 Stunden' },
+          { value: 'today', label: 'Bis Tagesende' }
+        ]
+      }
+    ];
+  }
+
+  return [];
+}
+
+function telegramCommandFields(definition) {
+  const fields = Array.isArray(definition.fields) ? definition.fields : [];
+
+  if (fields.length > 0) {
+    return fields.map(asObject);
+  }
+
+  return inferTelegramCommandFields(firstDefined(definition, ['command', 'name']) || '');
+}
+
+function telegramCommandNeedsModal(definition) {
+  const commandName = firstDefined(definition, ['command', 'name']) || '';
+  const inputMode = firstDefined(definition, ['input', 'inputMode', 'input_mode']) || 'none';
+
+  return commandName === '/delete_logs' || inputMode !== 'none' || telegramCommandFields(definition).length > 0;
+}
+
+function renderTelegramCommandField(field) {
+  const type = firstDefined(field, ['type']) || 'text';
+  const name = firstDefined(field, ['name']) || '';
+  const label = firstDefined(field, ['label']) || name;
+  const suffix = firstDefined(field, ['suffix']) || '';
+  const options = Array.isArray(field.options) ? field.options : [];
+
+  if (type === 'select') {
+    return `
+      <label class="telegram-modal-field">
+        <span>${escapeHtml(label)}</span>
+        <select name="${escapeHtml(name)}">
+          ${options.map(optionRaw => {
+            const option = typeof optionRaw === 'string' ? { value: optionRaw, label: optionRaw } : asObject(optionRaw);
+            const value = firstDefined(option, ['value']) || '';
+            const optionLabel = firstDefined(option, ['label']) || value;
+
+            return `<option value="${escapeHtml(value)}">${escapeHtml(optionLabel)}</option>`;
+          }).join('')}
+        </select>
+      </label>
+    `;
+  }
+
+  const inputType = type === 'time' || type === 'number' ? type : 'text';
+  const min = firstDefined(field, ['min']);
+  const step = firstDefined(field, ['step']) || (inputType === 'number' ? '0.01' : null);
+
+  return `
+    <label class="telegram-modal-field">
+      <span>${escapeHtml(label)}</span>
+      <span class="telegram-input-wrap">
+        <input name="${escapeHtml(name)}"
+               type="${escapeHtml(inputType)}"
+               ${min != null ? `min="${escapeHtml(min)}"` : ''}
+               ${step != null ? `step="${escapeHtml(step)}"` : ''}>
+        ${suffix ? `<span>${escapeHtml(suffix)}</span>` : ''}
+      </span>
+    </label>
+  `;
+}
+
+function composeTelegramCommandText(commandName, values) {
+  if (commandName === '/setgoal') {
+    return `${commandName} ${values.scope || values.target || 'day'} ${values.amount || ''}`.trim();
+  }
+
+  if (commandName === '/sethourly') {
+    return `${commandName} ${values.scope || values.level || 'ok'} ${values.amount || ''}`.trim();
+  }
+
+  if (commandName === '/report') {
+    return values.mode === 'off'
+      ? `${commandName} off`
+      : `${commandName} on ${values.time || ''}`.trim();
+  }
+
+  if (commandName === '/mute') {
+    return `${commandName} ${values.duration || '1h'}`.trim();
+  }
+
+  return commandName;
+}
+
+function closeTelegramCommandModal() {
+  const modal = $('telegramCommandModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function setTelegramCommandStatus(ok, message) {
+  telegramCommandStatus = { ok, message };
+  const status = document.querySelector('.telegram-command-status');
+
+  if (status) {
+    status.className = `telegram-command-status ${ok ? 'is-ok' : 'is-error'}`;
+    status.textContent = message;
+    return;
+  }
+
+  const commandList = document.querySelector('.telegram-command-list');
+
+  if (commandList) {
+    commandList.insertAdjacentHTML(
+      'beforeend',
+      `<div class="telegram-command-status ${ok ? 'is-ok' : 'is-error'}">${escapeHtml(message)}</div>`
+    );
+  }
+}
+
+async function sendTelegramCommand(commandName, values = {}) {
+  const text = composeTelegramCommandText(commandName, values);
+  setTelegramCommandStatus(true, `${text} wird gesendet ...`);
+
+  try {
+    const result = await postJson(`${API_BASE}?type=telegramCommand`, {
+      command: commandName,
+      values,
+      text
+    });
+
+    if (!result || result.ok === false) {
+      throw new Error(firstDefined(asObject(result), ['error', 'message']) || 'Befehl konnte nicht gesendet werden.');
+    }
+
+    setTelegramCommandStatus(true, `${text} wurde an Telegram gesendet.`);
+
+    if (cachedData.system) {
+      cachedData.system.telegram = {
+        ...asObject(cachedData.system.telegram || cachedData.system.telegram_bot),
+        lastCommand: { command: text, received_at: new Date().toISOString() }
+      };
+    }
+
+    return result;
+  } catch (error) {
+    setTelegramCommandStatus(false, error.message || 'Befehl konnte nicht gesendet werden.');
+    throw error;
+  }
+}
+
+function openTelegramCommandModal(definition) {
+  const commandName = firstDefined(definition, ['command', 'name']) || '';
+  const fields = telegramCommandFields(definition);
+  const isConfirm = commandName === '/delete_logs'
+    || firstDefined(definition, ['input', 'inputMode', 'input_mode']) === 'confirm';
+
+  closeTelegramCommandModal();
+
+  const modal = document.createElement('div');
+  modal.id = 'telegramCommandModal';
+  modal.className = 'telegram-modal-backdrop';
+  modal.innerHTML = `
+    <div class="telegram-modal" role="dialog" aria-modal="true" aria-labelledby="telegramCommandModalTitle">
+      <div class="telegram-modal-head">
+        <h3 id="telegramCommandModalTitle">${escapeHtml(commandName)}</h3>
+        <button type="button" class="telegram-modal-close" data-telegram-modal-close aria-label="Schliessen">x</button>
+      </div>
+      <form id="telegramCommandForm">
+        ${isConfirm ? '<p class="telegram-modal-copy">Diesen Befehl wirklich an Telegram senden?</p>' : ''}
+        ${fields.map(renderTelegramCommandField).join('')}
+        <div class="telegram-modal-actions">
+          <button type="button" class="secondary-btn" data-telegram-modal-close>Abbrechen</button>
+          <button type="submit" class="primary-btn">Senden</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const firstInput = modal.querySelector('select, input, button[type="submit"]');
+  if (firstInput) firstInput.focus();
+
+  modal.addEventListener('click', event => {
+    if (event.target === modal || event.target.closest('[data-telegram-modal-close]')) {
+      closeTelegramCommandModal();
+    }
+  });
+
+  const form = $('telegramCommandForm');
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const values = {};
+    fields.forEach(fieldRaw => {
+      const field = asObject(fieldRaw);
+      const name = firstDefined(field, ['name']);
+      const input = name ? form.elements[name] : null;
+
+      if (input) {
+        values[name] = input.value;
+      }
+    });
+
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+
+    try {
+      await sendTelegramCommand(commandName, values);
+      closeTelegramCommandModal();
+    } catch (error) {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+
+function bindTelegramCommandControls() {
+  const systemContent = $('systemContent');
+
+  if (!systemContent || systemContent.dataset.telegramBound === '1') return;
+
+  systemContent.dataset.telegramBound = '1';
+  systemContent.addEventListener('click', event => {
+    const button = event.target && event.target.closest
+      ? event.target.closest('[data-telegram-command]')
+      : null;
+
+    if (!button) return;
+
+    const commandName = button.dataset.telegramCommand;
+    const definition = findTelegramCommandDefinition(commandName);
+
+    if (telegramCommandNeedsModal(definition)) {
+      openTelegramCommandModal(definition);
+      return;
+    }
+
+    button.disabled = true;
+    sendTelegramCommand(commandName)
+      .catch(() => {})
+      .finally(() => {
+        button.disabled = false;
+      });
+  });
 }
 
 function renderSystem(data) {
@@ -3283,6 +3612,10 @@ async function loadTab(tab, options = {}) {
       bindSettingsForm();
     }
 
+    if (tab === 'system') {
+      bindTelegramCommandControls();
+    }
+
     if (tab === 'stats') {
       bindStudiesControls();
     }
@@ -3480,6 +3813,7 @@ document.addEventListener('click', () => setStudiesDatePanelOpen(false));
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     setStudiesDatePanelOpen(false);
+    closeTelegramCommandModal();
   }
 });
 

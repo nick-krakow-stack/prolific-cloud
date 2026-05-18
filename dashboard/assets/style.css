@@ -877,17 +877,164 @@ a:not(.icon-btn):hover {
   display: grid;
   gap: 3px;
   min-width: 0;
+  width: 100%;
   padding: 9px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--bg) 58%, var(--bg-card));
+  color: var(--text);
   font-size: 12px;
   line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.telegram-command-item:hover {
+  border-color: color-mix(in srgb, var(--link) 42%, var(--border));
+  background: color-mix(in srgb, var(--bg-card) 70%, var(--primary));
+}
+
+.telegram-command-item:disabled {
+  cursor: progress;
+  opacity: 0.7;
 }
 
 .telegram-command-name {
   color: var(--link);
   font-weight: 800;
+}
+
+.telegram-command-status {
+  grid-column: 1 / -1;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.telegram-command-status.is-ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.telegram-command-status.is-error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.telegram-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.telegram-modal {
+  width: min(430px, 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
+
+.telegram-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 8px;
+}
+
+.telegram-modal-head h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.telegram-modal-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.telegram-modal form {
+  display: grid;
+  gap: 12px;
+  padding: 8px 16px 16px;
+}
+
+.telegram-modal-copy {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.telegram-modal-field {
+  display: grid;
+  gap: 5px;
+}
+
+.telegram-modal-field > span:first-child {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.telegram-modal select,
+.telegram-modal input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.telegram-input-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.telegram-input-wrap > span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.telegram-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.telegram-modal-actions button {
+  min-height: 36px;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.primary-btn {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.secondary-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
 }
 
 @media (min-width: 520px) {

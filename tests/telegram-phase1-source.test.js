@@ -8,6 +8,7 @@ const configExample = read('config.example.php');
 const hashGenerator = read('hash-generator.php');
 const install = read('install.php');
 const telegramHelper = read('api/_telegram.php');
+const telegramCommands = read('api/_telegram_commands.php');
 const webhook = read('api/telegram-webhook.php');
 const deploy = read('scripts/deploy-webspace.ps1');
 
@@ -50,23 +51,27 @@ const checks = [
       /UPDATE telegram_messages\s+SET response_sent/.test(telegramHelper)
   ],
   [
-    'telegram webhook validates request and dispatches phase one commands',
+    'telegram webhook validates request and delegates phase one commands',
     webhook.includes("require_once __DIR__ . '/_telegram.php';") &&
+      webhook.includes("require_once __DIR__ . '/_telegram_commands.php';") &&
       webhook.includes('telegram_require_webhook_secret()') &&
       webhook.includes('telegram_verify_secret_token_header()') &&
       webhook.includes('telegram_claim_update($pdo, $updateId') &&
       webhook.includes('telegram_is_allowed_chat($chatId)') &&
-      webhook.includes("case '/start':") &&
-      webhook.includes("case '/help':") &&
-      webhook.includes("case '/status':")
+      webhook.includes('telegram_dispatch_command($parsed, $pdo') &&
+      telegramCommands.includes("case '/start':") &&
+      telegramCommands.includes("case '/help':") &&
+      telegramCommands.includes("case '/status':")
   ],
   [
     'telegram help advertises status command',
-    webhook.includes('/status \\\\- aktueller Zustand')
+    telegramCommands.includes("'command' => '/status'") &&
+      telegramCommands.includes('Aktueller Systemstatus')
   ],
   [
     'deploy script uploads telegram runtime files',
     deploy.includes('"api/_telegram.php"') &&
+      deploy.includes('"api/_telegram_commands.php"') &&
       deploy.includes('"api/telegram-webhook.php"')
   ]
 ];

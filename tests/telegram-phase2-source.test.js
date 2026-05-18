@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const webhook = fs.readFileSync('api/telegram-webhook.php', 'utf8');
 const helper = fs.readFileSync('api/_telegram.php', 'utf8');
+const commands = fs.readFileSync('api/_telegram_commands.php', 'utf8');
 const data = fs.readFileSync('api/data.php', 'utf8');
 const app = fs.readFileSync('dashboard/assets/app.js', 'utf8');
 const css = fs.readFileSync('dashboard/assets/style.css', 'utf8');
@@ -9,35 +10,35 @@ const webhookInfoFunction = helper.match(/function telegram_get_webhook_info\(\)
 
 const checks = [
   [
-    'webhook dispatches phase two telegram commands',
+    'shared dispatcher handles phase two telegram commands',
     ["case '/balance':", "case '/studies':", "case '/earnings':", "case '/today':"]
-      .every(fragment => webhook.includes(fragment))
+      .every(fragment => commands.includes(fragment))
   ],
   [
-    'webhook help lists implemented phase two commands',
-    ['/balance \\\\', '/studies \\\\', '/earnings \\\\', '/today \\\\']
-      .every(fragment => webhook.includes(fragment))
+    'command registry lists implemented phase two commands',
+    ["'command' => '/balance'", "'command' => '/studies'", "'command' => '/earnings'", "'command' => '/today'"]
+      .every(fragment => commands.includes(fragment))
   ],
   [
-    'webhook implements balance from stored Prolific balance',
-    /function telegram_balance_message\(\): string/.test(webhook) &&
-      webhook.includes("get_setting('balance')") &&
-      /telegram_extract_balance\(/.test(webhook)
+    'command library implements balance from stored Prolific balance',
+    /function telegram_balance_message\(\): string/.test(commands) &&
+      commands.includes("get_setting('balance')") &&
+      /telegram_extract_balance\(/.test(commands)
   ],
   [
-    'webhook implements active studies list with direct links',
-    /function telegram_studies_message\(\): string/.test(webhook) &&
-      /SELECT COUNT\(\*\) FROM studies WHERE is_active = 1/.test(webhook) &&
-      /FROM studies\s+WHERE is_active = 1/.test(webhook) &&
-      webhook.includes('https://app.prolific.com/studies/')
+    'command library implements active studies list with direct links',
+    /function telegram_studies_message\(PDO \$pdo,\s*int \$limit\): string/.test(commands) &&
+      /SELECT COUNT\(\*\) FROM studies WHERE is_active = 1/.test(commands) &&
+      /FROM studies\s+WHERE is_active = 1/.test(commands) &&
+      commands.includes('https://app.prolific.com/studies/')
   ],
   [
-    'webhook implements earnings and today summaries with effective rewards',
-    /function telegram_earnings_message\(\): string/.test(webhook) &&
-      /function telegram_today_message\(\): string/.test(webhook) &&
-      /function telegram_sum_by_period\(PDO \$pdo/.test(webhook) &&
-      webhook.includes('$countedStatuses = array_merge($earnedStatuses, $pendingStatuses);') &&
-      webhook.includes('effective_reward_amount_sql()')
+    'command library implements earnings and today summaries with effective rewards',
+    /function telegram_earnings_message\(PDO \$pdo\): string/.test(commands) &&
+      /function telegram_today_message\(PDO \$pdo\): string/.test(commands) &&
+      /function telegram_sum_by_period\(PDO \$pdo/.test(commands) &&
+      commands.includes('telegram_earned_statuses()') &&
+      commands.includes('effective_reward_amount_sql()')
   ],
   [
     'telegram helper can read webhook info without exposing token or url',
