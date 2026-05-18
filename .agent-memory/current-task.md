@@ -1,6 +1,6 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-18 18:22:00 +02:00
+Last updated: 2026-05-18 23:50:00 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -88,13 +88,12 @@ Last updated: 2026-05-18 18:22:00 +02:00
 - [x] Verify production helper file, schema readiness, deployed tab markup, JS,
   root HTTP 200, and unauthenticated API 401.
 
+## Active Task: Tab Order And Watcher Control Discussion
 
-
-
-
-
-
-
-
-
+- [x] Move `Zusatzeinkommen` to the far right after `Einstellungen`.
+- [x] Add a visible `|` separator before `Zusatzeinkommen`.
+- [x] Update render coverage for the tab order.
+- [x] Deploy the runtime UI change to production.
+- [x] Review current Telegram mute and sync direction at code level.
+- [x] Capture backend-to-extension control idea in next steps.
 

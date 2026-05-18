@@ -134,6 +134,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps
 ## Backlog
 
 - Review fixes from owner feedback.
+- Design a Prolific Watcher extension control channel. Current dashboard can
+  only receive plugin pushes through `api/sync.php`; the server cannot directly
+  call a browser extension unless the extension polls or keeps a live connection.
+  Preferred future approach: backend stores command intents such as
+  `telegram_pause_until` and `sync_now_requested_at`; the extension polls a new
+  authenticated endpoint during its normal loop, applies Telegram pause locally,
+  triggers a sync when requested, and acknowledges the command back to the cloud.
 - Optional hardening: stronger CSRF token, if the private dashboard later gets
   broader exposure.
 - Optional polish: split large `dashboard/assets/app.js` after the review pass.

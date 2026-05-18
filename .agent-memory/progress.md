@@ -313,3 +313,6 @@
 - 2026-05-18 18:01:41 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-18 18:04:14 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-18 18:18:00 +02:00 - Implemented, reviewed, deployed, and server-migrated the `Zusatzeinkommen` tab with defensive schema reads, explicit write-route schema checks, dashboard overview integration, source/render/PHP calculation tests, and updated runtime deploy helper.
+- 2026-05-18 18:19:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 23:38:47 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 23:50:00 +02:00 - Moved `Zusatzeinkommen` to the far-right nav position after `Einstellungen` with a separator, deployed the UI change, and captured the future extension-control channel idea for Telegram pause and dashboard-triggered sync.
