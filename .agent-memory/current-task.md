@@ -1,6 +1,6 @@
 ﻿# Current Task Checklist
 
-Last updated: 2026-05-18 17:33:00 +02:00
+Last updated: 2026-05-18 18:22:00 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -63,15 +63,7 @@ Last updated: 2026-05-18 17:33:00 +02:00
 - The live month worktime bucket after fixing incomplete negative rows is:
   paid `63699` seconds, unpaid `1370` seconds, total `65069` seconds.
 
-## Active Task Checklist
-
-- [ ] Add an item.
-
-## Completed Task Steps
-
-- [x] Baseline step.
-
-## Draft Task: Zusatzeinkommen
+## Active Task: Zusatzeinkommen
 
 - [x] Capture initial owner intent for the chat moderator income tab.
 - [x] Document clarified billing, bonus, dashboard, and payout rules in
@@ -85,36 +77,16 @@ Last updated: 2026-05-18 17:33:00 +02:00
   details conservatively.
 - [x] Write `docs/superpowers/specs/2026-05-18-zusatzeinkommen-design.md`.
 - [x] Self-review and write the implementation plan.
-- [ ] Commit the design spec and implementation plan.
-- [ ] Split implementation work across
-  Sub-Agents.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- [x] Commit and push the design spec and implementation plan.
+- [x] Split implementation work across backend and frontend Sub-Agents.
+- [x] Integrate backend/API, dashboard markup, JS, CSS, install schema, tests,
+  and deployment helper updates.
+- [x] Run spec and code-quality reviews; fix schema-read hardening findings.
+- [x] Verify Node render/source tests and server PHP 8.4 lint/calculation test.
+- [x] Deploy runtime files to the live webspace.
+- [x] Run the extra-income schema migration deliberately on the server.
+- [x] Verify production helper file, schema readiness, deployed tab markup, JS,
+  root HTTP 200, and unauthenticated API 401.
 
 
 

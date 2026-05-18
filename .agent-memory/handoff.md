@@ -1,31 +1,28 @@
 ﻿# Handoff
 
-Last updated: 2026-05-17 20:07:24 +02:00
+Last updated: 2026-05-18 18:22:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Euro analytics pass is implemented and deployed. `Heute`, `Aktueller Monat`,
-settings money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
-`Top-Studien` use Euro values based on stored Frankfurter/fxRates data. The top
-earnings tiles and `Pending-Übersicht` intentionally remain in original
-currencies.
+`Zusatzeinkommen` is implemented, reviewed, deployed, and server-migrated.
+The runtime deploy helper now includes `api/_extra_income.php`. Production
+schema checks showed `extra_income_sessions`, `extra_income_timer`, and
+`extra_income_payouts` present. Unauthenticated API access still returns `401`.
 
 ## Git Snapshot
 
 - Branch: main
-- Product commit for this pass: e8fbb04 Show goal analytics in euros
+- Product commit: 8e5d377 Add additional income tracking
 
 ## Working Tree
 
 ~~~text
- M .agent-memory/current-task.md
- M .agent-memory/feedback.md
- M .agent-memory/handoff.md
- M .agent-memory/progress.md
  M .agent-memory/current-state.md
-Product files are committed. Only memory files should remain modified before
-the memory commit.
+ M .agent-memory/current-task.md
+ M .agent-memory/handoff.md
+ M .agent-memory/next-steps.md
+ M .agent-memory/progress.md
 ~~~
 
 ## Current State Summary

@@ -212,6 +212,48 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   button. The next-month button is disabled in the current server month. The
   stats API now returns historical heatmap buckets from the first available
   submission month through today instead of current-month-only data.
+- Telegram command expansion backend is implemented and deployed:
+  `api/_telegram_commands.php` owns command parsing, metadata, dispatch, expanded
+  command handlers, and dashboard execution; `api/telegram-webhook.php` is back
+  to request/security/log/send orchestration; `api/data.php?type=telegramCommand`
+  is session/write-protected and sends responses to the configured allowed chat.
+  Dashboard asset work was implemented in the system tab. Telegram Node source
+  tests and remote PHP 8.4 lint passed for the backend files.
+- Browser review fix: the overview top period tiles now count pending rewards in
+  the primary total and render the pending share as `Davon ... ausstehend`.
+  The `Heute` and `Aktueller Monat` goal cards use the same earned-plus-pending
+  basis, including FX conversion for foreign-currency pending values, and render
+  SVG progress rings with concrete stroke offsets so progress remains visible on
+  production. The monthly forecast uses the same combined current-month basis.
+- `dashboard/app.php` adds filemtime cache busters for `/assets/style.css` and
+  `/assets/app.js` so live browser tabs stop using stale dashboard assets after
+  a deploy.
+- The `Heute` and `Aktueller Monat` SVG goal rings now use a continuous
+  percent-based stroke color: 0-5% red, 5-50% red-to-yellow, 50-98%
+  yellow-to-green, 98-100% green, and >100% keeps the existing blue overflow
+  ring. Ring color is rendered as concrete SVG stroke attributes/styles and old
+  CSS threshold stroke overrides were removed.
+- Worktime tracking is implemented through `api/_worktime.php`. Effective
+  hourly-rate calculations use `time_taken_seconds`; raw zero/missing values use
+  60 seconds, screened-out rows have a 60-second minimum, and incomplete
+  negative rows (`RETURNED`/`REJECTED`/`TIMED OUT` without `completed_at`) use
+  60 seconds for the unbezahlt bucket so stale open timers do not dominate the
+  dashboard. The dashboard and Telegram wording is `Davon ... unbezahlt`.
+- The submissions status chart uses SVG circle segments instead of inline
+  `conic-gradient` styles so the chart remains visible under the strict
+  `style-src 'self'` Content-Security-Policy.
+- The `Zusatzeinkommen` tab is implemented and deployed for chat moderator
+  income. `api/_extra_income.php` owns the billing-week, message-tier, night
+  bonus, special bonus, payout fee, timer, session, and payout calculations.
+  `/api/data.php?type=extraIncome` is read-only/defensive when the schema is
+  missing; write routes require the schema and do not create tables implicitly.
+  The production schema was created deliberately via server-side migration after
+  deploy. Overview shows an independent `Zusatzverdienste` tile and the `Heute`
+  / `Aktueller Monat` goal cards include additional-income rows without adding
+  them to Prolific rings or Prolific totals.
+- `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` in the runtime
+  deploy list. Normal deploys still exclude `install.php`,
+  `hash-generator.php`, `config.example.php`, and `config.php`.
 - Before broad staging, verify `config.php` is ignored:
 
 ```powershell

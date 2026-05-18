@@ -294,3 +294,22 @@
 - 2026-05-18 17:23:02 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-18 17:33:00 +02:00 - Drafted `docs/superpowers/specs/2026-05-18-zusatzeinkommen-design.md` after owner asked to stop further upfront clarification and proceed with the agreed `Zusatzeinkommen` scope.
 - 2026-05-18 17:36:00 +02:00 - Wrote `docs/superpowers/plans/2026-05-18-zusatzeinkommen.md` with backend, API, frontend, CSS, verification, deploy, and Sub-Agent split tasks.
+- 2026-05-18 17:31:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:31:40 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:36:34 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:38:18 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:45:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:45:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:47:40 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:49:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:53:51 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:53:55 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:53:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:55:09 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:55:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:55:14 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-18 17:56:08 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 17:57:42 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 18:01:41 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 18:04:14 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-18 18:18:00 +02:00 - Implemented, reviewed, deployed, and server-migrated the `Zusatzeinkommen` tab with defensive schema reads, explicit write-route schema checks, dashboard overview integration, source/render/PHP calculation tests, and updated runtime deploy helper.

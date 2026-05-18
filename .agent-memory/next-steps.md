@@ -7,7 +7,9 @@ Last updated: 2026-05-17
 - Owner should log in at `https://prolific.nickkrakow.de/` and do a full
   browser review across all tabs with real data.
 - Collect review notes as a batch before starting the next fix pass.
-- Plan the new `Zusatzeinkommen` tab before implementation. Current clarified
+- `Zusatzeinkommen` is implemented and deployed. During browser review, verify
+  timer start/stop, manual backfill, edit/delete, payout marking, dashboard tile,
+  and the goal-card Zusatzverdienste rows with real entries. Implemented
   requirements:
   - Separate tab `Zusatzeinkommen` for chat moderator income.
   - Billing period is always Monday through Sunday.
