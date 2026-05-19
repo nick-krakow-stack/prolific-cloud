@@ -178,6 +178,19 @@ const sampleOverview = {
     dbCounts: { studies: 12, submissions: 34, events: 5, syncLog: 3 },
     serverTime: '2026-05-17T12:00:00Z'
   },
+  extraIncome: {
+    month: {
+      grossCents: 1425
+    }
+  },
+  miscIncome: {
+    summary: {
+      monthByCurrency: {
+        EUR: 5000,
+        USD: 1270
+      }
+    }
+  },
   serverTime: '2026-05-17T12:00:00Z'
 };
 
@@ -270,6 +283,9 @@ const checks = [
   ['colors paid and negative status tags', html.includes('class="tag tag-paid">SCREENED OUT</span>') && html.includes('class="tag tag-danger">RETURNED</span>') && html.includes('class="tag tag-danger-soft">TIMED-OUT</span>')],
   ['counts returned as rejected in fallback reject rate', html.includes('<span class="key">Reject-Rate</span>') && html.includes('<span class="value">8,6 %</span>')],
   ['renders monthly comparison as development tile', html.includes('class="earning-tile comparison-tile"') && html.includes('<div class="label">Entwicklung zum Vormonat</div>') && !html.includes('<div class="label">Vormonat</div>') && !html.includes('<div class="label">Vergleich</div>')],
+  ['renders comparison before monthly additional income tile', html.indexOf('<div class="label">Entwicklung zum Vormonat</div>') >= 0 && html.indexOf('<div class="label">Entwicklung zum Vormonat</div>') < html.indexOf('<div class="label">Zusatzeinkommen</div>')],
+  ['renders additional income tile as current month total from all sources', html.includes('class="earning-tile additional-income-tile"') && html.includes('<div class="label">Zusatzeinkommen</div>') && html.includes('<div class="value">€76,05</div>') && html.includes('<div class="secondary">im aktuellen Monat</div>') && !html.includes('<div class="label">Arbeit-Zuhause</div>') && !html.includes('Offen zur Auszahlung')],
+  ['styles additional income tile differently from Prolific total tiles', css.includes('.earning-tile.additional-income-tile') && css.includes('#134e4a') && css.includes('#99f6e4')],
   ['renders monthly comparison percentage with sign and threshold color class', html.includes('class="value comparison-value is-good"') && html.includes('+ 286,5 %')],
   ['renders previous month amounts without duplicate label', html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat: £25,00 + $1,50')],
   ['formats monthly comparison signs', typeof sandbox.fmtComparisonPercent === 'function' && sandbox.fmtComparisonPercent(94.9) === '- 94,9 %' && sandbox.fmtComparisonPercent(100) === '= 100 %' && sandbox.fmtComparisonPercent(105.1) === '+ 105,1 %'],

@@ -72,6 +72,8 @@ for (const route of [
 ]) {
   assert(data.includes(route), `missing route ${route}`);
 }
+assert(data.includes('$miscIncome = build_misc_income_response($pdo);'));
+assert(data.includes("'miscIncome'      => $miscIncome"));
 assert(/case 'miscIncomeSave':[\s\S]*\$_SERVER\['REQUEST_METHOD'\] !== 'POST'[\s\S]*require_dashboard_write_request\(\)[\s\S]*save_misc_income_entry\(\$pdo\)/.test(data));
 assert(/case 'miscIncomeDelete':[\s\S]*\$_SERVER\['REQUEST_METHOD'\] !== 'POST'[\s\S]*require_dashboard_write_request\(\)[\s\S]*delete_misc_income_entry\(\$pdo\)/.test(data));
 

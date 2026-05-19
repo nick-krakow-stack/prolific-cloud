@@ -289,6 +289,7 @@ function build_overview(PDO $pdo): array {
         ->fetch();
     $system = build_system_stats($pdo, $lastSyncAt, $lastSyncRow ?: null);
     $extraIncome = build_extra_income_overview_summary($pdo);
+    $miscIncome = build_misc_income_response($pdo);
 
     return [
         'ok' => true,
@@ -328,6 +329,7 @@ function build_overview(PDO $pdo): array {
         'dailyStats'       => $dailyStats,
         'worktime'        => $worktime,
         'extraIncome'     => $extraIncome,
+        'miscIncome'      => $miscIncome,
         'system'           => $system,
         'balance'          => $balance,
         'fxRates'          => $fxRates,

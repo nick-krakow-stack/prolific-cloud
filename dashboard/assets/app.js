@@ -1734,18 +1734,34 @@ function selectExtraIncomeCalendarDate(form, value) {
   renderExtraIncomeRangeCalendar(form);
 }
 
-function renderExtraIncomeOverviewTile(extraIncome) {
-  const summary = readExtraIncomeSummary(extraIncome);
+function miscIncomeMonthEurCents(miscIncome, fxRates) {
+  const summary = asObject(asObject(miscIncome).summary);
+  const monthByCurrency = asObject(summary.monthByCurrency || summary.month_by_currency);
 
-  if (!extraIncome || Object.keys(asObject(extraIncome)).length === 0) {
+  return convertToEur(monthByCurrency, fxRates) || 0;
+}
+
+function totalAdditionalIncomeMonthCents(extraIncome, miscIncome, fxRates) {
+  const summary = readExtraIncomeSummary(extraIncome);
+  const workHomeCents = Number(summary.monthGrossCents);
+  const miscCents = miscIncomeMonthEurCents(miscIncome, fxRates);
+
+  return (Number.isFinite(workHomeCents) ? Math.max(0, Math.round(workHomeCents)) : 0)
+    + (Number.isFinite(miscCents) ? Math.max(0, Math.round(miscCents)) : 0);
+}
+
+function renderExtraIncomeOverviewTile(extraIncome, miscIncome, fxRates) {
+  const monthTotalCents = totalAdditionalIncomeMonthCents(extraIncome, miscIncome, fxRates);
+
+  if (monthTotalCents <= 0 && !extraIncome && !miscIncome) {
     return '';
   }
 
   return `
-    <div class="earning-tile">
-      <div class="label">Arbeit-Zuhause</div>
-      <div class="value">${fmtEurAmount(summary.openNetCents)}</div>
-      <div class="secondary">Offen zur Auszahlung</div>
+    <div class="earning-tile additional-income-tile">
+      <div class="label">Zusatzeinkommen</div>
+      <div class="value">${fmtEurAmount(monthTotalCents)}</div>
+      <div class="secondary">im aktuellen Monat</div>
     </div>
   `;
 }
@@ -3199,10 +3215,10 @@ function renderExpandedOverview(data) {
   html += tile('Gesamt', allTime.earned, allTime.pending, null, { includePending: true });
   html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
-  html += renderExtraIncomeOverviewTile(data.extraIncome || data.extra_income);
   if (Object.keys(lastMonth.earned || {}).length) {
     html += comparisonTile();
   }
+  html += renderExtraIncomeOverviewTile(data.extraIncome || data.extra_income, data.miscIncome || data.misc_income, fxRates);
   html += '</div>';
   html += renderWorktimeCards(worktimeStats);
   html += renderEffectiveHourlyKpis(e, worktimeStats, fxRates);
