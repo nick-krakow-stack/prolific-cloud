@@ -37,6 +37,63 @@ function effective_unpaid_time_seconds(array $sub): int {
     return effective_time_seconds($sub);
 }
 
+function worktime_datetime($value): ?DateTime {
+    if ($value === null || $value === '') {
+        return null;
+    }
+
+    try {
+        return new DateTime((string)$value, new DateTimeZone(date_default_timezone_get()));
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
+function worktime_period_available_seconds(array $sub, ?DateTime $from, ?DateTime $to): ?int {
+    if (!$from && !$to) {
+        return null;
+    }
+
+    $startedAt = worktime_datetime($sub['started_at'] ?? null);
+    $completedAt = worktime_datetime($sub['completed_at'] ?? null);
+
+    if (!$startedAt) {
+        return null;
+    }
+
+    if ($from && $startedAt < $from) {
+        return 0;
+    }
+
+    if ($to && $startedAt >= $to) {
+        return 0;
+    }
+
+    $windowEnd = $to ? clone $to : new DateTime('now', new DateTimeZone(date_default_timezone_get()));
+
+    if ($completedAt && $completedAt < $windowEnd) {
+        $windowEnd = clone $completedAt;
+    }
+
+    $available = $windowEnd->getTimestamp() - $startedAt->getTimestamp();
+
+    return max(0, $available);
+}
+
+function period_worktime_seconds(array $sub, int $seconds, ?DateTime $from, ?DateTime $to): int {
+    $available = worktime_period_available_seconds($sub, $from, $to);
+
+    if ($available === null) {
+        return $seconds;
+    }
+
+    if ($available <= 0) {
+        return 0;
+    }
+
+    return min($seconds, $available);
+}
+
 function worktime_seconds_sql(string $alias = ''): string {
     $prefix = $alias !== '' ? rtrim($alias, '.') . '.' : '';
     $statusField = $prefix . 'status';
@@ -53,19 +110,19 @@ function worktime_seconds_sql(string $alias = ''): string {
 
 function sum_worktime_by_period(PDO $pdo, ?DateTime $from, ?DateTime $to): array {
     $sql = "
-        SELECT status, time_taken_seconds, completed_at
+        SELECT status, time_taken_seconds, started_at, completed_at
         FROM submissions
         WHERE 1 = 1
     ";
     $params = [];
 
     if ($from) {
-        $sql .= " AND COALESCE(completed_at, started_at) >= ?";
+        $sql .= " AND COALESCE(started_at, completed_at) >= ?";
         $params[] = $from->format('Y-m-d H:i:s');
     }
 
     if ($to) {
-        $sql .= " AND COALESCE(completed_at, started_at) < ?";
+        $sql .= " AND COALESCE(started_at, completed_at) < ?";
         $params[] = $to->format('Y-m-d H:i:s');
     }
 
@@ -88,14 +145,17 @@ function sum_worktime_by_period(PDO $pdo, ?DateTime $from, ?DateTime $to): array
 
         if (in_array($status, $paidSet, true)) {
             $seconds = effective_time_seconds($row);
+            $seconds = period_worktime_seconds($row, $seconds, $from, $to);
             $result['paid_seconds'] += $seconds;
             $result['count_paid']++;
         } elseif (in_array($status, $unpaidSet, true)) {
             $seconds = effective_unpaid_time_seconds($row);
+            $seconds = period_worktime_seconds($row, $seconds, $from, $to);
             $result['unpaid_seconds'] += $seconds;
             $result['count_unpaid']++;
         } else {
             $seconds = effective_time_seconds($row);
+            $seconds = period_worktime_seconds($row, $seconds, $from, $to);
         }
 
         $result['total_seconds'] += $seconds;

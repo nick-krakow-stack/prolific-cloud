@@ -53,8 +53,18 @@ const checks = [
   ],
   [
     'sum_worktime_by_period reads completion state for unpaid fallback',
-    /SELECT status,\s*time_taken_seconds,\s*completed_at/.test(worktimeSource) &&
+    /SELECT status,\s*time_taken_seconds,\s*started_at,\s*completed_at/.test(worktimeSource) &&
       /effective_unpaid_time_seconds\(\$row\)/.test(worktimeSource)
+  ],
+  [
+    'worktime period availability helper exists',
+    /function worktime_period_available_seconds\(array \$sub,\s*\?DateTime \$from,\s*\?DateTime \$to\): \?int/.test(worktimeSource) &&
+      /function period_worktime_seconds\(array \$sub,\s*int \$seconds,\s*\?DateTime \$from,\s*\?DateTime \$to\): int/.test(worktimeSource)
+  ],
+  [
+    'period worktime is anchored to started_at and capped by available period time',
+    /\$from && \$startedAt < \$from/.test(worktimeSource) &&
+      /return min\(\$seconds,\s*\$available\)/.test(worktimeSource)
   ],
   [
     'worktime total is added once after bucket-specific fallback is selected',
@@ -66,9 +76,9 @@ const checks = [
     /str_replace\(\['-', '_'\],\s*' ',/.test(worktimeSource)
   ],
   [
-    'worktime period filter uses completed_at fallback to started_at',
-    /COALESCE\(completed_at,\s*started_at\)\s*>=\s*\?/.test(worktimeSource) &&
-      /COALESCE\(completed_at,\s*started_at\)\s*<\s*\?/.test(worktimeSource)
+    'worktime period filter uses started_at fallback to completed_at',
+    /COALESCE\(started_at,\s*completed_at\)\s*>=\s*\?/.test(worktimeSource) &&
+      /COALESCE\(started_at,\s*completed_at\)\s*<\s*\?/.test(worktimeSource)
   ],
   [
     'worktime buckets include paid statuses',
