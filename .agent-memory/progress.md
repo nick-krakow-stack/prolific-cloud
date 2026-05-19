@@ -364,3 +364,9 @@
 - 2026-05-19 13:27:04 +02:00 - Captured owner feedback on UserPromptSubmit.
 
 - 2026-05-19 13:30:58 +02:00 - Updated overview additional-income tile: comparison now appears first, the tile is labeled Zusatzeinkommen, shows current-month total across Arbeit-Zuhause plus generic Tech-Support/User Testing entries, uses a distinct teal visual style, and was deployed with Node/source tests plus server PHP 8.4 lint and live HTTP 200 verification.
+- 2026-05-19 13:33:17 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 13:38:11 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 13:41:30 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 14:05:00 +02:00 - Fixed the Arbeit-Zuhause range picker calendar click sequence: first calendar click now sets only the start date, second click sets the end date, earlier second dates swap start/end, and clicks after a complete range begin a new range. Widened/rebalanced the modal to a 1080px date-range layout and added focused Node regression coverage plus updated render contract.
+- 2026-05-19 13:44:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 13:47:30 +02:00 - Deployed the Arbeit-Zuhause date-range picker fix to production. Verification passed: node syntax check, focused range-picker regression test, extra-income render contract, overview/misc render contracts, git diff check, config.php ignore check, server PHP 8.4 lint for dashboard/app.php and api/data.php, live root HTTP 200, and live app.js HTTP 200.

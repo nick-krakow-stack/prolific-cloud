@@ -1,27 +1,29 @@
-# Handoff
+﻿# Handoff
 
-Last updated: 2026-05-19 13:30:58 +02:00
+Last updated: 2026-05-19 13:49:30 +02:00
 Update mode: Orchestrator
 
 ## Latest Notes
 
-- Overview API now includes miscIncome for generic income summary data.
-- Overview top grid order is now comparison tile first, then Zusatzeinkommen tile.
-- Zusatzeinkommen tile shows current-month EUR total across Arbeit-Zuhause, User Testing, and Tech-Support.
-- Tile styling is subtly different from the Prolific income tiles to show it is not included in Prolific totals.
-- Runtime files were deployed to production with scripts/deploy-webspace.ps1.
-- Verification passed: overview render contract, misc income backend source contract, extra/misc render contracts,
-ode --check dashboard/assets/app.js, server PHP 8.4 lint, live HTTP 200, and git diff --check.
+- Arbeit-Zuhause date-range picker behavior is fixed and deployed.
+- Calendar selection now uses two clicks for a range: first click sets only start, second click sets end, earlier second dates swap start/end, and a new click after a complete range begins a new selection.
+- The dark range-picker modal was widened to a 1080px layout with a stronger preset/calendar balance.
+- Product changes were committed in `527af3c Improve work-home range picker`.
+- Verification passed: Node syntax check, focused range-picker regression test, extra-income/overview/misc render contracts, git diff check, config.php ignore check, server PHP 8.4 lint, and live HTTP checks.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before current commits: 879fcd4
+- Last commit: 527af3c Improve work-home range picker
 
 ## Working Tree
 
 ~~~text
-Run git status --short for the exact current tree.
+ M .agent-memory/current-state.md
+ M .agent-memory/current-task.md
+ M .agent-memory/feedback.md
+ M .agent-memory/handoff.md
+ M .agent-memory/progress.md
 ~~~
 
 ## Current State Summary

@@ -268,7 +268,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   supports `Tech-Support` entries with EUR hours/rate and `User Testing` entries
   with `Test`/`Umfrage` USD amounts. The Arbeit-Zuhause manual-session range
   picker is now a wider modal with quick presets, a calendar-like month grid,
-  and separate start/end time inputs.
+  and separate start/end time inputs. Calendar clicks use a two-step range
+  selection: first click sets only start, second click sets end, earlier end
+  dates swap cleanly, and a click after a complete range starts a new range.
+  The range-picker fix is deployed to production.
 - The overview top grid now places `Entwicklung zum Vormonat` before the
   additional-income tile. That tile is labeled `Zusatzeinkommen`, uses a subtly
   different teal treatment to signal that it is separate from Prolific totals,
