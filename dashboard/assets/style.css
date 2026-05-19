@@ -2029,6 +2029,59 @@ a:not(.icon-btn):hover {
   gap: 16px 24px;
   min-width: 0;
 }
+.extra-income-range-field {
+  grid-column: 1 / -1;
+}
+.extra-income-range-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  padding: 9px 12px;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.extra-income-range-button:hover,
+.extra-income-range-button:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+}
+.extra-income-calendar-icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  color: #fff;
+}
+.extra-income-calendar-icon::before,
+.extra-income-calendar-icon::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  background: currentColor;
+}
+.extra-income-calendar-icon::before {
+  top: 4px;
+  height: 2px;
+}
+.extra-income-calendar-icon::after {
+  top: -4px;
+  height: 5px;
+  box-shadow: 8px 0 0 currentColor;
+  width: 2px;
+  right: auto;
+}
 .extra-income-form .extra-income-field,
 .extra-income-modal label {
   min-width: 0;
@@ -2096,6 +2149,18 @@ a:not(.icon-btn):hover {
 .extra-income-modal .telegram-modal {
   max-width: 420px;
 }
+.extra-income-range-modal .telegram-modal {
+  max-width: 560px;
+}
+.extra-income-range-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.extra-income-range-modal input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.9;
+}
 .extra-income-modal .telegram-modal-field,
 .extra-income-modal .toggle-row {
   display: block;
@@ -2118,7 +2183,8 @@ a:not(.icon-btn):hover {
 
 @media (max-width: 760px) {
   .extra-income-grid,
-  .extra-income-field-grid {
+  .extra-income-field-grid,
+  .extra-income-range-grid {
     grid-template-columns: 1fr;
   }
   .extra-income-session-list .event-card {

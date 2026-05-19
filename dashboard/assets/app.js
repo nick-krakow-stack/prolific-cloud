@@ -1534,6 +1534,25 @@ function extraIncomeStatusLabel(status) {
   return 'Offen';
 }
 
+function fmtExtraIncomeRangeLabel(startValue, endValue) {
+  if (!startValue && !endValue) return 'Zeitraum auswählen';
+
+  const start = fmtDateTime(startValue);
+  const end = fmtDateTime(endValue);
+
+  return `${start} - ${end}`;
+}
+
+function refreshExtraIncomeRangeDisplay() {
+  const label = $('extraIncomeRangeValue');
+  const start = $('extraIncomeStartedAt')?.value || '';
+  const end = $('extraIncomeEndedAt')?.value || '';
+
+  if (label) {
+    label.textContent = fmtExtraIncomeRangeLabel(start, end);
+  }
+}
+
 function renderExtraIncomeOverviewTile(extraIncome) {
   const summary = readExtraIncomeSummary(extraIncome);
 
@@ -1619,15 +1638,16 @@ function renderExtraIncomeForm() {
       <div class="extra-income-form-head">
         <h3>Session nachtragen</h3>
       </div>
+      <input id="extraIncomeStartedAt" name="started_at" type="hidden" required>
+      <input id="extraIncomeEndedAt" name="ended_at" type="hidden" required>
       <div class="extra-income-field-grid">
-        <label class="extra-income-field">
-          <span>Start</span>
-          <input id="extraIncomeStartedAt" name="started_at" type="datetime-local" required>
-        </label>
-        <label class="extra-income-field">
-          <span>Ende</span>
-          <input id="extraIncomeEndedAt" name="ended_at" type="datetime-local" required>
-        </label>
+        <div class="extra-income-field extra-income-range-field">
+          <span>Zeitraum</span>
+          <button id="extraIncomeRangeButton" class="extra-income-range-button" type="button" aria-haspopup="dialog">
+            <span id="extraIncomeRangeValue">${escapeHtml(fmtExtraIncomeRangeLabel('', ''))}</span>
+            <span class="extra-income-calendar-icon" aria-hidden="true"></span>
+          </button>
+        </div>
         <label class="extra-income-field">
           <span>Bezahlte Nachrichten</span>
           <input id="extraIncomeMessageCount" name="message_count" type="number" min="0" step="1" required>
@@ -1757,9 +1777,16 @@ async function reloadExtraIncomeAfterWrite() {
 
 function extraIncomeFormPayload(form) {
   const data = new FormData(form);
+  const startedAt = data.get('started_at') || '';
+  const endedAt = data.get('ended_at') || '';
+
+  if (!startedAt || !endedAt) {
+    throw new Error('Bitte zuerst einen Zeitraum auswählen.');
+  }
+
   const payload = {
-    started_at: data.get('started_at') || '',
-    ended_at: data.get('ended_at') || '',
+    started_at: startedAt,
+    ended_at: endedAt,
     message_count: Number(data.get('message_count') || 0),
     night_bonus_enabled: Boolean(data.get('night_bonus_enabled')),
     bonus_mode: data.get('bonus_mode') || 'none',
@@ -1773,6 +1800,93 @@ function extraIncomeFormPayload(form) {
   }
 
   return payload;
+}
+
+function openExtraIncomeRangeModal() {
+  closeExtraIncomeRangeModal();
+
+  const wrapper = document.createElement('div');
+  const start = $('extraIncomeStartedAt')?.value || '';
+  const end = $('extraIncomeEndedAt')?.value || '';
+
+  wrapper.id = 'extraIncomeRangeModal';
+  wrapper.className = 'telegram-modal-backdrop extra-income-modal extra-income-range-modal';
+  wrapper.innerHTML = `
+    <div class="telegram-modal" role="dialog" aria-modal="true" aria-labelledby="extraIncomeRangeTitle">
+      <div class="telegram-modal-head">
+        <h3 id="extraIncomeRangeTitle">Zeitraum auswählen</h3>
+        <button class="telegram-modal-close" type="button" data-extra-income-range-close aria-label="Schließen">&times;</button>
+      </div>
+      <form id="extraIncomeRangeForm">
+        <div class="extra-income-range-grid">
+          <label class="telegram-modal-field">Start
+            <input id="extraIncomeRangeStart" name="started_at" type="datetime-local" value="${escapeHtml(start)}" required>
+          </label>
+          <label class="telegram-modal-field">Ende
+            <input id="extraIncomeRangeEnd" name="ended_at" type="datetime-local" value="${escapeHtml(end)}" required>
+          </label>
+        </div>
+        <div class="telegram-modal-actions">
+          <button type="submit">Übernehmen</button>
+          <button class="filter-reset" type="button" data-extra-income-range-close>Abbrechen</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(wrapper);
+  wrapper.querySelector('#extraIncomeRangeStart')?.focus();
+  wrapper.querySelector('#extraIncomeRangeForm')?.addEventListener('submit', event => {
+    try {
+      submitExtraIncomeRange(event);
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+  wrapper.addEventListener('click', event => {
+    const target = event.target;
+
+    if (target === wrapper || target?.dataset?.extraIncomeRangeClose != null) {
+      closeExtraIncomeRangeModal();
+    }
+  });
+}
+
+function closeExtraIncomeRangeModal() {
+  const modal = $('extraIncomeRangeModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function submitExtraIncomeRange(event) {
+  event.preventDefault();
+
+  const form = event.target?.closest('form');
+
+  if (!form) return;
+
+  const data = new FormData(form);
+  const startedAt = data.get('started_at') || '';
+  const endedAt = data.get('ended_at') || '';
+
+  if (!startedAt || !endedAt) {
+    throw new Error('Bitte Start und Ende auswählen.');
+  }
+
+  if (new Date(String(endedAt)).getTime() <= new Date(String(startedAt)).getTime()) {
+    throw new Error('Das Ende muss nach dem Start liegen.');
+  }
+
+  const startField = $('extraIncomeStartedAt');
+  const endField = $('extraIncomeEndedAt');
+
+  if (startField) startField.value = startedAt;
+  if (endField) endField.value = endedAt;
+
+  refreshExtraIncomeRangeDisplay();
+  closeExtraIncomeRangeModal();
 }
 
 function ensureExtraIncomeOk(response) {
@@ -1877,16 +1991,23 @@ async function submitExtraIncomeStop(event) {
 async function submitExtraIncomeSession(event) {
   event.preventDefault();
 
-  const response = await postJson(`${API_BASE}?type=extraIncomeSave`, extraIncomeFormPayload(event.currentTarget));
+  const form = event.target?.closest('form');
+
+  if (!form) {
+    throw new Error('Formular konnte nicht gelesen werden.');
+  }
+
+  const response = await postJson(`${API_BASE}?type=extraIncomeSave`, extraIncomeFormPayload(form));
 
   if (ensureExtraIncomeOk(response)) {
-    event.currentTarget.reset();
+    form.reset();
     const idField = $('extraIncomeSessionId');
 
     if (idField) {
       idField.value = '';
     }
 
+    refreshExtraIncomeRangeDisplay();
     await reloadExtraIncomeAfterWrite();
   }
 }
@@ -1939,6 +2060,8 @@ function prefillExtraIncomeSessionForm(id) {
   if (night) {
     night.checked = nightEnabled !== false;
   }
+
+  refreshExtraIncomeRangeDisplay();
 }
 
 function resetExtraIncomeSessionForm() {
@@ -1953,6 +2076,8 @@ function resetExtraIncomeSessionForm() {
   if (id) {
     id.value = '';
   }
+
+  refreshExtraIncomeRangeDisplay();
 }
 
 function bindExtraIncomeControls() {
@@ -1988,6 +2113,11 @@ function bindExtraIncomeControls() {
 
     if (target.id === 'extraIncomeFormReset') {
       resetExtraIncomeSessionForm();
+      return;
+    }
+
+    if (target.closest && target.closest('#extraIncomeRangeButton')) {
+      openExtraIncomeRangeModal();
       return;
     }
 

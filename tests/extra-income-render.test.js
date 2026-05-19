@@ -20,6 +20,11 @@ for (const symbol of [
   'openExtraIncomeStopModal',
   'submitExtraIncomeStop',
   'submitExtraIncomeSession',
+  'openExtraIncomeRangeModal',
+  'closeExtraIncomeRangeModal',
+  'submitExtraIncomeRange',
+  'fmtExtraIncomeRangeLabel',
+  'refreshExtraIncomeRangeDisplay',
   'deleteExtraIncomeSession',
   'markExtraIncomePaid',
   'renderExtraIncomeOverviewTile',
@@ -38,6 +43,12 @@ assert(js.includes('Nachtbonus anwenden'));
 assert(js.includes('extra-income-field-grid'));
 assert(js.includes('extra-income-field'));
 assert(js.includes('extra-income-actions'));
+assert(js.includes('id="extraIncomeRangeButton"'));
+assert(js.includes('id="extraIncomeRangeValue"'));
+assert(js.includes('name="started_at" type="hidden"'));
+assert(js.includes('name="ended_at" type="hidden"'));
+assert(js.includes('extraIncomeFormPayload(form)'));
+assert(!js.includes('extraIncomeFormPayload(event.currentTarget)'));
 assert(js.includes('extraIncome'));
 assert(js.includes('openNetCents'));
 assert(js.includes('todayGrossCents'));
@@ -55,6 +66,10 @@ for (const cls of [
   '.extra-income-field-grid',
   '.extra-income-field',
   '.extra-income-actions',
+  '.extra-income-range-button',
+  '.extra-income-calendar-icon',
+  '.extra-income-range-modal',
+  '.extra-income-range-grid',
 ]) {
   assert(css.includes(cls), `missing css ${cls}`);
 }
@@ -66,6 +81,14 @@ assert(
 assert(
   css.includes('.extra-income-form .extra-income-toggle'),
   'manual session toggle should override the global settings label layout'
+);
+assert(
+  css.includes('.extra-income-range-field') && css.includes('grid-column: 1 / -1'),
+  'date range trigger should span the form width'
+);
+assert(
+  /\.extra-income-calendar-icon\s*\{[\s\S]*border:\s*2px solid #fff/.test(css),
+  'calendar icon should be white'
 );
 assert(!css.includes('repeat(3, minmax(180px, 1fr))'));
 
