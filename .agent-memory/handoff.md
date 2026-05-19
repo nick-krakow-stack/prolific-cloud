@@ -1,22 +1,20 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 00:09:16 +02:00
+Last updated: 2026-05-19 08:15:24 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Latest completed work: dashboard review polish was implemented and deployed.
-Requester-Analyse metric columns are centered while requester names remain left aligned.
-Overview goal cards now receive exact saved EUR goal values from `api/data.php`
-and render target/remaining values without EUR -> GBP -> EUR rounding drift.
-`Zusatzeinkommen` manual session form now uses a scoped responsive field grid.
-Tests added/updated: exact EUR goal display, requester alignment, extra-income
-form CSS/markup contracts.
+Latest work: fixed the live `Zusatzeinkommen > Session nachtragen` form layout
+after owner screenshot review. The CSS now uses a bounded two-column
+`.extra-income-field-grid`, falls back to one column at `760px`, and scopes
+`.extra-income-form .extra-income-toggle` strongly enough to override global
+settings label rules. Runtime files were deployed and live CSS was verified.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before this task: c42a729 Update memory for tab order and watcher control
+- Last commit before this task: b1b152f Update memory for dashboard polish
 
 ## Working Tree
 
@@ -25,13 +23,8 @@ form CSS/markup contracts.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/data.php
- M dashboard/assets/app.js
  M dashboard/assets/style.css
  M tests/extra-income-render.test.js
- M tests/overview-render.test.js
- M tests/roadmap-rest-render.test.js
- M tests/settings-goals-source.test.js
 ~~~
 
 ## Current State Summary

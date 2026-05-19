@@ -323,3 +323,6 @@
 - 2026-05-18 23:54:19 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-18 23:54:26 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 00:09:16 +02:00 - Polished dashboard review items: centered Requester-Analyse metric columns, fixed exact EUR goal display by passing saved EUR target values through overview API/UI, modernized `Zusatzeinkommen` manual session form layout, added regression/source tests, deployed runtime files, and verified production with PHP 8.4 lint and HTTP 200.
+- 2026-05-19 00:12:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 08:09:53 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 08:15:24 +02:00 - Corrected the `Zusatzeinkommen > Session nachtragen` form after owner screenshot review: replaced the overflowing three-column grid with a bounded two-column layout, raised toggle selector specificity so the checkbox aligns horizontally, added regression coverage, deployed runtime files, and verified live CSS plus HTTP 200.

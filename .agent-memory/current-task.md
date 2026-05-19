@@ -1,6 +1,6 @@
-﻿# Current Task Checklist
+# Current Task Checklist
 
-Last updated: 2026-05-19 00:09:16 +02:00
+Last updated: 2026-05-19 08:15:24 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -108,6 +108,15 @@ Last updated: 2026-05-19 00:09:16 +02:00
 - [x] Add regression/source coverage for exact EUR goal display, requester alignment, and extra-income form classes.
 - [x] Run JS render/source checks, PHP 8.4 lint on the server, deploy runtime files, and verify production HTTP 200.
 
+## Active Task: Extra Income Form Layout Correction
+
+- [x] Read required repository startup files and current git status.
+- [x] Confirm from owner screenshot that the previous three-column manual session form overflows and the checkbox is misaligned.
+- [x] Replace the manual session form grid with a bounded two-column layout and one-column breakpoint.
+- [x] Increase CSS selector specificity so the night-bonus toggle overrides the global settings label layout.
+- [x] Add regression coverage for the two-column grid and scoped toggle selector.
+- [x] Run JS checks, deploy runtime files, and verify the deployed CSS on the webspace.
+
 ## Active Task Checklist
 
 - [ ] Add an item.
@@ -115,4 +124,3 @@ Last updated: 2026-05-19 00:09:16 +02:00
 ## Completed Task Steps
 
 - [x] Baseline step.
-
