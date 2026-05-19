@@ -59,4 +59,14 @@ for (const cls of [
   assert(css.includes(cls), `missing css ${cls}`);
 }
 
+assert(
+  /\.extra-income-field-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/.test(css),
+  'manual session form should use two bounded columns'
+);
+assert(
+  css.includes('.extra-income-form .extra-income-toggle'),
+  'manual session toggle should override the global settings label layout'
+);
+assert(!css.includes('repeat(3, minmax(180px, 1fr))'));
+
 console.log('extra income render contract ok');

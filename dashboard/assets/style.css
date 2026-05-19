@@ -2009,6 +2009,7 @@ a:not(.icon-btn):hover {
 }
 .extra-income-form {
   gap: 16px;
+  overflow: hidden;
 }
 .extra-income-form-head h3 {
   margin: 0;
@@ -2024,43 +2025,45 @@ a:not(.icon-btn):hover {
 }
 .extra-income-field-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
   min-width: 0;
 }
-.extra-income-field,
+.extra-income-form .extra-income-field,
 .extra-income-modal label {
   min-width: 0;
 }
-.extra-income-field {
+.extra-income-form .extra-income-field {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
-.extra-income-field > span,
-.extra-income-toggle > span {
+.extra-income-form .extra-income-field > span,
+.extra-income-form .extra-income-toggle > span {
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 750;
+  line-height: 1.25;
 }
-.extra-income-field input,
-.extra-income-field select,
+.extra-income-form .extra-income-field input,
+.extra-income-form .extra-income-field select,
 .extra-income-modal input,
 .extra-income-modal select {
   width: 100%;
   min-width: 0;
 }
-.extra-income-field input,
-.extra-income-field select {
+.extra-income-form .extra-income-field input,
+.extra-income-form .extra-income-field select {
   min-height: 38px;
 }
-.extra-income-toggle {
+.extra-income-form .extra-income-toggle {
   display: flex;
   align-items: center;
   gap: 10px;
   width: fit-content;
   max-width: 100%;
+  margin-top: 2px;
 }
-.extra-income-toggle input {
+.extra-income-form .extra-income-toggle input {
   width: auto;
   flex: 0 0 auto;
 }
@@ -2111,12 +2114,9 @@ a:not(.icon-btn):hover {
   .extra-income-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .extra-income-field-grid {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
-  }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 760px) {
   .extra-income-grid,
   .extra-income-field-grid {
     grid-template-columns: 1fr;
