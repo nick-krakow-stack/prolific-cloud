@@ -50,8 +50,8 @@ function asset_version(string $asset): string {
   <button class="tab" data-tab="stats">Statistiken</button>
   <button class="tab" data-tab="system">System</button>
   <button class="tab" data-tab="settings">Einstellungen</button>
-  <button class="tab" data-tab="misc-income">Zusatzeinkommen</button>
   <span class="tabs-divider" aria-hidden="true">|</span>
+  <button class="tab" data-tab="misc-income">Zusatzeinkommen</button>
   <button class="tab" data-tab="work-home">Arbeit-Zuhause</button>
 </nav>
 

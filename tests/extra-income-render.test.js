@@ -8,8 +8,9 @@ assert(shell.includes('data-tab="work-home"'));
 assert(shell.includes('id="panel-work-home"'));
 assert(shell.includes('id="workHomeContent"'));
 assert(shell.includes('Arbeit-Zuhause'));
-assert(shell.indexOf('data-tab="misc-income"') < shell.indexOf('class="tabs-divider"'));
-assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="work-home"'));
+assert(shell.indexOf('data-tab="settings"') < shell.indexOf('class="tabs-divider"'));
+assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="misc-income"'));
+assert(shell.indexOf('data-tab="misc-income"') < shell.indexOf('data-tab="work-home"'));
 assert(!shell.includes('id="panel-extra-income"'));
 
 for (const symbol of [

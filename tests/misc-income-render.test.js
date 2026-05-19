@@ -9,8 +9,9 @@ assert(shell.includes('data-tab="misc-income"'));
 assert(shell.includes('id="panel-misc-income"'));
 assert(shell.includes('id="miscIncomeContent"'));
 assert(shell.includes('Zusatzeinkommen'));
-assert(shell.indexOf('data-tab="settings"') < shell.indexOf('data-tab="misc-income"'));
-assert(shell.indexOf('data-tab="misc-income"') < shell.indexOf('class="tabs-divider"'));
+assert(shell.indexOf('data-tab="settings"') < shell.indexOf('class="tabs-divider"'));
+assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="misc-income"'));
+assert(shell.indexOf('data-tab="misc-income"') < shell.indexOf('data-tab="work-home"'));
 
 for (const symbol of [
   'loadMiscIncome',
