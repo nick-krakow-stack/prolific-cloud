@@ -355,3 +355,7 @@
 - 2026-05-19 12:34:20 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 12:36:46 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 12:50:00 +02:00 - Renamed the existing chatmoderator `Zusatzeinkommen` UI to `Arbeit-Zuhause`, added a separate generic `Zusatzeinkommen` tab for Tech-Support and User Testing, created/deployed `api/_misc_income.php`, migrated production schema `misc_income_entries`, widened the Arbeit-Zuhause range picker into a calendar-style modal, and verified local Node tests plus server PHP 8.4 lint/schema smoke checks.
+- 2026-05-19 12:58:34 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 13:12:02 +02:00 - Captured owner feedback on UserPromptSubmit.
+
+- 2026-05-19 13:17:00 +02:00 - Moved the dashboard tab separator left of generic Zusatzeinkommen, updated render contract tests for the new order, deployed runtime files, and verified Node render tests, server PHP 8.4 lint, live HTTP 200, and config.php ignore status.
