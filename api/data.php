@@ -16,6 +16,7 @@ require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/_rewards.php';
 require_once __DIR__ . '/_worktime.php';
 require_once __DIR__ . '/_extra_income.php';
+require_once __DIR__ . '/_misc_income.php';
 require_once __DIR__ . '/_telegram.php';
 require_once __DIR__ . '/_telegram_commands.php';
 require_once __DIR__ . '/../dashboard/session.php';
@@ -131,6 +132,23 @@ try {
             }
             require_dashboard_write_request();
             json_response(mark_extra_income_paid($pdo));
+
+        case 'miscIncome':
+            json_response(build_misc_income_response($pdo));
+
+        case 'miscIncomeSave':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(save_misc_income_entry($pdo));
+
+        case 'miscIncomeDelete':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                json_error('Nur POST erlaubt.', 405);
+            }
+            require_dashboard_write_request();
+            json_response(delete_misc_income_entry($pdo));
 
         case 'telegramCommand':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

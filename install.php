@@ -186,6 +186,23 @@ $statements = [
     `created_at`     DATETIME NOT NULL,
     INDEX `idx_extra_income_payouts_period` (`period_start`, `period_end`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+// === misc_income_entries: generische weitere Zusatzeinkommen ===
+"CREATE TABLE IF NOT EXISTS `misc_income_entries` (
+    `id`                   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `category`             VARCHAR(32) NOT NULL,
+    `entry_type`           VARCHAR(16) NULL,
+    `entry_date`           DATE NOT NULL,
+    `hours_hundredths`     INT NOT NULL DEFAULT 0,
+    `hourly_rate_cents`    INT NOT NULL DEFAULT 0,
+    `amount_minor`         INT NOT NULL DEFAULT 0,
+    `currency`             VARCHAR(3) NOT NULL,
+    `created_at`           DATETIME NOT NULL,
+    `updated_at`           DATETIME NOT NULL,
+    INDEX `idx_misc_income_entries_date` (`entry_date`),
+    INDEX `idx_misc_income_entries_category` (`category`),
+    INDEX `idx_misc_income_entries_currency` (`currency`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 ];
 
 $created = [];
@@ -237,7 +254,7 @@ while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
 <div class="box">
   <h2>📦 Tabellen</h2>
   <ul>
-    <?php foreach (['studies','submissions','settings','events','sync_log','telegram_messages','extra_income_sessions','extra_income_timer','extra_income_payouts'] as $t): ?>
+    <?php foreach (['studies','submissions','settings','events','sync_log','telegram_messages','extra_income_sessions','extra_income_timer','extra_income_payouts','misc_income_entries'] as $t): ?>
       <li>
         <code><?= htmlspecialchars($t) ?></code>:
         <?php if (in_array($t, $existing, true)): ?>

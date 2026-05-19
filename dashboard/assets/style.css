@@ -2150,14 +2150,109 @@ a:not(.icon-btn):hover {
   max-width: 420px;
 }
 .extra-income-range-modal .telegram-modal {
-  max-width: 560px;
+  max-width: 920px;
+}
+.extra-income-range-top {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.extra-income-range-layout {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.extra-income-range-presets {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.extra-income-range-presets button {
+  justify-content: flex-start;
+  width: 100%;
+}
+.extra-income-range-main {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
 }
 .extra-income-range-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+.extra-income-calendar {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: color-mix(in srgb, var(--bg) 44%, var(--bg-card));
+}
+.extra-income-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.extra-income-calendar-head strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+.extra-income-calendar-weekdays,
+.extra-income-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.extra-income-calendar-weekdays {
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+.extra-income-calendar-day {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.extra-income-calendar-day:hover,
+.extra-income-calendar-day:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+}
+.extra-income-calendar-day.is-outside {
+  color: var(--text-muted);
+  opacity: 0.56;
+}
+.extra-income-calendar-day.is-in-range {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.extra-income-calendar-day.is-start,
+.extra-income-calendar-day.is-end {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
 .extra-income-range-modal input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.9;
+}
+.extra-income-range-modal input[type="date"]::-webkit-calendar-picker-indicator,
+.extra-income-range-modal input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.9;
 }
@@ -2184,8 +2279,15 @@ a:not(.icon-btn):hover {
 @media (max-width: 760px) {
   .extra-income-grid,
   .extra-income-field-grid,
-  .extra-income-range-grid {
+  .extra-income-range-grid,
+  .extra-income-range-layout {
     grid-template-columns: 1fr;
+  }
+  .extra-income-range-top {
+    justify-content: stretch;
+  }
+  .extra-income-range-top button {
+    flex: 1 1 140px;
   }
   .extra-income-session-list .event-card {
     align-items: stretch;
@@ -2199,5 +2301,52 @@ a:not(.icon-btn):hover {
   }
   .extra-income-actions button {
     width: 100%;
+  }
+}
+
+.misc-income-layout {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.misc-income-forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+.misc-income-form {
+  margin-bottom: 0;
+}
+.misc-income-entry-list {
+  margin-bottom: 16px;
+}
+.misc-income-entry {
+  align-items: center;
+}
+.misc-income-entry-amount {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  min-width: max-content;
+  color: var(--text);
+}
+.misc-income-entry-amount span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .misc-income-forms {
+    grid-template-columns: 1fr;
+  }
+  .misc-income-entry {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .misc-income-entry-amount {
+    justify-items: start;
+    min-width: 0;
   }
 }

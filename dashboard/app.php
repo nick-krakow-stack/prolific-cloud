@@ -50,8 +50,9 @@ function asset_version(string $asset): string {
   <button class="tab" data-tab="stats">Statistiken</button>
   <button class="tab" data-tab="system">System</button>
   <button class="tab" data-tab="settings">Einstellungen</button>
+  <button class="tab" data-tab="misc-income">Zusatzeinkommen</button>
   <span class="tabs-divider" aria-hidden="true">|</span>
-  <button class="tab" data-tab="extra-income">Zusatzeinkommen</button>
+  <button class="tab" data-tab="work-home">Arbeit-Zuhause</button>
 </nav>
 
 <main class="container">
@@ -62,8 +63,13 @@ function asset_version(string $asset): string {
   </section>
 
   <!-- ZUSATZEINKOMMEN -->
-  <section class="tab-panel" id="panel-extra-income">
-    <div id="extraIncomeContent" class="loading">Lade...</div>
+  <section class="tab-panel" id="panel-misc-income">
+    <div id="miscIncomeContent" class="loading">Lade...</div>
+  </section>
+
+  <!-- ARBEIT-ZUHAUSE -->
+  <section class="tab-panel" id="panel-work-home">
+    <div id="workHomeContent" class="loading">Lade...</div>
   </section>
 
   <!-- TEILNAHMEN -->

@@ -4,14 +4,17 @@ const assert = require('assert');
 const shell = fs.readFileSync('dashboard/app.php', 'utf8');
 const js = fs.readFileSync('dashboard/assets/app.js', 'utf8');
 
-assert(shell.includes('data-tab="extra-income"'));
-assert(shell.includes('id="panel-extra-income"'));
-assert(shell.indexOf('data-tab="settings"') < shell.indexOf('class="tabs-divider"'));
-assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="extra-income"'));
-assert(shell.includes('id="extraIncomeContent"'));
+assert(shell.includes('data-tab="work-home"'));
+assert(shell.includes('id="panel-work-home"'));
+assert(shell.includes('id="workHomeContent"'));
+assert(shell.includes('Arbeit-Zuhause'));
+assert(shell.indexOf('data-tab="misc-income"') < shell.indexOf('class="tabs-divider"'));
+assert(shell.indexOf('class="tabs-divider"') < shell.indexOf('data-tab="work-home"'));
+assert(!shell.includes('id="panel-extra-income"'));
 
 for (const symbol of [
   'loadExtraIncome',
+  'loadWorkHome',
   'renderExtraIncome',
   'renderExtraIncomeTiles',
   'renderExtraIncomeTimer',
@@ -38,7 +41,8 @@ assert(js.includes('type=extraIncomeStop'));
 assert(js.includes('type=extraIncomeSave'));
 assert(js.includes('type=extraIncomeDelete'));
 assert(js.includes('type=extraIncomeMarkPaid'));
-assert(js.includes('Zusatzverdienste'));
+assert(js.includes("contentIds = {\n    'misc-income': 'miscIncomeContent',\n    'work-home': 'workHomeContent'"));
+assert(js.includes('Arbeit-Zuhause'));
 assert(js.includes('Nachtbonus-Nachrichten'));
 assert(js.includes('Free Messages'));
 assert(js.includes('extra-income-field-grid'));
@@ -46,6 +50,17 @@ assert(js.includes('extra-income-field'));
 assert(js.includes('extra-income-actions'));
 assert(js.includes('id="extraIncomeRangeButton"'));
 assert(js.includes('id="extraIncomeRangeValue"'));
+assert(js.includes('extra-income-range-presets'));
+assert(js.includes('data-extra-income-range-preset="today"'));
+assert(js.includes('data-extra-income-range-preset="yesterday"'));
+assert(js.includes('data-extra-income-range-preset="this-week"'));
+assert(js.includes('data-extra-income-range-preset="last-week"'));
+assert(js.includes('data-extra-income-range-preset="this-month"'));
+assert(js.includes('extraIncomeRangeStartTime'));
+assert(js.includes('extraIncomeRangeEndTime'));
+assert(js.includes('extraIncomeRangeCalendar'));
+assert(js.includes('renderExtraIncomeRangeCalendar'));
+assert(js.includes('applyExtraIncomeRangePreset'));
 assert(js.includes('id="extraIncomeFreeMessageCount"'));
 assert(js.includes('id="extraIncomeNightBonusMessageCount"'));
 assert(js.includes('name="started_at" type="hidden"'));
@@ -77,6 +92,10 @@ for (const cls of [
   '.extra-income-calendar-icon',
   '.extra-income-range-modal',
   '.extra-income-range-grid',
+  '.extra-income-range-layout',
+  '.extra-income-range-presets',
+  '.extra-income-calendar-grid',
+  '.extra-income-calendar-day',
 ]) {
   assert(css.includes(cls), `missing css ${cls}`);
 }
@@ -96,6 +115,10 @@ assert(
 assert(
   /\.extra-income-calendar-icon\s*\{[\s\S]*border:\s*2px solid #fff/.test(css),
   'calendar icon should be white'
+);
+assert(
+  /\.extra-income-range-modal \.telegram-modal\s*\{[\s\S]*max-width:\s*920px/.test(css),
+  'work-home range picker should use a wider modal'
 );
 assert(!css.includes('repeat(3, minmax(180px, 1fr))'));
 

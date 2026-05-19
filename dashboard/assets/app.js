@@ -15,6 +15,7 @@ let cachedData = {
   account: null,
   system: null,
   settings: null,
+  miscIncome: null,
   extraIncome: null,
   events: null
 };
@@ -1557,6 +1558,182 @@ function refreshExtraIncomeRangeDisplay() {
   }
 }
 
+let extraIncomeRangeCalendarMonth = null;
+
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function localDateKey(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function localTimeKey(date) {
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+function parseLocalDateKey(value) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) return null;
+
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function shiftDate(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function mondayOf(date) {
+  const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = copy.getDay() || 7;
+  copy.setDate(copy.getDate() - day + 1);
+  return copy;
+}
+
+function extraIncomeDatePart(value, fallbackDate = new Date()) {
+  const normalized = extraIncomeDateInputValue(value);
+
+  if (normalized) return normalized.slice(0, 10);
+
+  return localDateKey(fallbackDate);
+}
+
+function extraIncomeTimePart(value, fallback = '09:00') {
+  const normalized = extraIncomeDateInputValue(value);
+
+  if (normalized && normalized.length >= 16) return normalized.slice(11, 16);
+
+  return fallback;
+}
+
+function combineExtraIncomeDateTime(dateValue, timeValue) {
+  const date = String(dateValue || '').slice(0, 10);
+  const time = String(timeValue || '').slice(0, 5);
+
+  if (!date || !time) return '';
+
+  return `${date}T${time}`;
+}
+
+function setExtraIncomeRangeFormValues(form, startDate, endDate, startTime, endTime) {
+  const startDateField = form.querySelector('#extraIncomeRangeStartDate');
+  const endDateField = form.querySelector('#extraIncomeRangeEndDate');
+  const startTimeField = form.querySelector('#extraIncomeRangeStartTime');
+  const endTimeField = form.querySelector('#extraIncomeRangeEndTime');
+
+  if (startDateField) startDateField.value = startDate || '';
+  if (endDateField) endDateField.value = endDate || '';
+  if (startTimeField && startTime != null) startTimeField.value = startTime;
+  if (endTimeField && endTime != null) endTimeField.value = endTime;
+}
+
+function applyExtraIncomeRangePreset(preset, form) {
+  const now = new Date();
+  const startTime = form.querySelector('#extraIncomeRangeStartTime')?.value || '09:00';
+  const endTime = form.querySelector('#extraIncomeRangeEndTime')?.value || localTimeKey(now);
+  let start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let end = new Date(start);
+
+  if (preset === 'yesterday') {
+    start = shiftDate(start, -1);
+    end = new Date(start);
+  } else if (preset === 'this-week') {
+    start = mondayOf(now);
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if (preset === 'last-week') {
+    end = shiftDate(mondayOf(now), -1);
+    start = shiftDate(end, -6);
+  } else if (preset === 'this-month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  setExtraIncomeRangeFormValues(form, localDateKey(start), localDateKey(end), startTime, endTime);
+  extraIncomeRangeCalendarMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+  renderExtraIncomeRangeCalendar(form);
+}
+
+function resetExtraIncomeRangeForm(form) {
+  setExtraIncomeRangeFormValues(form, '', '', '09:00', localTimeKey(new Date()));
+  renderExtraIncomeRangeCalendar(form);
+}
+
+function renderExtraIncomeRangeCalendar(form) {
+  const calendar = form.querySelector('#extraIncomeRangeCalendar');
+
+  if (!calendar) return;
+
+  const now = new Date();
+  const startValue = form.querySelector('#extraIncomeRangeStartDate')?.value || '';
+  const endValue = form.querySelector('#extraIncomeRangeEndDate')?.value || '';
+  const selectedStart = parseLocalDateKey(startValue);
+  const selectedEnd = parseLocalDateKey(endValue);
+  const month = extraIncomeRangeCalendarMonth || new Date(
+    (selectedStart || now).getFullYear(),
+    (selectedStart || now).getMonth(),
+    1
+  );
+  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  const firstGridDay = shiftDate(monthStart, -((monthStart.getDay() + 6) % 7));
+  const days = [];
+
+  for (let i = 0; i < 42; i += 1) {
+    const day = shiftDate(firstGridDay, i);
+    const key = localDateKey(day);
+    const isOutside = day.getMonth() !== month.getMonth();
+    const isStart = key === startValue;
+    const isEnd = key === endValue;
+    const inRange = selectedStart && selectedEnd && day >= selectedStart && day <= selectedEnd;
+    const classes = [
+      'extra-income-calendar-day',
+      isOutside ? 'is-outside' : '',
+      inRange ? 'is-in-range' : '',
+      isStart ? 'is-start' : '',
+      isEnd ? 'is-end' : ''
+    ].filter(Boolean).join(' ');
+
+    days.push(`<button class="${classes}" type="button" data-extra-income-calendar-date="${key}">${day.getDate()}</button>`);
+  }
+
+  calendar.innerHTML = `
+    <div class="extra-income-calendar-head">
+      <button class="filter-reset" type="button" data-extra-income-calendar-nav="-1" aria-label="Vorheriger Monat">&lt;</button>
+      <strong>${month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</strong>
+      <button class="filter-reset" type="button" data-extra-income-calendar-nav="1" aria-label="N&auml;chster Monat">&gt;</button>
+    </div>
+    <div class="extra-income-calendar-weekdays" aria-hidden="true">
+      <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+    </div>
+    <div class="extra-income-calendar-grid">
+      ${days.join('')}
+    </div>
+  `;
+}
+
+function selectExtraIncomeCalendarDate(form, value) {
+  const startField = form.querySelector('#extraIncomeRangeStartDate');
+  const endField = form.querySelector('#extraIncomeRangeEndDate');
+
+  if (!startField || !endField) return;
+
+  if (!startField.value || (startField.value && endField.value)) {
+    startField.value = value;
+    endField.value = value;
+  } else if (value < startField.value) {
+    endField.value = startField.value;
+    startField.value = value;
+  } else {
+    endField.value = value;
+  }
+
+  renderExtraIncomeRangeCalendar(form);
+}
+
 function renderExtraIncomeOverviewTile(extraIncome) {
   const summary = readExtraIncomeSummary(extraIncome);
 
@@ -1566,7 +1743,7 @@ function renderExtraIncomeOverviewTile(extraIncome) {
 
   return `
     <div class="earning-tile">
-      <div class="label">Zusatzverdienste</div>
+      <div class="label">Arbeit-Zuhause</div>
       <div class="value">${fmtEurAmount(summary.openNetCents)}</div>
       <div class="secondary">Offen zur Auszahlung</div>
     </div>
@@ -1580,7 +1757,7 @@ function renderExtraIncomeGoalRow(amountCents) {
 
   return `
       <div class="status-row">
-        <span class="key">Zusatzverdienste</span>
+        <span class="key">Arbeit-Zuhause</span>
         <span class="value">${fmtEurAmount(numeric)}</span>
       </div>
   `;
@@ -1820,32 +1997,69 @@ function extraIncomeFormPayload(form) {
   return payload;
 }
 
+function closeExtraIncomeRangeModal() {
+  const modal = $('extraIncomeRangeModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
+
 function openExtraIncomeRangeModal() {
   closeExtraIncomeRangeModal();
 
   const wrapper = document.createElement('div');
   const start = $('extraIncomeStartedAt')?.value || '';
   const end = $('extraIncomeEndedAt')?.value || '';
+  const now = new Date();
+  const startDate = extraIncomeDatePart(start, now);
+  const endDate = extraIncomeDatePart(end, now);
+  const startTime = extraIncomeTimePart(start, '09:00');
+  const endTime = extraIncomeTimePart(end, localTimeKey(now));
+  const calendarBase = parseLocalDateKey(startDate) || now;
 
+  extraIncomeRangeCalendarMonth = new Date(calendarBase.getFullYear(), calendarBase.getMonth(), 1);
   wrapper.id = 'extraIncomeRangeModal';
   wrapper.className = 'telegram-modal-backdrop extra-income-modal extra-income-range-modal';
   wrapper.innerHTML = `
     <div class="telegram-modal" role="dialog" aria-modal="true" aria-labelledby="extraIncomeRangeTitle">
       <div class="telegram-modal-head">
-        <h3 id="extraIncomeRangeTitle">Zeitraum auswählen</h3>
-        <button class="telegram-modal-close" type="button" data-extra-income-range-close aria-label="Schließen">&times;</button>
+        <h3 id="extraIncomeRangeTitle">Zeitraum ausw&auml;hlen</h3>
+        <button class="telegram-modal-close" type="button" data-extra-income-range-close aria-label="Schlie&szlig;en">&times;</button>
       </div>
       <form id="extraIncomeRangeForm">
-        <div class="extra-income-range-grid">
-          <label class="telegram-modal-field">Start
-            <input id="extraIncomeRangeStart" name="started_at" type="datetime-local" value="${escapeHtml(start)}" required>
-          </label>
-          <label class="telegram-modal-field">Ende
-            <input id="extraIncomeRangeEnd" name="ended_at" type="datetime-local" value="${escapeHtml(end)}" required>
-          </label>
+        <div class="extra-income-range-top">
+          <button class="filter-reset" type="button" data-extra-income-range-preset="today">Heute</button>
+          <button class="filter-reset" type="button" data-extra-income-range-reset>Zur&uuml;cksetzen</button>
+          <button type="submit">&Uuml;bernehmen</button>
+        </div>
+        <div class="extra-income-range-layout">
+          <div class="extra-income-range-presets" aria-label="Schnellwahl">
+            <button class="filter-reset" type="button" data-extra-income-range-preset="today">Heute</button>
+            <button class="filter-reset" type="button" data-extra-income-range-preset="yesterday">Gestern</button>
+            <button class="filter-reset" type="button" data-extra-income-range-preset="this-week">Diese Woche</button>
+            <button class="filter-reset" type="button" data-extra-income-range-preset="last-week">Letzte Woche</button>
+            <button class="filter-reset" type="button" data-extra-income-range-preset="this-month">Dieser Monat</button>
+          </div>
+          <div class="extra-income-range-main">
+            <div class="extra-income-range-grid">
+              <label class="telegram-modal-field">Startdatum
+                <input id="extraIncomeRangeStartDate" name="start_date" type="date" value="${escapeHtml(startDate)}" required>
+              </label>
+              <label class="telegram-modal-field">Enddatum
+                <input id="extraIncomeRangeEndDate" name="end_date" type="date" value="${escapeHtml(endDate)}" required>
+              </label>
+              <label class="telegram-modal-field">Startzeit
+                <input id="extraIncomeRangeStartTime" name="start_time" type="time" value="${escapeHtml(startTime)}" required>
+              </label>
+              <label class="telegram-modal-field">Endzeit
+                <input id="extraIncomeRangeEndTime" name="end_time" type="time" value="${escapeHtml(endTime)}" required>
+              </label>
+            </div>
+            <div id="extraIncomeRangeCalendar" class="extra-income-calendar" aria-label="Kalender"></div>
+          </div>
         </div>
         <div class="telegram-modal-actions">
-          <button type="submit">Übernehmen</button>
           <button class="filter-reset" type="button" data-extra-income-range-close>Abbrechen</button>
         </div>
       </form>
@@ -1853,8 +2067,14 @@ function openExtraIncomeRangeModal() {
   `;
 
   document.body.appendChild(wrapper);
-  wrapper.querySelector('#extraIncomeRangeStart')?.focus();
-  wrapper.querySelector('#extraIncomeRangeForm')?.addEventListener('submit', event => {
+  const form = wrapper.querySelector('#extraIncomeRangeForm');
+
+  if (form) {
+    renderExtraIncomeRangeCalendar(form);
+  }
+
+  wrapper.querySelector('#extraIncomeRangeStartDate')?.focus();
+  form?.addEventListener('submit', event => {
     try {
       submitExtraIncomeRange(event);
     } catch (error) {
@@ -1866,16 +2086,53 @@ function openExtraIncomeRangeModal() {
 
     if (target === wrapper || target?.dataset?.extraIncomeRangeClose != null) {
       closeExtraIncomeRangeModal();
+      return;
+    }
+
+    const activeForm = target?.closest?.('#extraIncomeRangeForm');
+
+    if (!activeForm) return;
+
+    const preset = target?.dataset?.extraIncomeRangePreset;
+
+    if (preset) {
+      applyExtraIncomeRangePreset(preset, activeForm);
+      return;
+    }
+
+    if (target?.dataset?.extraIncomeRangeReset != null) {
+      resetExtraIncomeRangeForm(activeForm);
+      return;
+    }
+
+    const nav = target?.dataset?.extraIncomeCalendarNav;
+
+    if (nav) {
+      const current = extraIncomeRangeCalendarMonth || new Date();
+      extraIncomeRangeCalendarMonth = new Date(current.getFullYear(), current.getMonth() + Number(nav), 1);
+      renderExtraIncomeRangeCalendar(activeForm);
+      return;
+    }
+
+    const dateValue = target?.dataset?.extraIncomeCalendarDate;
+
+    if (dateValue) {
+      selectExtraIncomeCalendarDate(activeForm, dateValue);
     }
   });
-}
+  form?.addEventListener('input', event => {
+    const target = event.target;
 
-function closeExtraIncomeRangeModal() {
-  const modal = $('extraIncomeRangeModal');
+    if (target?.id === 'extraIncomeRangeStartDate' || target?.id === 'extraIncomeRangeEndDate') {
+      const parsed = parseLocalDateKey(target.value);
 
-  if (modal) {
-    modal.remove();
-  }
+      if (parsed) {
+        extraIncomeRangeCalendarMonth = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+      }
+
+      renderExtraIncomeRangeCalendar(form);
+    }
+  });
 }
 
 function submitExtraIncomeRange(event) {
@@ -1886,11 +2143,11 @@ function submitExtraIncomeRange(event) {
   if (!form) return;
 
   const data = new FormData(form);
-  const startedAt = data.get('started_at') || '';
-  const endedAt = data.get('ended_at') || '';
+  const startedAt = combineExtraIncomeDateTime(data.get('start_date'), data.get('start_time'));
+  const endedAt = combineExtraIncomeDateTime(data.get('end_date'), data.get('end_time'));
 
   if (!startedAt || !endedAt) {
-    throw new Error('Bitte Start und Ende auswählen.');
+    throw new Error('Bitte Start und Ende ausw\u00e4hlen.');
   }
 
   if (new Date(String(endedAt)).getTime() <= new Date(String(startedAt)).getTime()) {
@@ -2097,7 +2354,7 @@ function resetExtraIncomeSessionForm() {
 }
 
 function bindExtraIncomeControls() {
-  const root = $('extraIncomeContent');
+  const root = $('workHomeContent') || $('extraIncomeContent');
 
   if (!root || root.dataset.bound === '1') return;
 
@@ -2146,6 +2403,279 @@ function bindExtraIncomeControls() {
     const deleteButton = target.closest ? target.closest('[data-extra-income-delete]') : null;
     if (deleteButton) {
       deleteExtraIncomeSession(deleteButton.dataset.extraIncomeDelete).catch(error => alert(error.message));
+    }
+  });
+}
+
+function readMiscIncomeEntries(data) {
+  const obj = asObject(data);
+  const entries = parseJsonMaybe(obj.entries || obj.items || obj.recent || obj.miscIncome || obj.misc_income || []);
+
+  return Array.isArray(entries) ? entries.map(asObject) : [];
+}
+
+function miscIncomeCategoryLabel(category) {
+  const normalized = String(category || '').toLowerCase();
+
+  if (normalized === 'tech_support' || normalized === 'tech-support') return 'Tech-Support';
+  if (normalized === 'user_testing' || normalized === 'user-testing') return 'User Testing';
+
+  return category ? String(category) : DASH;
+}
+
+function miscIncomeTypeLabel(type) {
+  const normalized = String(type || '').toLowerCase();
+
+  if (normalized === 'survey' || normalized === 'umfrage') return 'Umfrage';
+  if (normalized === 'test') return 'Test';
+
+  return type ? String(type) : '';
+}
+
+function miscIncomeEntryDate(entry) {
+  return String(firstDefined(entry, ['entryDate', 'entry_date', 'date', 'workDate', 'work_date', 'createdAt', 'created_at']) || '').slice(0, 10);
+}
+
+function miscIncomeAmountParts(entry, fxRates) {
+  const category = String(firstDefined(entry, ['category', 'kind']) || '').toLowerCase();
+  const currency = String(firstDefined(entry, ['currency', 'amountCurrency', 'amount_currency']) || (category === 'tech_support' ? 'EUR' : 'USD')).toUpperCase();
+  let amountCents = firstNumber(entry, ['amountMinor', 'amount_minor', 'amountCents', 'amount_cents', 'totalCents', 'total_cents', 'grossCents', 'gross_cents']);
+
+  if (amountCents == null && category === 'tech_support') {
+    const hours = firstNumber(entry, ['hours', 'durationHours', 'duration_hours']);
+    const hoursHundredths = firstNumber(entry, ['hoursHundredths', 'hours_hundredths']);
+    const hourly = firstNumber(entry, ['hourlyRateEur', 'hourly_rate_eur']);
+    const hourlyCents = firstNumber(entry, ['hourlyRateCents', 'hourly_rate_cents']);
+    const normalizedHours = hours ?? (hoursHundredths == null ? 0 : hoursHundredths / 100);
+    const normalizedHourly = hourly ?? (hourlyCents == null ? 50 : hourlyCents / 100);
+    amountCents = Math.round(normalizedHours * normalizedHourly * 100);
+  }
+
+  if (amountCents == null && category === 'user_testing') {
+    const amountUsd = firstNumber(entry, ['amountUsd', 'amount_usd', 'amount']) ?? 0;
+    amountCents = Math.round(amountUsd * 100);
+  }
+
+  if (amountCents == null) {
+    return { primary: DASH, secondary: '' };
+  }
+
+  const primary = fmtAmount(amountCents, currency);
+  const eurMinor = currency === 'EUR'
+    ? amountCents
+    : (currency === 'USD' ? convertToEur({ USD: amountCents }, fxRates) : convertToEur({ [currency]: amountCents }, fxRates));
+  const secondary = eurMinor != null && currency !== 'EUR' ? `ca. ${fmtEurAmount(eurMinor)}` : '';
+
+  return { primary, secondary };
+}
+
+function renderMiscIncomeForms() {
+  const today = localDateKey(new Date());
+
+  return `
+    <div class="misc-income-forms">
+      <form id="miscIncomeTechSupportForm" class="settings-form misc-income-form">
+        <input type="hidden" name="category" value="tech_support">
+        <div class="extra-income-form-head">
+          <h3>Tech-Support</h3>
+        </div>
+        <div class="extra-income-field-grid">
+          <label class="extra-income-field">
+            <span>Datum</span>
+            <input name="date" type="date" value="${today}" required>
+          </label>
+          <label class="extra-income-field">
+            <span>Stunden</span>
+            <input type="number" name="hours" min="0" step="0.01" required>
+          </label>
+          <label class="extra-income-field">
+            <span>Stundenlohn EUR</span>
+            <input type="number" name="hourly_rate_eur" min="0" step="0.01" value="50.00" required>
+          </label>
+        </div>
+        <div class="form-actions extra-income-actions">
+          <button type="submit">Speichern</button>
+        </div>
+      </form>
+      <form id="miscIncomeUserTestingForm" class="settings-form misc-income-form">
+        <input type="hidden" name="category" value="user_testing">
+        <div class="extra-income-form-head">
+          <h3>User Testing</h3>
+        </div>
+        <div class="extra-income-field-grid">
+          <label class="extra-income-field">
+            <span>Datum</span>
+            <input name="date" type="date" value="${today}" required>
+          </label>
+          <label class="extra-income-field">
+            <span>Typ</span>
+            <select name="type">
+              <option value="test">Test</option>
+              <option value="survey">Umfrage</option>
+            </select>
+          </label>
+          <label class="extra-income-field">
+            <span>Betrag USD</span>
+            <input name="amount_usd" type="number" min="0" step="0.01" required>
+          </label>
+        </div>
+        <div class="form-actions extra-income-actions">
+          <button type="submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function renderMiscIncomeEntries(data) {
+  const fxRates = data?.fxRates || data?.fx_rates;
+  const entries = readMiscIncomeEntries(data);
+
+  if (entries.length === 0) {
+    return `
+      <div class="status-box misc-income-entry-list">
+        <h3>Letzte Eintr&auml;ge</h3>
+        <div class="loading">Keine Eintr&auml;ge.</div>
+      </div>
+    `;
+  }
+
+  const rows = entries.slice(0, 20).map(entry => {
+    const id = firstDefined(entry, ['id', 'entryId', 'entry_id']);
+    const category = miscIncomeCategoryLabel(firstDefined(entry, ['category', 'kind']));
+    const type = miscIncomeTypeLabel(firstDefined(entry, ['type', 'entryType', 'entry_type']));
+    const date = miscIncomeEntryDate(entry);
+    const amount = miscIncomeAmountParts(entry, fxRates);
+    const meta = [date, type].filter(Boolean).join(' · ');
+
+    return `
+      <div class="event-card misc-income-entry" data-misc-income-entry-id="${escapeHtml(id)}">
+        <div>
+          <div class="type">${escapeHtml(category)}</div>
+          <div class="message">${escapeHtml(meta || DASH)}</div>
+        </div>
+        <div class="misc-income-entry-amount">
+          <strong>${escapeHtml(amount.primary)}</strong>
+          ${amount.secondary ? `<span>${escapeHtml(amount.secondary)}</span>` : ''}
+        </div>
+        <div class="form-actions">
+          <button class="filter-reset" type="button" data-misc-income-delete="${escapeHtml(id)}">L&ouml;schen</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="status-box misc-income-entry-list">
+      <h3>Letzte Eintr&auml;ge</h3>
+      <div class="log-list">${rows}</div>
+    </div>
+  `;
+}
+
+function renderMiscIncome(data) {
+  if (!data || data.ok === false) {
+    return '<div class="error">Daten konnten nicht geladen werden.</div>';
+  }
+
+  return `
+    <div class="misc-income-layout">
+      ${renderMiscIncomeForms()}
+      ${renderMiscIncomeEntries(data)}
+    </div>
+  `;
+}
+
+function miscIncomeBasePayload(form) {
+  const data = new FormData(form);
+
+  return {
+    category: data.get('category'),
+    date: data.get('date')
+  };
+}
+
+async function submitMiscIncomeTechSupport(event) {
+  event.preventDefault();
+
+  const form = event.target?.closest('form');
+
+  if (!form) return;
+
+  const data = new FormData(form);
+  const payload = {
+    ...miscIncomeBasePayload(form),
+    hours: Number(data.get('hours') || 0),
+    hourly_rate_eur: Number(data.get('hourly_rate_eur') || 0)
+  };
+  const response = await postJson(`${API_BASE}?type=miscIncomeSave`, payload);
+
+  if (ensureExtraIncomeOk(response)) {
+    form.reset();
+    const date = form.querySelector('[name="date"]');
+    const hourly = form.querySelector('[name="hourly_rate_eur"]');
+
+    if (date) date.value = localDateKey(new Date());
+    if (hourly) hourly.value = '50.00';
+    await loadMiscIncome({ showPageLoader: true });
+  }
+}
+
+async function submitMiscIncomeUserTesting(event) {
+  event.preventDefault();
+
+  const form = event.target?.closest('form');
+
+  if (!form) return;
+
+  const data = new FormData(form);
+  const payload = {
+    ...miscIncomeBasePayload(form),
+    type: data.get('type') || 'test',
+    amount_usd: Number(data.get('amount_usd') || 0)
+  };
+  const response = await postJson(`${API_BASE}?type=miscIncomeSave`, payload);
+
+  if (ensureExtraIncomeOk(response)) {
+    form.reset();
+    const date = form.querySelector('[name="date"]');
+
+    if (date) date.value = localDateKey(new Date());
+    await loadMiscIncome({ showPageLoader: true });
+  }
+}
+
+async function deleteMiscIncomeEntry(id) {
+  if (!id || !window.confirm('Diesen Eintrag wirklich l\u00f6schen?')) return;
+
+  const response = await postJson(`${API_BASE}?type=miscIncomeDelete`, { id });
+
+  if (ensureExtraIncomeOk(response)) {
+    await loadMiscIncome({ showPageLoader: true });
+  }
+}
+
+function bindMiscIncomeControls() {
+  const root = $('miscIncomeContent');
+
+  if (!root || root.dataset.bound === '1') return;
+
+  root.dataset.bound = '1';
+  root.addEventListener('submit', event => {
+    if (event.target?.id === 'miscIncomeTechSupportForm') {
+      submitMiscIncomeTechSupport(event).catch(error => alert(error.message));
+      return;
+    }
+
+    if (event.target?.id === 'miscIncomeUserTestingForm') {
+      submitMiscIncomeUserTesting(event).catch(error => alert(error.message));
+    }
+  });
+  root.addEventListener('click', event => {
+    const deleteButton = event.target?.closest?.('[data-misc-income-delete]');
+
+    if (deleteButton) {
+      deleteMiscIncomeEntry(deleteButton.dataset.miscIncomeDelete).catch(error => alert(error.message));
     }
   });
 }
@@ -4576,8 +5106,8 @@ function setRefreshButtonLoading(isLoading) {
 }
 
 async function loadExtraIncome(options = {}) {
-  const panel = $('panel-extra-income');
-  const container = $('extraIncomeContent');
+  const panel = $('panel-work-home') || $('panel-extra-income');
+  const container = $('workHomeContent') || $('extraIncomeContent');
 
   if (!container) return;
 
@@ -4604,20 +5134,59 @@ async function loadExtraIncome(options = {}) {
   }
 }
 
+async function loadWorkHome(options = {}) {
+  await loadExtraIncome(options);
+}
+
+async function loadMiscIncome(options = {}) {
+  const panel = $('panel-misc-income');
+  const container = $('miscIncomeContent');
+
+  if (!container) return;
+
+  if (options.showPageLoader) {
+    setPanelLoading(panel, true);
+  }
+
+  try {
+    const data = await fetchData('miscIncome');
+
+    if (!data) return;
+
+    cachedData.miscIncome = data;
+    container.innerHTML = renderMiscIncome(data);
+    container.classList.remove('loading');
+    bindMiscIncomeControls();
+  } catch (e) {
+    container.innerHTML = `<div class="error">Fehler beim Laden: ${escapeHtml(e.message)}</div>`;
+    container.classList.remove('loading');
+  } finally {
+    if (options.showPageLoader) {
+      setPanelLoading(panel, false);
+    }
+  }
+}
+
 async function loadTab(tab, options = {}) {
   const panel = $(`panel-${tab}`);
 
   if (!panel) return;
 
   const contentIds = {
-    'extra-income': 'extraIncomeContent'
+    'misc-income': 'miscIncomeContent',
+    'work-home': 'workHomeContent'
   };
   const container = panel.querySelector(`#${contentIds[tab] || `${tab}Content`}`);
 
   if (!container) return;
 
-  if (tab === 'extra-income') {
-    await loadExtraIncome(options);
+  if (tab === 'misc-income') {
+    await loadMiscIncome(options);
+    return;
+  }
+
+  if (tab === 'work-home') {
+    await loadWorkHome(options);
     return;
   }
 
@@ -4629,7 +5198,8 @@ async function loadTab(tab, options = {}) {
     account: renderAccount,
     system: renderSystem,
     settings: renderSettings,
-    'extra-income': renderExtraIncome
+    'misc-income': renderMiscIncome,
+    'work-home': renderExtraIncome
   };
 
   if (options.showPageLoader) {
