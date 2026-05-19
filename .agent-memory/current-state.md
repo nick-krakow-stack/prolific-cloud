@@ -261,8 +261,17 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   normal paid `message_count`, and split night-bonus counts proportionally across
   billing weeks while preserving whole-count sums. Production has the
   `night_bonus_message_count` DB column.
-- `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` in the runtime
-  deploy list. Normal deploys still exclude `install.php`,
+- The former `Zusatzeinkommen` chatmoderator area is now labeled
+  `Arbeit-Zuhause` and remains backed by `api/_extra_income.php`.
+  A separate generic `Zusatzeinkommen` tab exists left of it, backed by
+  `api/_misc_income.php` and the `misc_income_entries` table. It currently
+  supports `Tech-Support` entries with EUR hours/rate and `User Testing` entries
+  with `Test`/`Umfrage` USD amounts. The Arbeit-Zuhause manual-session range
+  picker is now a wider modal with quick presets, a calendar-like month grid,
+  and separate start/end time inputs.
+- `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
+  `api/_misc_income.php` in the runtime deploy list. Normal deploys still
+  exclude `install.php`,
   `hash-generator.php`, `config.example.php`, and `config.php`.
 - Before broad staging, verify `config.php` is ignored:
 

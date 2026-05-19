@@ -346,3 +346,12 @@
 - 2026-05-19 10:50:00 +02:00 - Updated `Zusatzeinkommen` backend contracts and implementation for explicit `extra_income_sessions.night_bonus_message_count`: source contract was made red first, the schema/install/payload/persistence/split/calculation/response paths were updated, and local verification passed with `node tests/extra-income-backend-source.test.js`; local PHP CLI was unavailable.
 - 2026-05-19 10:58:00 +02:00 - Completed explicit `Zusatzeinkommen` night-bonus message count end to end: replaced the UI checkbox with `Nachtbonus-Nachrichten`, added `night_bonus_message_count` to payloads and session display, deployed runtime files, migrated production schema, verified server PHP 8.4 lint, calculation contract, schema readiness, example calculation `113:3:39:1425`, and live HTTP 200.
 - 2026-05-19 10:40:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:48:52 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 11:34:44 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 11:36:14 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 12:23:04 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 12:28:00 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 12:28:24 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 12:34:20 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 12:36:46 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 12:50:00 +02:00 - Renamed the existing chatmoderator `Zusatzeinkommen` UI to `Arbeit-Zuhause`, added a separate generic `Zusatzeinkommen` tab for Tech-Support and User Testing, created/deployed `api/_misc_income.php`, migrated production schema `misc_income_entries`, widened the Arbeit-Zuhause range picker into a calendar-style modal, and verified local Node tests plus server PHP 8.4 lint/schema smoke checks.

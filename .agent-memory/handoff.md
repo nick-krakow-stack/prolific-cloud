@@ -1,55 +1,48 @@
 # Handoff
 
-Last updated: 2026-05-19 10:58:00 +02:00
-Update mode: Manual
+Last updated: 2026-05-19 12:50:00 +02:00
+Update mode: Orchestrator
 
 ## Latest Notes
 
-Zusatzeinkommen night bonus is now an explicit entered count instead of an
-automatic time-window checkbox. UI uses `Nachtbonus-Nachrichten`; backend stores
-`extra_income_sessions.night_bonus_message_count`, validates it against normal
-paid `message_count`, and calculates 1 cent per entered night-bonus message.
-Production DB was migrated and runtime files were deployed.
+- Existing chatmoderator `Zusatzeinkommen` is now labeled `Arbeit-Zuhause`.
+- New generic `Zusatzeinkommen` tab is implemented separately for
+  `Tech-Support` and `User Testing`.
+- Production schema `misc_income_entries` was created deliberately before
+  deployment.
+- Runtime files were deployed to
+  `/www/htdocs/w021974e/prolific.nickkrakow.de` using
+  `scripts/deploy-webspace.ps1`; setup files and `config.php` were not uploaded.
+- Server PHP 8.4 lint passed for the changed PHP files, the new schema smoke
+  check returned ready, and the live root returned HTTP 200.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 235e96e Update memory for free messages
+- Last commit before current product/memory commits: 04e95e4
 
 ## Working Tree
 
 ~~~text
- M .agent-memory/current-state.md
- M .agent-memory/current-task.md
- M .agent-memory/feedback.md
- M .agent-memory/handoff.md
- M .agent-memory/next-steps.md
- M .agent-memory/progress.md
- M api/_extra_income.php
- M dashboard/assets/app.js
- M install.php
- M tests/extra-income-backend-source.test.js
- M tests/extra-income-calculation.test.php
- M tests/extra-income-render.test.js
+Run git status --short for the exact current tree.
 ~~~
 
 ## Current State Summary
 
-See .agent-memory/current-state.md.
+See `.agent-memory/current-state.md`.
 
 ## Next Planned Work
 
-Run final checks, commit product changes separately from memory changes, and
-push `main`.
+See `.agent-memory/next-steps.md`.
 
 ## Required Startup For Next Agent
 
-1. Read AGENTS.md.
-2. Read .agent-memory/current-state.md.
+1. Read `AGENTS.md`.
+2. Read `.agent-memory/current-state.md`.
 3. Read this handoff.
-4. Read .agent-memory/next-steps.md.
-5. Read CODEX_PROLIFIC_WATCHER_ROADMAP.md.
-6. Run git status --short.
+4. Read `.agent-memory/next-steps.md`.
+5. Read `CODEX_PROLIFIC_WATCHER_ROADMAP.md`.
+6. Run `git status --short`.
 
 ## Operating Constraints
 
@@ -57,6 +50,7 @@ push `main`.
 - Delegate implementation to Sub-Agents whenever tooling supports it.
 - Keep Sub-Agent write scopes separate for parallel work.
 - No Cloudflare deployment workflow applies to this repository.
-- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
-- Keep config.php local and ignored.
-- Preserve root routing through / and absolute frontend paths.
+- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens,
+  session secrets, or personal Prolific data into memory files.
+- Keep `config.php` local and ignored.
+- Preserve root routing through `/` and absolute frontend paths.

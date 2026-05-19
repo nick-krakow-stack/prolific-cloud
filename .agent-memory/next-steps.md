@@ -141,6 +141,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\deploy-webspace.ps
 ## Backlog
 
 - Review fixes from owner feedback.
+- Current income-tab naming: `Arbeit-Zuhause` is the chatmoderator/work-from-home
+  area backed by `extraIncome`; generic `Zusatzeinkommen` is the separate tab for
+  Tech-Support and User Testing entries backed by `miscIncome`.
 - Design a Prolific Watcher extension control channel. Current dashboard can
   only receive plugin pushes through `api/sync.php`; the server cannot directly
   call a browser extension unless the extension polls or keeps a live connection.
