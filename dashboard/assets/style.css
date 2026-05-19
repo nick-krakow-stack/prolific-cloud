@@ -278,6 +278,35 @@ a:not(.icon-btn):hover {
   min-width: 0;
   margin-bottom: 0;
 }
+.forecast-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 214px;
+}
+.forecast-verdict {
+  margin-top: auto;
+  padding: 18px 12px 6px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  color: var(--text-muted);
+  font-size: 22px;
+  font-weight: 850;
+  line-height: 1.16;
+  letter-spacing: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.forecast-verdict.is-good {
+  color: var(--success);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--success) 52%, transparent);
+}
+.forecast-verdict.is-danger {
+  color: var(--danger);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--danger) 52%, transparent);
+}
+.forecast-verdict.is-neutral {
+  color: var(--text-muted);
+  text-shadow: none;
+}
 .goal-card-head {
   display: flex;
   align-items: center;
@@ -369,6 +398,13 @@ a:not(.icon-btn):hover {
   .forecast-status-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+  .forecast-card {
+    min-height: 190px;
+  }
+  .forecast-verdict {
+    padding: 15px 6px 2px;
+    font-size: 18px;
   }
   .goal-card { padding: 12px 10px; }
   .goal-card-head {

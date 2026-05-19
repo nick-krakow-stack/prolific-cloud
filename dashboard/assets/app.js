@@ -3178,6 +3178,16 @@ function renderExpandedOverview(data) {
   const fmtSignedForecast = (minor) => forecast.currency === 'EUR'
     ? fmtSignedAmount(minor, 'EUR')
     : fmtSignedGbpAsEur(minor, fxRates);
+  const forecastVerdictText = forecast.willReach == null
+    ? DASH
+    : forecast.willReach
+      ? 'Ziel wird voraussichtlich erreicht'
+      : 'Ziel wird voraussichtlich verfehlt';
+  const forecastVerdictClass = forecast.willReach == null
+    ? 'is-neutral'
+    : forecast.willReach
+      ? 'is-good'
+      : 'is-danger';
 
   const tile = (label, earned, pending, subline, options = {}) => {
     const displayValue = options.includePending ? sumCurrencyMaps(earned, pending) : earned;
@@ -3253,7 +3263,7 @@ function renderExpandedOverview(data) {
 
   html += `
     <div class="forecast-status-grid">
-      <div class="status-box">
+      <div class="status-box forecast-card">
         <h3>Monatsprognose</h3>
 
         <div class="status-row">
@@ -3276,15 +3286,8 @@ function renderExpandedOverview(data) {
           <span class="value">${fmtSignedForecast(forecast.delta)}</span>
         </div>
 
-        <div class="status-row">
-          <span class="key">Einschätzung</span>
-          <span class="value">${
-            forecast.willReach == null
-              ? DASH
-              : forecast.willReach
-                ? 'Ziel wird voraussichtlich erreicht'
-                : 'Ziel wird voraussichtlich verfehlt'
-          }</span>
+        <div class="forecast-verdict ${forecastVerdictClass}">
+          ${forecastVerdictText}
         </div>
       </div>
 
