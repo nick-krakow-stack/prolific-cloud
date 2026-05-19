@@ -1,6 +1,6 @@
 # Current Task Checklist
 
-Last updated: 2026-05-19 08:58:00 +02:00
+Last updated: 2026-05-19 10:12:00 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -69,6 +69,9 @@ Last updated: 2026-05-19 08:58:00 +02:00
 - The manual extra-income session form now keeps API payload fields as hidden
   `started_at`/`ended_at` inputs and uses one Zeitraum button to open a compact
   Start/Ende date-time modal. The custom calendar icon is white.
+- Extra-income Free Messages are a separate per-session count worth 10 cents
+  each. They count toward gross/net payout and hourly rate, but not toward the
+  normal weekly message tier, night bonus, or special bonus thresholds.
 
 ## Active Task: Zusatzeinkommen
 
@@ -138,6 +141,25 @@ Last updated: 2026-05-19 08:58:00 +02:00
 - [x] Add render/source regression coverage for the picker and submit fix.
 - [x] Run JS checks and diff whitespace checks.
 - [x] Deploy runtime files and verify production HTTP 200 plus server PHP 8.4 lint.
+
+## Active Task: Extra Income Free Messages
+
+- [x] Read required repository startup files and current git status.
+- [x] Use a Backend Sub-Agent with a disjoint write scope for schema,
+  calculation, install, and backend tests.
+- [x] Add failing frontend render coverage for `Free Messages` input and
+  `free_message_count` payload.
+- [x] Add `free_message_count` to manual session form and timer stop modal.
+- [x] Include Free Messages in session display, today/week summaries, gross
+  payout, and hourly-rate basis.
+- [x] Keep Free Messages out of normal weekly tier, night bonus, and special
+  bonus threshold calculations.
+- [x] Add backend/source calculation coverage for Free Messages.
+- [x] Deploy runtime files to production.
+- [x] Run deliberate server migration adding
+  `extra_income_sessions.free_message_count`.
+- [x] Verify Node contracts, server PHP 8.4 lint, schema readiness, live HTTP
+  200, and deployed asset markers.
 
 ## Active Task Checklist
 

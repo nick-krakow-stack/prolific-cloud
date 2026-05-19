@@ -24,6 +24,8 @@ Last updated: 2026-05-17
     remainders go to the longer time share.
   - User enters work sessions with start datetime, end datetime, and paid
     message count.
+  - User can also enter `Free Messages` for a session. Each Free Message pays
+    0.10 EUR and is tracked separately from normal paid messages.
   - There should also be a live timer with `Start`/`Stop`; on stop, the system
     asks for the paid message count and creates the work session.
   - Timer state is persisted server-side. Browser reloads or closing/reopening
@@ -33,8 +35,10 @@ Last updated: 2026-05-17
     billing week and applies retroactively to all normal messages that week:
     1-1000 => 0.12 EUR/message; 1001-1250 => 0.13; 1251-1500 => 0.14;
     1501-2000 => 0.15; 2001+ => 0.17.
+  - Free Messages do not count toward the normal weekly message tier.
   - Standard night bonus applies only to normal sent/paid messages, not to
-    unpayable special message types. Night window is 00:00-07:00.
+    unpayable special message types or Free Messages. Night window is
+    00:00-07:00.
   - Standard night bonus is enabled by default for each work session, but can be
     disabled per session with a `Nachtbonus anwenden` checkbox.
   - If a session crosses night/non-night windows, estimate night messages
@@ -43,6 +47,8 @@ Last updated: 2026-05-17
   - Special message categories such as favorites, likes, flirts, matches, etc.
     should not be tracked individually. Only the paid message count from the
     provider backend matters.
+  - Free Messages are the exception: they are tracked as their own count because
+    they pay a fixed 0.10 EUR per message.
   - Each work session can have one optional special bonus. Bonus applies only to
     messages inside that same work session.
   - Bonus supports two modes:
@@ -54,6 +60,8 @@ Last updated: 2026-05-17
   - Per-message bonuses are retroactive within the session once the threshold
     is reached: if threshold is 55 and the session has 231 paid messages, all
     231 messages receive the extra per-message amount.
+  - Free Messages do not count toward special bonus thresholds and do not
+    receive special bonus payments.
   - Bonus parameters vary by session and must be editable when entering or
     finishing a session.
   - The stop dialog should ask for paid message count, night-bonus checkbox,

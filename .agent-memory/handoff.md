@@ -1,22 +1,21 @@
-﻿# Handoff
+# Handoff
 
-Last updated: 2026-05-19 08:58:00 +02:00
+Last updated: 2026-05-19 10:12:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Latest task fixed the `Zusatzeinkommen` manual-session submit alert and date
-range entry UI. The browser alert was caused by delegated submit handling using
-`event.currentTarget` (`#extraIncomeContent`, a div) instead of the submitted
-form when constructing `FormData`. `dashboard/assets/app.js` now resolves the
-form through `event.target.closest('form')`. The manual session form keeps
-hidden `started_at`/`ended_at` payload fields and opens a compact Start/Ende
-date-time modal from a single Zeitraum button with a white calendar icon.
+Latest task added `Zusatzeinkommen` Free Messages. Each session now has
+`free_message_count`, worth 10 cents per message. Free Messages count toward
+gross/net payout and hourly rate, but do not affect the normal weekly message
+tier, night bonus, or special bonus thresholds. Production was deployed and the
+server DB was migrated with `extra_income_sessions.free_message_count INT NOT
+NULL DEFAULT 0`.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before final staging: 75896bc Update memory for form layout fix
+- Last commit before final staging: f359799 Update memory for extra income picker fix
 
 ## Working Tree
 
@@ -25,8 +24,11 @@ date-time modal from a single Zeitraum button with a white calendar icon.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/_extra_income.php
  M dashboard/assets/app.js
- M dashboard/assets/style.css
+ M install.php
+ M tests/extra-income-backend-source.test.js
+ M tests/extra-income-calculation.test.php
  M tests/extra-income-render.test.js
 ~~~
 

@@ -333,3 +333,8 @@
 - 2026-05-19 08:34:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 08:35:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 08:58:00 +02:00 - Fixed `Zusatzeinkommen` manual-session submit by using the actual submitted form for `FormData`, replaced inline Start/Ende inputs with a single Zeitraum button plus compact Start/Ende modal, made the calendar icon white, added render/source regression coverage, deployed runtime files, and verified Node checks, server PHP 8.4 lint, live HTTP 200, and deployed asset markers.
+- 2026-05-19 08:47:53 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 09:53:13 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 09:55:00 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:00:25 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:12:00 +02:00 - Added `Zusatzeinkommen` Free Messages: separate `free_message_count` input for manual sessions and timer stop, fixed 10-cent calculation in `api/_extra_income.php`, separate weekly/session summary fields, install schema update, backend/render tests, production deploy, deliberate `extra_income_sessions.free_message_count` migration, server PHP 8.4 lint, schema check, and live HTTP 200 verification.

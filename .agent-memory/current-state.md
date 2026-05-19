@@ -251,6 +251,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   deploy. Overview shows an independent `Zusatzverdienste` tile and the `Heute`
   / `Aktueller Monat` goal cards include additional-income rows without adding
   them to Prolific rings or Prolific totals.
+- `Zusatzeinkommen` sessions support `free_message_count`. Free Messages pay a
+  fixed 10 cents each and are included in gross/net payout and hourly-rate
+  calculations, but excluded from the normal weekly tier, night bonus, and
+  special bonus thresholds. Production has the `free_message_count` DB column.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` in the runtime
   deploy list. Normal deploys still exclude `install.php`,
   `hash-generator.php`, `config.example.php`, and `config.php`.
