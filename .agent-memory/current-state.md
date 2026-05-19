@@ -286,6 +286,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   different teal treatment to signal that it is separate from Prolific totals,
   and shows the current-month EUR total across Arbeit-Zuhause, User Testing,
   and Tech-Support.
+- The overview monthly forecast card renders the forecast verdict as a large
+  bottom-aligned callout: green/glowing when the goal is projected to be reached,
+  red/glowing when it is projected to be missed, and muted when no verdict is
+  available.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,

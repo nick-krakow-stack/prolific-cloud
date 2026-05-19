@@ -1,6 +1,6 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 16:17:51 +02:00
+Last updated: 2026-05-19 16:50:00 +02:00
 Update mode: Stop
 
 ## Latest Notes
@@ -12,7 +12,7 @@ Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 5cc73ee Update memory for worktime fix
+- Last commit: 4b2854a Update memory for worktime aggregation fix
 
 ## Working Tree
 
@@ -21,6 +21,9 @@ Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M dashboard/assets/app.js
+ M dashboard/assets/style.css
+ M tests/overview-render.test.js
 ~~~
 
 ## Current State Summary
@@ -30,6 +33,14 @@ See .agent-memory/current-state.md.
 ## Next Planned Work
 
 See .agent-memory/next-steps.md.
+
+## Current Turn Note
+
+The monthly forecast verdict UI has been changed locally and deployed:
+`dashboard/assets/app.js` now renders a `forecast-verdict` callout inside the
+forecast card, `dashboard/assets/style.css` provides green/red/neutral glow
+styles plus mobile sizing, and `tests/overview-render.test.js` covers the new
+contract. Verification passed locally and against live assets.
 
 ## Required Startup For Next Agent
 

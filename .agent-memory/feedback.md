@@ -2,6 +2,8 @@
 
 Last updated: 2026-05-19
 
+2026-05-19 16:50:00 +02:00 - Clean summary of latest owner feedback: In the monthly forecast card, render the forecast verdict as large centered text at the bottom. Use green for projected success, red for projected miss, a subtle glow, and mobile-safe sizing.
+
 - 2026-05-17 - Browser feedback: Convert `Heute`, `Aktueller Monat`, settings
   money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
   `Top-Studien` to Euro using the existing Frankfurter/fxRates data. Keep the
