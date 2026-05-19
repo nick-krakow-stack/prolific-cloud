@@ -326,3 +326,10 @@
 - 2026-05-19 00:12:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 08:09:53 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-19 08:15:24 +02:00 - Corrected the `Zusatzeinkommen > Session nachtragen` form after owner screenshot review: replaced the overflowing three-column grid with a bounded two-column layout, raised toggle selector specificity so the checkbox aligns horizontally, added regression coverage, deployed runtime files, and verified live CSS plus HTTP 200.
+- 2026-05-19 08:20:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 08:32:50 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 08:34:05 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 08:34:09 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 08:34:11 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 08:35:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 08:58:00 +02:00 - Fixed `Zusatzeinkommen` manual-session submit by using the actual submitted form for `FormData`, replaced inline Start/Ende inputs with a single Zeitraum button plus compact Start/Ende modal, made the calendar icon white, added render/source regression coverage, deployed runtime files, and verified Node checks, server PHP 8.4 lint, live HTTP 200, and deployed asset markers.

@@ -1,20 +1,22 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 08:15:24 +02:00
+Last updated: 2026-05-19 08:58:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Latest work: fixed the live `Zusatzeinkommen > Session nachtragen` form layout
-after owner screenshot review. The CSS now uses a bounded two-column
-`.extra-income-field-grid`, falls back to one column at `760px`, and scopes
-`.extra-income-form .extra-income-toggle` strongly enough to override global
-settings label rules. Runtime files were deployed and live CSS was verified.
+Latest task fixed the `Zusatzeinkommen` manual-session submit alert and date
+range entry UI. The browser alert was caused by delegated submit handling using
+`event.currentTarget` (`#extraIncomeContent`, a div) instead of the submitted
+form when constructing `FormData`. `dashboard/assets/app.js` now resolves the
+form through `event.target.closest('form')`. The manual session form keeps
+hidden `started_at`/`ended_at` payload fields and opens a compact Start/Ende
+date-time modal from a single Zeitraum button with a white calendar icon.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before this task: b1b152f Update memory for dashboard polish
+- Last commit before final staging: 75896bc Update memory for form layout fix
 
 ## Working Tree
 
@@ -23,6 +25,7 @@ settings label rules. Runtime files were deployed and live CSS was verified.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M dashboard/assets/app.js
  M dashboard/assets/style.css
  M tests/extra-income-render.test.js
 ~~~

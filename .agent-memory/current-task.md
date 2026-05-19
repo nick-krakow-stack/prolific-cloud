@@ -1,6 +1,6 @@
 # Current Task Checklist
 
-Last updated: 2026-05-19 08:15:24 +02:00
+Last updated: 2026-05-19 08:58:00 +02:00
 
 ## Active Task: Overview Totals And Goal Progress
 
@@ -62,6 +62,13 @@ Last updated: 2026-05-19 08:15:24 +02:00
   effective hourly KPI cards; Telegram exposes `/worktime` and `/effective`.
 - The live month worktime bucket after fixing incomplete negative rows is:
   paid `63699` seconds, unpaid `1370` seconds, total `65069` seconds.
+- Extra-income manual-session submit used delegated submit handling from
+  `#extraIncomeContent`. Passing `event.currentTarget` into `FormData` meant a
+  `div` was used instead of the actual form, causing the browser alert
+  `Failed to construct 'FormData': parameter 1 is not of type 'HTMLFormElement'`.
+- The manual extra-income session form now keeps API payload fields as hidden
+  `started_at`/`ended_at` inputs and uses one Zeitraum button to open a compact
+  Start/Ende date-time modal. The custom calendar icon is white.
 
 ## Active Task: Zusatzeinkommen
 
@@ -117,9 +124,24 @@ Last updated: 2026-05-19 08:15:24 +02:00
 - [x] Add regression coverage for the two-column grid and scoped toggle selector.
 - [x] Run JS checks, deploy runtime files, and verify the deployed CSS on the webspace.
 
+## Active Task: Extra Income Range Picker And Submit Fix
+
+- [x] Read required repository startup files and current git status.
+- [x] Use a read-only Sub-Agent to identify the `FormData` submit root cause.
+- [x] Fix manual session submit to resolve the real submitted form via
+  `event.target.closest('form')`.
+- [x] Replace inline Start/Ende fields with a single Zeitraum button and
+  compact modal for Start/Ende date-time selection.
+- [x] Keep `started_at`/`ended_at` API payload behavior unchanged through hidden
+  form fields.
+- [x] Make the visible calendar icon white and add responsive modal styling.
+- [x] Add render/source regression coverage for the picker and submit fix.
+- [x] Run JS checks and diff whitespace checks.
+- [x] Deploy runtime files and verify production HTTP 200 plus server PHP 8.4 lint.
+
 ## Active Task Checklist
 
-- [ ] Add an item.
+- [x] No open item for the current task.
 
 ## Completed Task Steps
 
