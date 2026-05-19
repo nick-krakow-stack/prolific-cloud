@@ -359,3 +359,8 @@
 - 2026-05-19 13:12:02 +02:00 - Captured owner feedback on UserPromptSubmit.
 
 - 2026-05-19 13:17:00 +02:00 - Moved the dashboard tab separator left of generic Zusatzeinkommen, updated render contract tests for the new order, deployed runtime files, and verified Node render tests, server PHP 8.4 lint, live HTTP 200, and config.php ignore status.
+- 2026-05-19 13:18:47 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 13:20:17 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 13:27:04 +02:00 - Captured owner feedback on UserPromptSubmit.
+
+- 2026-05-19 13:30:58 +02:00 - Updated overview additional-income tile: comparison now appears first, the tile is labeled Zusatzeinkommen, shows current-month total across Arbeit-Zuhause plus generic Tech-Support/User Testing entries, uses a distinct teal visual style, and was deployed with Node/source tests plus server PHP 8.4 lint and live HTTP 200 verification.

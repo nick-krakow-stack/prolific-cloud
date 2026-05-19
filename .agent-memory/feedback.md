@@ -76,3 +76,5 @@ Last updated: 2026-05-19
 2026-05-19 12:23:04 +02:00 - Owner-Feedback: Ja, perfekt, mach das gerne so.
 2026-05-19 12:50:00 +02:00 - Clean summary of latest owner feedback: Rename current chatmoderator `Zusatzeinkommen` to `Arbeit-Zuhause`; add a separate generic `Zusatzeinkommen` tab for Tech-Support and User Testing; improve the Arbeit-Zuhause date range picker into a larger calendar-style modal.
 2026-05-19 13:12:02 +02:00 - Owner-Feedback: Das Trennzeichen muss bitte links von "Zusatzeinkommen" sein.
+2026-05-19 13:20:17 +02:00 - Browser-Feedback: Tausch bitte diese beiden Kacheln im Dashboard und benennen "Arbeit Zuhause" in "Zusatzeinkommen" um. Anstatt "Offen zur Auszahlung" schreibst du "im aktuellen Monat". Dort kommt die gesamte Summe aller Zusatzeinnahmen rein, also Arbeit-Zuhause, User Testing und Tech Support, die in diesem Monat angefallen sind.
+2026-05-19 13:27:04 +02:00 - Owner-Feedback: Kannst du der Zusatzeinkommen-Kachel eine leicht andere Farbe geben, damit ich leichter sehen kannen, dass sie beim Gesamteinkommen nicht mitz├ñhlt?

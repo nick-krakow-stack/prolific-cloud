@@ -1,15 +1,18 @@
 # Current Task Checklist
 
-Last updated: 2026-05-19 13:15:23 +02:00
+Last updated: 2026-05-19 13:30:58 +02:00
 
-## Active Task: Move Income Tab Separator
+## Active Task: Dashboard Zusatzeinkommen Tile
 
 - [x] Read required repository startup files and current git status.
-- [x] Move the tab separator so it sits left of Zusatzeinkommen.
-- [x] Update render contract tests for the new navigation order.
-- [x] Run local checks and deploy to production.
-- [x] Update memory, commit, and push main.
+- [x] Include generic miscIncome data in the overview API response.
+- [x] Swap monthly comparison and additional-income dashboard tiles.
+- [x] Rename dashboard tile to Zusatzeinkommen and show current-month total for Arbeit-Zuhause, User Testing, and Tech-Support.
+- [x] Give the Zusatzeinkommen tile a distinct visual treatment so it is clearly separate from Prolific totals.
+- [x] Update render/backend tests and deploy to production.
 
 ## Completed Notes
 
-- Final navigation order is Einstellungen, |, Zusatzeinkommen, Arbeit-Zuhause.
+- The dashboard top grid now renders Entwicklung zum Vormonat before Zusatzeinkommen.
+- The Zusatzeinkommen tile value is an EUR current-month total across extraIncome.monthGrossCents and miscIncome.summary.monthByCurrency.
+- The tile has a subtle teal background/border/value color distinct from the normal Prolific earning tiles.

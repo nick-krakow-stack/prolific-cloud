@@ -1,20 +1,22 @@
 # Handoff
 
-Last updated: 2026-05-19 13:17:00 +02:00
+Last updated: 2026-05-19 13:30:58 +02:00
 Update mode: Orchestrator
 
 ## Latest Notes
 
-- The dashboard tab separator now sits left of Zusatzeinkommen.
-- Final income navigation order: Einstellungen, |, Zusatzeinkommen, Arbeit-Zuhause.
+- Overview API now includes miscIncome for generic income summary data.
+- Overview top grid order is now comparison tile first, then Zusatzeinkommen tile.
+- Zusatzeinkommen tile shows current-month EUR total across Arbeit-Zuhause, User Testing, and Tech-Support.
+- Tile styling is subtly different from the Prolific income tiles to show it is not included in Prolific totals.
 - Runtime files were deployed to production with scripts/deploy-webspace.ps1.
-- Verification passed: local render contract tests,
-ode --check dashboard/assets/app.js, server php84 -l dashboard/app.php, live HTTP 200, and config.php ignore check.
+- Verification passed: overview render contract, misc income backend source contract, extra/misc render contracts,
+ode --check dashboard/assets/app.js, server PHP 8.4 lint, live HTTP 200, and git diff --check.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before current commits: f20a9eb
+- Last commit before current commits: 879fcd4
 
 ## Working Tree
 

@@ -269,6 +269,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   with `Test`/`Umfrage` USD amounts. The Arbeit-Zuhause manual-session range
   picker is now a wider modal with quick presets, a calendar-like month grid,
   and separate start/end time inputs.
+- The overview top grid now places `Entwicklung zum Vormonat` before the
+  additional-income tile. That tile is labeled `Zusatzeinkommen`, uses a subtly
+  different teal treatment to signal that it is separate from Prolific totals,
+  and shows the current-month EUR total across Arbeit-Zuhause, User Testing,
+  and Tech-Support.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,
