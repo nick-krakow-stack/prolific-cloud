@@ -1,26 +1,23 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 16:08:00 +02:00
-Update mode: Orchestrator
+Last updated: 2026-05-19 16:17:51 +02:00
+Update mode: Stop
 
 ## Latest Notes
 
-- Implausible `Arbeitszeit heute` value was diagnosed and fixed.
-- Root cause: worktime period filtering used completion date semantics, so a multi-day approved submission with 158,676 raw seconds was counted fully on its completion day.
-- Worktime periods now anchor to `started_at` and cap each row by the available period window.
-- Production smoke check after deploy: today worktime is `paid_seconds = 6720`, `unpaid_seconds = 120`.
-- Product changes were committed in `b81a65a Fix worktime period aggregation`; memory commit/push is pending.
+Automatic handoff snapshot written by .codex/hooks/agent-protocol.ps1.
+Current task status is tracked in .agent-memory/current-task.md.
+Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: b81a65a Fix worktime period aggregation
+- Last commit: 5cc73ee Update memory for worktime fix
 
 ## Working Tree
 
 ~~~text
  M .agent-memory/current-task.md
- M .agent-memory/current-state.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md

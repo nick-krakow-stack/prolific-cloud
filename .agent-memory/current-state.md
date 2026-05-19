@@ -241,7 +241,13 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   dashboard. Worktime periods are anchored to `started_at` rather than
   `completed_at`, so multi-day submissions are not fully assigned to their
   completion day. Period contributions are capped by the available period
-  window. The dashboard and Telegram wording is `Davon ... unbezahlt`.
+  window. Implausible stale completed timers are capped against
+  `studies.estimated_minutes` when the raw value is over 4 hours and more than
+  6x the study estimate, which keeps dashboard/month/all-time hourly cards from
+  being dominated by abandoned Prolific timers. Dashboard overview goal-card
+  hourly rates, efficiency cards, monthly report hourly rates, requester
+  analysis, CSV export hourly rates, and Telegram `/effective` now use this
+  same helper path. The dashboard and Telegram wording is `Davon ... unbezahlt`.
 - The submissions status chart uses SVG circle segments instead of inline
   `conic-gradient` styles so the chart remains visible under the strict
   `style-src 'self'` Content-Security-Policy.

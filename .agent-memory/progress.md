@@ -375,3 +375,14 @@
 - 2026-05-19 15:57:40 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-05-19 15:59:07 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 16:01:12 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:11:29 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:14:19 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 16:15:32 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 16:15:32 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 16:15:34 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:15:36 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 16:15:37 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 16:15:43 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:17:21 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:17:51 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:35:00 +02:00 - Completed the dashboard-wide worktime audit/fix. Backend hourly aggregations now use the shared started-at worktime helper instead of direct SQL seconds sums, requester stats and monthly report use the same corrected path, CSV and Telegram top/effective paths get study estimates, and implausible stale timers are capped against study estimates. Deployed to production and verified with Node tests, server PHP 8.4 lint, live root HTTP 200, expected unauthenticated API 401, and server-side worktime smoke checks.

@@ -1,34 +1,33 @@
-# Current Task
+﻿# Current Task
 
-Last updated: 2026-05-19
+Last updated: 2026-05-19 16:35:00 +02:00
 
 ## Task
 
-Fix implausible `Arbeitszeit heute` value in overview.
+Audit and fix worktime/time_taken_seconds period logic across the whole dashboard.
 
 ## Scope
 
 - `api/_worktime.php`
 - `api/data.php`
-- `dashboard/assets/app.js`
-- relevant tests
+- `api/export.php`
+- `api/_telegram_commands.php`
+- frontend render tests / source tests
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Trace source of `Arbeitszeit heute` from API to UI.
-- [x] Reproduce/inspect production aggregate that yields `45 h 56 min`.
-- [x] Fix root cause without hiding valid worktime.
-- [x] Add/update focused regression coverage.
+- [x] Audit all backend period/hourly aggregations that use `time_taken_seconds` or `worktime_seconds_sql()`.
+- [x] Audit frontend/Telegram/export display paths for worktime-derived values.
+- [x] Fix remaining period buckets so working time is not assigned by completion date where that is wrong.
+- [x] Add/update regression coverage for the shared rule.
 - [x] Deploy and verify live.
-- [x] Commit product changes.
-- [ ] Commit memory changes and push.
 
 ## Notes
 
-- Root cause: worktime buckets used `completed_at` fallback to `started_at`, which assigned a multi-day participation fully to the completion day.
-- Worktime period buckets now use `started_at` fallback to `completed_at`, so worktime belongs to the day/week/month the work started in.
-- Period contribution is capped by the available period window to prevent one row from exceeding the current period's elapsed time.
-- Live production check after deploy now reports today as `6720` paid seconds (`1 h 52 min`) plus `120` unpaid seconds (`2 min`).
-- Product commit: `b81a65a Fix worktime period aggregation`.
+- Owner reports the issue appears across the dashboard, not just `Arbeitszeit heute`.
+- The previously found root cause was completion-date bucketing for worktime. The system now needs a full pass for all derived worktime/hourly calculations.
+- Production diagnosis found the remaining visible distortion came from one stale approved Prolific timer: raw `time_taken_seconds` was 158,676 seconds for a study with `estimated_minutes = 5`.
+- Shared worktime now caps implausible stale durations only when an estimate exists and the raw value is both over 4 hours and more than 6x the estimate.
+- Period/hourly aggregations in overview, efficiency cards, monthly report, requester analysis, CSV hourly export, and Telegram `/effective` now share the started-at/worktime helper path.
