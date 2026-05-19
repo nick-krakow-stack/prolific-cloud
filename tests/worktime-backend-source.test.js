@@ -33,6 +33,13 @@ const checks = [
     /SCREENED OUT/.test(worktimeSource) && /max\(\$raw,\s*60\)/.test(worktimeSource)
   ],
   [
+    'effective_time_seconds caps implausible stale durations against study estimates',
+    /function plausible_worktime_seconds\(array \$sub,\s*int \$seconds\): int/.test(worktimeSource) &&
+      /estimated_minutes/.test(worktimeSource) &&
+      /\$seconds\s*>\s*4\s*\*\s*3600/.test(worktimeSource) &&
+      /\$seconds\s*>\s*\$estimatedSeconds\s*\*\s*6/.test(worktimeSource)
+  ],
+  [
     'unpaid worktime with missing completion uses fallback instead of stale running seconds',
     /function effective_unpaid_time_seconds\(array \$sub\): int/.test(worktimeSource) &&
       /completed_at/.test(worktimeSource) &&
@@ -53,7 +60,8 @@ const checks = [
   ],
   [
     'sum_worktime_by_period reads completion state for unpaid fallback',
-    /SELECT status,\s*time_taken_seconds,\s*started_at,\s*completed_at/.test(worktimeSource) &&
+    /SELECT s\.status,\s*s\.time_taken_seconds,\s*s\.started_at,\s*s\.completed_at,\s*st\.estimated_minutes/.test(worktimeSource) &&
+      /LEFT JOIN studies st ON st\.id = s\.study_id/.test(worktimeSource) &&
       /effective_unpaid_time_seconds\(\$row\)/.test(worktimeSource)
   ],
   [
@@ -77,8 +85,8 @@ const checks = [
   ],
   [
     'worktime period filter uses started_at fallback to completed_at',
-    /COALESCE\(started_at,\s*completed_at\)\s*>=\s*\?/.test(worktimeSource) &&
-      /COALESCE\(started_at,\s*completed_at\)\s*<\s*\?/.test(worktimeSource)
+    /COALESCE\(s\.started_at,\s*s\.completed_at\)\s*>=\s*\?/.test(worktimeSource) &&
+      /COALESCE\(s\.started_at,\s*s\.completed_at\)\s*<\s*\?/.test(worktimeSource)
   ],
   [
     'worktime buckets include paid statuses',
@@ -106,11 +114,12 @@ const checks = [
     deploySource.includes('"api/_worktime.php"')
   ],
   [
-    'hourly SQL uses worktime fallback instead of filtering raw positive seconds',
+    'hourly calculations use period helpers instead of SQL seconds aggregation',
     !/time_taken_seconds\s*>\s*0/.test(dataSource) &&
       !/\/\s*s\.time_taken_seconds/.test(dataSource) &&
       !/SUM\(time_taken_seconds\)\s+seconds_total/.test(dataSource) &&
-      (dataSource.match(/worktime_seconds_sql\(/g) || []).length >= 4
+      !/SUM\(\{\$worktimeExpr\}\)\s+seconds_total/.test(dataSource) &&
+      /period_worktime_seconds\(\$row,\s*effective_time_seconds\(\$row\),\s*\$from,\s*\$to\)/.test(dataSource)
   ],
   [
     'CSV reward per hour uses effective fallback seconds while display keeps raw duration',

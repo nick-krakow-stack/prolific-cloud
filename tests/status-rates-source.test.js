@@ -15,7 +15,7 @@ const checks = [
   [
     'requester analysis treats returned as rejected',
     /in_array\(\$status,\s*\['REJECTED',\s*'RETURNED'\],\s*true\)/.test(source) &&
-      /\$items\[\$requester\]\['rejectedCount'\]\s*\+=\s*\$count;/.test(source)
+      /\$items\[\$requester\]\['rejectedCount'\]\s*\+\+;/.test(source)
   ]
 ];
 

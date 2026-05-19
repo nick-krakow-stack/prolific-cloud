@@ -549,7 +549,7 @@ function build_period_stats(
         'pending' => $pending,
         'submissionsCount' => $submissionsCount,
         'averageReward' => build_period_average_reward($pdo, $earnedStatuses, $periodStartSql),
-        'effectiveHourlyRate' => build_period_effective_hourly_rate($pdo, $earnedStatuses, $periodStartSql),
+        'effectiveHourlyRate' => build_period_effective_hourly_rate($pdo, $earnedStatuses, $periodStart, null),
     ];
 }
 
@@ -598,52 +598,72 @@ function build_period_average_reward(PDO $pdo, array $earnedStatuses, string $pe
     ];
 }
 
-function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $todayStart): array {
-    return build_period_effective_hourly_rate($pdo, $earnedStatuses, $todayStart);
+function build_today_effective_hourly_rate(PDO $pdo, array $earnedStatuses, DateTime $todayStart): array {
+    return build_period_effective_hourly_rate($pdo, $earnedStatuses, $todayStart, null);
 }
 
-function build_period_effective_hourly_rate(PDO $pdo, array $earnedStatuses, string $periodStartSql): array {
+function build_period_effective_hourly_rate(PDO $pdo, array $earnedStatuses, ?DateTime $from, ?DateTime $to): array {
     $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
-    $rewardExpr = effective_reward_amount_sql();
-    $worktimeExpr = worktime_seconds_sql();
-    $params = $earnedStatuses;
-    $params[] = $periodStartSql;
-    $params[] = $periodStartSql;
+    $rewardExpr = effective_reward_amount_sql('s');
 
-    $stmt = $pdo->prepare("
-        SELECT reward_currency,
-               COUNT(*) sample_count,
-               SUM({$rewardExpr}) reward_total,
-               SUM({$worktimeExpr}) seconds_total
-        FROM submissions
-        WHERE status IN ($placeholders)
+    $sql = "
+        SELECT s.status,
+               s.reward_currency,
+               {$rewardExpr} effective_reward_minor,
+               s.time_taken_seconds,
+               s.started_at,
+               s.completed_at,
+               st.estimated_minutes
+        FROM submissions s
+        LEFT JOIN studies st ON st.id = s.study_id
+        WHERE s.status IN ($placeholders)
           AND {$rewardExpr} > 0
-          AND (completed_at >= ? OR started_at >= ?)
-        GROUP BY reward_currency
-    ");
+    ";
+
+    $params = $earnedStatuses;
+
+    if ($from) {
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) >= ?";
+        $params[] = $from->format('Y-m-d H:i:s');
+    }
+
+    if ($to) {
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) < ?";
+        $params[] = $to->format('Y-m-d H:i:s');
+    }
+
+    $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
     $byCurrency = [];
     $rewardByCurrency = [];
     $sampleCount = 0;
     $secondsGrandTotal = 0;
+    $secondsByCurrency = [];
 
     foreach ($stmt->fetchAll() as $row) {
         if (empty($row['reward_currency'])) {
             continue;
         }
 
-        $secondsTotal = (int)$row['seconds_total'];
-        if ($secondsTotal <= 0) {
+        $seconds = period_worktime_seconds($row, effective_time_seconds($row), $from, $to);
+        if ($seconds <= 0) {
             continue;
         }
 
-        $sampleCount += (int)$row['sample_count'];
-        $secondsGrandTotal += $secondsTotal;
         $currency = $row['reward_currency'];
-        $rewardTotal = (int)$row['reward_total'];
-        $rewardByCurrency[$currency] = $rewardTotal;
-        $byCurrency[$currency] = (int)round(($rewardTotal * 3600) / $secondsTotal);
+        $rewardTotal = (int)$row['effective_reward_minor'];
+        $sampleCount++;
+        $secondsGrandTotal += $seconds;
+        $rewardByCurrency[$currency] = ($rewardByCurrency[$currency] ?? 0) + $rewardTotal;
+        $secondsByCurrency[$currency] = ($secondsByCurrency[$currency] ?? 0) + $seconds;
+    }
+
+    foreach ($rewardByCurrency as $currency => $rewardTotal) {
+        $secondsTotal = (int)($secondsByCurrency[$currency] ?? 0);
+        if ($secondsTotal > 0) {
+            $byCurrency[$currency] = (int)round(($rewardTotal * 3600) / $secondsTotal);
+        }
     }
 
     return [
@@ -662,69 +682,15 @@ function build_efficiency_stats(
     DateTime $monthStart
 ): array {
     return [
-        'today' => build_efficiency_period($pdo, $earnedStatuses, $today),
-        'week' => build_efficiency_period($pdo, $earnedStatuses, $weekStart),
-        'month' => build_efficiency_period($pdo, $earnedStatuses, $monthStart),
-        'allTime' => build_efficiency_period($pdo, $earnedStatuses, null),
+        'today' => build_efficiency_period($pdo, $earnedStatuses, $today, null),
+        'week' => build_efficiency_period($pdo, $earnedStatuses, $weekStart, null),
+        'month' => build_efficiency_period($pdo, $earnedStatuses, $monthStart, null),
+        'allTime' => build_efficiency_period($pdo, $earnedStatuses, null, null),
     ];
 }
 
-function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $from): array {
-    $placeholders = implode(',', array_fill(0, count($earnedStatuses), '?'));
-    $rewardExpr = effective_reward_amount_sql();
-    $worktimeExpr = worktime_seconds_sql();
-
-    $sql = "
-        SELECT reward_currency,
-               COUNT(*) sample_count,
-               SUM({$rewardExpr}) reward_total,
-               SUM({$worktimeExpr}) seconds_total
-        FROM submissions
-        WHERE status IN ($placeholders)
-          AND {$rewardExpr} > 0
-    ";
-
-    $params = $earnedStatuses;
-
-    if ($from) {
-        $sql .= " AND completed_at >= ?";
-        $params[] = $from->format('Y-m-d H:i:s');
-    }
-
-    $sql .= " GROUP BY reward_currency";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-
-    $byCurrency = [];
-    $rewardByCurrency = [];
-    $sampleCount = 0;
-    $secondsGrandTotal = 0;
-
-    foreach ($stmt->fetchAll() as $row) {
-        if (empty($row['reward_currency'])) {
-            continue;
-        }
-
-        $secondsTotal = (int)$row['seconds_total'];
-        if ($secondsTotal <= 0) {
-            continue;
-        }
-
-        $sampleCount += (int)$row['sample_count'];
-        $secondsGrandTotal += $secondsTotal;
-        $currency = $row['reward_currency'];
-        $rewardTotal = (int)$row['reward_total'];
-        $rewardByCurrency[$currency] = $rewardTotal;
-        $byCurrency[$currency] = (int)round(($rewardTotal * 3600) / $secondsTotal);
-    }
-
-    return [
-        'byCurrency' => $byCurrency,
-        'rewardByCurrency' => $rewardByCurrency,
-        'sampleCount' => $sampleCount,
-        'secondsTotal' => $secondsGrandTotal,
-    ];
+function build_efficiency_period(PDO $pdo, array $earnedStatuses, ?DateTime $from, ?DateTime $to): array {
+    return build_period_effective_hourly_rate($pdo, $earnedStatuses, $from, $to);
 }
 
 function build_top_studies(PDO $pdo, array $earnedStatuses): array {
@@ -749,7 +715,8 @@ function fetch_top_study_rows(PDO $pdo, array $earnedStatuses, string $sortMode)
                {$rewardExpr} AS effective_reward_amount_minor,
                s.reward_currency,
                s.time_taken_seconds,
-               s.completed_at
+               s.completed_at,
+               st.estimated_minutes
         FROM submissions s
         LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
@@ -1330,57 +1297,38 @@ function build_monthly_report(
         'pending' => sum_by_period($pdo, $pendingStatuses, $monthStart, $nextMonthStart),
         'submissionsCount' => count_submissions_by_period($pdo, $monthStart, $nextMonthStart),
         'statusCounts' => count_statuses_by_period($pdo, $monthStart, $nextMonthStart),
-        'hourlyRate' => build_efficiency_period($pdo, $earnedStatuses, $monthStart),
+        'hourlyRate' => build_efficiency_period($pdo, $earnedStatuses, $monthStart, $nextMonthStart),
         'topStudies' => build_top_studies_for_period($pdo, $earnedStatuses, $monthStart, $nextMonthStart),
         'requesterStats' => build_requester_stats($pdo, $earnedStatuses, $monthStart, $nextMonthStart, 5),
     ];
 }
 
 function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from = null, ?DateTime $to = null, int $limit = 10): array {
-    $rewardExpr = effective_reward_amount_sql();
-    $worktimeExpr = worktime_seconds_sql();
+    $rewardExpr = effective_reward_amount_sql('s');
     $sql = "
-        SELECT COALESCE(NULLIF(researcher_name, ''), NULLIF(institution, ''), 'Unbekannt') requester,
-               status,
-               reward_currency,
-               COUNT(*) submission_count,
-               SUM({$rewardExpr}) reward_total,
-               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN {$rewardExpr} ELSE 0 END) hourly_reward_total,
-               SUM(CASE WHEN status IN (" . placeholders_for_inline_count(count($earnedStatuses)) . ") THEN {$worktimeExpr} ELSE 0 END) seconds_total,
-               SUM(CASE
-                   WHEN status = 'APPROVED'
-                    AND completed_at IS NOT NULL
-                    AND updated_at IS NOT NULL
-                    AND updated_at >= completed_at
-                   THEN TIMESTAMPDIFF(SECOND, completed_at, updated_at)
-                   ELSE 0
-               END) review_seconds_total,
-               SUM(CASE
-                   WHEN status = 'APPROVED'
-                    AND completed_at IS NOT NULL
-                    AND updated_at IS NOT NULL
-                    AND updated_at >= completed_at
-                   THEN 1
-                   ELSE 0
-               END) review_sample_count
-        FROM submissions
+        SELECT COALESCE(NULLIF(s.researcher_name, ''), NULLIF(s.institution, ''), 'Unbekannt') requester,
+               s.status,
+               s.reward_currency,
+               {$rewardExpr} effective_reward_minor,
+               s.time_taken_seconds,
+               s.started_at,
+               s.completed_at,
+               s.updated_at,
+               st.estimated_minutes
+        FROM submissions s
+        LEFT JOIN studies st ON st.id = s.study_id
         WHERE 1 = 1
     ";
-    $params = array_merge($earnedStatuses, $earnedStatuses);
+    $params = [];
 
     if ($from) {
-        $sql .= " AND completed_at >= ?";
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) >= ?";
         $params[] = $from->format('Y-m-d H:i:s');
     }
     if ($to) {
-        $sql .= " AND completed_at < ?";
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) < ?";
         $params[] = $to->format('Y-m-d H:i:s');
     }
-
-    $sql .= "
-        GROUP BY requester, status, reward_currency
-        ORDER BY SUM({$rewardExpr}) DESC
-    ";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -1405,17 +1353,17 @@ function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from 
             ];
         }
 
-        $count = (int)$row['submission_count'];
         $status = (string)$row['status'];
         $currency = $row['reward_currency'];
-        $items[$requester]['submissionsCount'] += $count;
+        $rewardTotal = (int)$row['effective_reward_minor'];
+        $items[$requester]['submissionsCount']++;
 
         if ($status === 'APPROVED') {
-            $items[$requester]['approvedCount'] += $count;
+            $items[$requester]['approvedCount']++;
         } elseif (in_array($status, ['REJECTED', 'RETURNED'], true)) {
-            $items[$requester]['rejectedCount'] += $count;
+            $items[$requester]['rejectedCount']++;
         } elseif ($status === 'AWAITING REVIEW') {
-            $items[$requester]['pendingCount'] += $count;
+            $items[$requester]['pendingCount']++;
         }
 
         if (!empty($currency)) {
@@ -1429,13 +1377,29 @@ function build_requester_stats(PDO $pdo, array $earnedStatuses, ?DateTime $from 
                 $items[$requester]['_hourlyRewardByCurrency'][$currency] = 0;
             }
 
-            $items[$requester]['totalReward'][$currency] += (int)$row['reward_total'];
-            $items[$requester]['_hourlyRewardByCurrency'][$currency] += (int)$row['hourly_reward_total'];
-            $items[$requester]['_secondsByCurrency'][$currency] += (int)$row['seconds_total'];
+            $items[$requester]['totalReward'][$currency] += $rewardTotal;
+
+            if (in_array($status, $earnedStatuses, true)) {
+                $seconds = period_worktime_seconds($row, effective_time_seconds($row), $from, $to);
+                if ($seconds > 0) {
+                    $items[$requester]['_hourlyRewardByCurrency'][$currency] += $rewardTotal;
+                    $items[$requester]['_secondsByCurrency'][$currency] += $seconds;
+                }
+            }
         }
 
-        $items[$requester]['_reviewSecondsTotal'] += (int)$row['review_seconds_total'];
-        $items[$requester]['_reviewSampleCount'] += (int)$row['review_sample_count'];
+        if ($status === 'APPROVED'
+            && !empty($row['completed_at'])
+            && !empty($row['updated_at'])
+            && $row['updated_at'] >= $row['completed_at']
+        ) {
+            $completedAt = worktime_datetime($row['completed_at']);
+            $updatedAt = worktime_datetime($row['updated_at']);
+            if ($completedAt && $updatedAt) {
+                $items[$requester]['_reviewSecondsTotal'] += max(0, $updatedAt->getTimestamp() - $completedAt->getTimestamp());
+                $items[$requester]['_reviewSampleCount']++;
+            }
+        }
     }
 
     foreach ($items as &$item) {
@@ -1518,14 +1482,15 @@ function build_top_studies_for_period(PDO $pdo, array $earnedStatuses, DateTime 
                {$rewardExpr} AS effective_reward_amount_minor,
                s.reward_currency,
                s.time_taken_seconds,
-               s.completed_at
+               s.completed_at,
+               st.estimated_minutes
         FROM submissions s
         LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
           AND {$rewardExpr} > 0
-          AND s.completed_at >= ?
-          AND s.completed_at < ?
-        ORDER BY {$rewardExpr} DESC, s.completed_at DESC
+          AND COALESCE(s.started_at, s.completed_at) >= ?
+          AND COALESCE(s.started_at, s.completed_at) < ?
+        ORDER BY {$rewardExpr} DESC, COALESCE(s.started_at, s.completed_at) DESC
         LIMIT 5
     ");
     $stmt->execute($params);

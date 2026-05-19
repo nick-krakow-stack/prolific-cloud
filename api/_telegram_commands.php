@@ -373,8 +373,8 @@ function telegram_worktime_message(PDO $pdo): string {
 function telegram_effective_message(PDO $pdo): string {
     $periods = telegram_current_periods();
     $earnedStatuses = telegram_earned_statuses();
-    $monthEarned = telegram_sum_by_period($pdo, $earnedStatuses, $periods['monthStart'], null);
-    $allTimeEarned = telegram_sum_by_period($pdo, $earnedStatuses, null, null);
+    $monthEarned = telegram_sum_by_started_period($pdo, $earnedStatuses, $periods['monthStart'], null);
+    $allTimeEarned = telegram_sum_by_started_period($pdo, $earnedStatuses, null, null);
     $worktime = telegram_worktime_periods($pdo);
 
     return implode("\n", [
@@ -778,6 +778,32 @@ function telegram_sum_by_period(PDO $pdo, array $statuses, ?DateTime $from, ?Dat
     }
     if ($to) {
         $sql .= ' AND completed_at < ?';
+        $params[] = $to->format('Y-m-d H:i:s');
+    }
+    $sql .= ' GROUP BY reward_currency';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $result = [];
+    foreach ($stmt->fetchAll() as $row) {
+        if (!empty($row['reward_currency'])) {
+            $result[(string)$row['reward_currency']] = (int)$row['total'];
+        }
+    }
+    return $result;
+}
+
+function telegram_sum_by_started_period(PDO $pdo, array $statuses, ?DateTime $from, ?DateTime $to): array {
+    $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+    $rewardExpr = effective_reward_amount_sql();
+    $sql = "SELECT reward_currency, SUM({$rewardExpr}) total FROM submissions WHERE status IN ($placeholders)";
+    $params = $statuses;
+    if ($from) {
+        $sql .= ' AND COALESCE(started_at, completed_at) >= ?';
+        $params[] = $from->format('Y-m-d H:i:s');
+    }
+    if ($to) {
+        $sql .= ' AND COALESCE(started_at, completed_at) < ?';
         $params[] = $to->format('Y-m-d H:i:s');
     }
     $sql .= ' GROUP BY reward_currency';
@@ -1233,8 +1259,10 @@ function telegram_top_rows(PDO $pdo, string $sort): array {
                s.status,
                s.reward_currency,
                {$rewardExpr} reward_minor,
-               s.time_taken_seconds
+               s.time_taken_seconds,
+               st.estimated_minutes
         FROM submissions s
+        LEFT JOIN studies st ON st.id = s.study_id
         WHERE s.status IN ($placeholders)
           AND {$rewardExpr} > 0
         ORDER BY {$rewardExpr} DESC

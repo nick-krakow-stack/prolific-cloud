@@ -37,10 +37,17 @@ const checks = [
     'effective message compares earned statuses against paid worktime seconds',
     /function telegram_effective_message\(PDO \$pdo\): string/.test(commands) &&
       commands.includes('$earnedStatuses = telegram_earned_statuses();') &&
+      commands.includes('telegram_sum_by_started_period($pdo, $earnedStatuses') &&
       commands.includes('telegram_effective_period_line(') &&
       commands.includes("['paid_seconds']") &&
       commands.includes('paidSeconds <= 0') &&
       commands.includes('Noch keine bezahlte Arbeitszeit')
+  ],
+  [
+    'effective earned sums use the same started-at period anchor as worktime',
+    /function telegram_sum_by_started_period\(PDO \$pdo,\s*array \$statuses,\s*\?DateTime \$from,\s*\?DateTime \$to\): array/.test(commands) &&
+      /COALESCE\(started_at,\s*completed_at\)\s*>=\s*\?/.test(commands) &&
+      /COALESCE\(started_at,\s*completed_at\)\s*<\s*\?/.test(commands)
   ],
   [
     'effective helper renders month and all time values from paid seconds',

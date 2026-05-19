@@ -14,14 +14,30 @@ function effective_time_seconds(array $sub): int {
     $status = normalize_worktime_status($sub['status'] ?? '');
 
     if ($status === 'SCREENED OUT') {
-        return max($raw, 60);
+        return plausible_worktime_seconds($sub, max($raw, 60));
     }
 
     if ($raw <= 0) {
         return 60;
     }
 
-    return $raw;
+    return plausible_worktime_seconds($sub, $raw);
+}
+
+function plausible_worktime_seconds(array $sub, int $seconds): int {
+    $estimatedMinutes = (int)($sub['estimated_minutes'] ?? 0);
+
+    if ($estimatedMinutes <= 0) {
+        return $seconds;
+    }
+
+    $estimatedSeconds = max(60, $estimatedMinutes * 60);
+
+    if ($seconds > 4 * 3600 && $seconds > $estimatedSeconds * 6) {
+        return $estimatedSeconds;
+    }
+
+    return $seconds;
 }
 
 function effective_unpaid_time_seconds(array $sub): int {
@@ -110,19 +126,20 @@ function worktime_seconds_sql(string $alias = ''): string {
 
 function sum_worktime_by_period(PDO $pdo, ?DateTime $from, ?DateTime $to): array {
     $sql = "
-        SELECT status, time_taken_seconds, started_at, completed_at
-        FROM submissions
+        SELECT s.status, s.time_taken_seconds, s.started_at, s.completed_at, st.estimated_minutes
+        FROM submissions s
+        LEFT JOIN studies st ON st.id = s.study_id
         WHERE 1 = 1
     ";
     $params = [];
 
     if ($from) {
-        $sql .= " AND COALESCE(started_at, completed_at) >= ?";
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) >= ?";
         $params[] = $from->format('Y-m-d H:i:s');
     }
 
     if ($to) {
-        $sql .= " AND COALESCE(started_at, completed_at) < ?";
+        $sql .= " AND COALESCE(s.started_at, s.completed_at) < ?";
         $params[] = $to->format('Y-m-d H:i:s');
     }
 

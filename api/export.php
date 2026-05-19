@@ -41,7 +41,8 @@ function export_submissions_csv(PDO $pdo): void {
             s.researcher_name AS submission_researcher_name,
             s.institution AS submission_institution,
             st.name AS stored_study_name,
-            st.researcher_name AS stored_researcher_name
+            st.researcher_name AS stored_researcher_name,
+            st.estimated_minutes
         FROM submissions s
         LEFT JOIN studies st ON st.id = s.study_id
         ORDER BY s.started_at DESC, s.completed_at DESC, s.id DESC
