@@ -1480,6 +1480,7 @@ function readExtraIncomeSummary(source) {
     currentNetCents: centsValue(current, ['netCents', 'net_cents'], centsValue(summary, ['currentNetCents', 'current_net_cents', 'netCents', 'net_cents'], null)),
     weekMessages: firstNumber(week, ['messageCount', 'message_count']) ?? firstNumber(summary, ['weekMessages', 'week_messages', 'currentWeekMessages', 'current_week_messages']) ?? 0,
     weekFreeMessages: firstNumber(week, ['freeMessageCount', 'free_message_count']) ?? firstNumber(summary, ['weekFreeMessages', 'week_free_messages', 'currentWeekFreeMessages', 'current_week_free_messages']) ?? 0,
+    weekNightBonusMessages: firstNumber(week, ['nightBonusMessageCount', 'night_bonus_message_count', 'nightMessages', 'night_messages']) ?? firstNumber(summary, ['weekNightBonusMessages', 'week_night_bonus_messages']) ?? 0,
     weekGrossCents: centsValue(week, ['grossCents', 'gross_cents'], centsValue(summary, ['weekGrossCents', 'week_gross_cents', 'currentWeekGrossCents', 'current_week_gross_cents'], 0)),
     weekHourlyCents: centsValue(week, ['hourlyGrossCents', 'hourly_gross_cents'], centsValue(summary, ['weekHourlyCents', 'week_hourly_cents', 'hourlyGrossCents', 'hourly_gross_cents'], null)),
     openGrossCents: centsValue(openPayout, ['grossCents', 'gross_cents'], centsValue(summary, ['openGrossCents', 'open_gross_cents', 'payoutGrossCents', 'payout_gross_cents'], 0)),
@@ -1488,6 +1489,7 @@ function readExtraIncomeSummary(source) {
     todaySeconds: firstNumber(today, ['durationSeconds', 'duration_seconds']) ?? firstNumber(summary, ['todaySeconds', 'today_seconds', 'todayDurationSeconds', 'today_duration_seconds']) ?? 0,
     todayMessages: firstNumber(today, ['messageCount', 'message_count']) ?? firstNumber(summary, ['todayMessages', 'today_messages']) ?? 0,
     todayFreeMessages: firstNumber(today, ['freeMessageCount', 'free_message_count']) ?? firstNumber(summary, ['todayFreeMessages', 'today_free_messages']) ?? 0,
+    todayNightBonusMessages: firstNumber(today, ['nightBonusMessageCount', 'night_bonus_message_count', 'nightMessages', 'night_messages']) ?? firstNumber(summary, ['todayNightBonusMessages', 'today_night_bonus_messages']) ?? 0,
     todayGrossCents: centsValue(today, ['grossCents', 'gross_cents'], centsValue(summary, ['todayGrossCents', 'today_gross_cents'], 0)),
     monthGrossCents: centsValue(month, ['grossCents', 'gross_cents'], centsValue(summary, ['monthGrossCents', 'month_gross_cents'], 0)),
     canMarkPaid: firstBoolean(openPayout, ['canMarkPaid', 'can_mark_paid', 'markPaidAllowed', 'mark_paid_allowed']) === true || firstBoolean(summary, ['canMarkPaid', 'can_mark_paid', 'markPaidAllowed', 'mark_paid_allowed']) === true
@@ -1589,7 +1591,9 @@ function renderExtraIncomeTiles(data) {
   const net = summary.currentNetCents == null ? summary.openNetCents : summary.currentNetCents;
   const hourly = summary.weekHourlyCents == null ? DASH : `${fmtEurAmount(summary.weekHourlyCents)}/h`;
   const weekFree = summary.weekFreeMessages > 0 ? ` + ${fmtCount(summary.weekFreeMessages)} Free` : '';
+  const weekNight = summary.weekNightBonusMessages > 0 ? ` + ${fmtCount(summary.weekNightBonusMessages)} Nachtbonus` : '';
   const todayFree = summary.todayFreeMessages > 0 ? ` + ${fmtCount(summary.todayFreeMessages)} Free` : '';
+  const todayNight = summary.todayNightBonusMessages > 0 ? ` + ${fmtCount(summary.todayNightBonusMessages)} Nachtbonus` : '';
 
   return `
     <div class="earnings-grid extra-income-grid">
@@ -1601,7 +1605,7 @@ function renderExtraIncomeTiles(data) {
       <div class="earning-tile">
         <div class="label">Diese Woche</div>
         <div class="value">${fmtCount(summary.weekMessages)} Nachrichten</div>
-        ${weekFree ? `<div class="secondary">${weekFree}</div>` : ''}
+        ${weekFree || weekNight ? `<div class="secondary">${weekFree}${weekNight}</div>` : ''}
         <div class="secondary">${fmtEurAmount(summary.weekGrossCents)} &middot; ${hourly}</div>
       </div>
       <div class="earning-tile">
@@ -1612,7 +1616,7 @@ function renderExtraIncomeTiles(data) {
       <div class="earning-tile">
         <div class="label">Heute</div>
         <div class="value">${fmtWorktime(summary.todaySeconds)}</div>
-        <div class="secondary">${fmtCount(summary.todayMessages)} Nachrichten${todayFree} &middot; ${fmtEurAmount(summary.todayGrossCents)}</div>
+        <div class="secondary">${fmtCount(summary.todayMessages)} Nachrichten${todayFree}${todayNight} &middot; ${fmtEurAmount(summary.todayGrossCents)}</div>
       </div>
     </div>
   `;
@@ -1662,6 +1666,10 @@ function renderExtraIncomeForm() {
           <input id="extraIncomeFreeMessageCount" name="free_message_count" type="number" min="0" step="1" value="0">
         </label>
         <label class="extra-income-field">
+          <span>Nachtbonus-Nachrichten</span>
+          <input id="extraIncomeNightBonusMessageCount" name="night_bonus_message_count" type="number" min="0" step="1" value="0">
+        </label>
+        <label class="extra-income-field">
           <span>Bonusmodus</span>
           <select id="extraIncomeBonusMode" name="bonus_mode">
             <option value="none">Kein Bonus</option>
@@ -1678,10 +1686,6 @@ function renderExtraIncomeForm() {
           <input id="extraIncomeBonusAmount" name="bonus_amount_eur" type="number" min="0" step="0.01" value="0">
         </label>
       </div>
-      <label class="toggle-row extra-income-toggle">
-        <input id="extraIncomeNightBonus" name="night_bonus_enabled" type="checkbox" checked>
-        <span>Nachtbonus anwenden</span>
-      </label>
       <div class="form-actions extra-income-actions">
         <button type="submit">Speichern</button>
         <button id="extraIncomeFormReset" class="filter-reset" type="button">Zurücksetzen</button>
@@ -1708,14 +1712,16 @@ function renderExtraIncomeSessions(data) {
     const endedAt = firstDefined(session, ['endedAt', 'ended_at']);
     const messages = firstNumber(session, ['messageCount', 'message_count']) ?? 0;
     const freeMessages = firstNumber(session, ['freeMessageCount', 'free_message_count']) ?? 0;
+    const nightBonusMessages = firstNumber(session, ['nightBonusMessageCount', 'night_bonus_message_count', 'nightMessages', 'night_messages']) ?? 0;
     const gross = firstNumber(session, ['grossCents', 'gross_cents', 'totalGrossCents', 'total_gross_cents']);
     const freeText = freeMessages > 0 ? ` + ${fmtCount(freeMessages)} Free` : '';
+    const nightText = nightBonusMessages > 0 ? ` + ${fmtCount(nightBonusMessages)} Nachtbonus` : '';
 
     return `
       <div class="event-card extra-income-session" data-extra-income-session-id="${escapeHtml(id)}">
         <div>
           <div class="type">${escapeHtml(fmtDateTime(startedAt))} - ${escapeHtml(fmtDateTime(endedAt))}</div>
-          <div class="message">${fmtCount(messages)} Nachrichten${freeText}${gross == null ? '' : ` &middot; ${fmtEurAmount(gross)}`}</div>
+          <div class="message">${fmtCount(messages)} Nachrichten${freeText}${nightText}${gross == null ? '' : ` &middot; ${fmtEurAmount(gross)}`}</div>
         </div>
         <div class="form-actions">
           <button class="filter-reset" type="button" data-extra-income-edit="${escapeHtml(id)}">Bearbeiten</button>
@@ -1800,7 +1806,7 @@ function extraIncomeFormPayload(form) {
     ended_at: endedAt,
     message_count: Number(data.get('message_count') || 0),
     free_message_count: Number(data.get('free_message_count') || 0),
-    night_bonus_enabled: Boolean(data.get('night_bonus_enabled')),
+    night_bonus_message_count: Number(data.get('night_bonus_message_count') || 0),
     bonus_mode: data.get('bonus_mode') || 'none',
     bonus_threshold_messages: Number(data.get('bonus_threshold_messages') || 0),
     bonus_amount_cents: Math.round(Number(data.get('bonus_amount_eur') || 0) * 100)
@@ -1938,9 +1944,8 @@ function openExtraIncomeStopModal() {
         <label class="telegram-modal-field">Free Messages
           <input name="free_message_count" type="number" min="0" step="1" value="0">
         </label>
-        <label class="toggle-row">
-          <input name="night_bonus_enabled" type="checkbox" checked>
-          <span>Nachtbonus anwenden</span>
+        <label class="telegram-modal-field">Nachtbonus-Nachrichten
+          <input name="night_bonus_message_count" type="number" min="0" step="1" value="0">
         </label>
         <label class="telegram-modal-field">Bonusmodus
           <select name="bonus_mode">
@@ -1991,7 +1996,7 @@ async function submitExtraIncomeStop(event) {
   const payload = {
     message_count: Number(data.get('message_count') || 0),
     free_message_count: Number(data.get('free_message_count') || 0),
-    night_bonus_enabled: Boolean(data.get('night_bonus_enabled')),
+    night_bonus_message_count: Number(data.get('night_bonus_message_count') || 0),
     bonus_mode: data.get('bonus_mode') || 'none',
     bonus_threshold_messages: Number(data.get('bonus_threshold_messages') || 0),
     bonus_amount_cents: Math.round(Number(data.get('bonus_amount_eur') || 0) * 100)
@@ -2067,16 +2072,10 @@ function prefillExtraIncomeSessionForm(id) {
   setValue('extraIncomeEndedAt', extraIncomeDateInputValue(firstDefined(session, ['endedAt', 'ended_at'])));
   setValue('extraIncomeMessageCount', firstNumber(session, ['messageCount', 'message_count']) ?? 0);
   setValue('extraIncomeFreeMessageCount', firstNumber(session, ['freeMessageCount', 'free_message_count']) ?? 0);
+  setValue('extraIncomeNightBonusMessageCount', firstNumber(session, ['nightBonusMessageCount', 'night_bonus_message_count', 'nightMessages', 'night_messages']) ?? 0);
   setValue('extraIncomeBonusMode', firstDefined(session, ['bonusMode', 'bonus_mode']) || 'none');
   setValue('extraIncomeBonusThreshold', firstNumber(session, ['bonusThresholdMessages', 'bonus_threshold_messages']) ?? 0);
   setValue('extraIncomeBonusAmount', ((firstNumber(session, ['bonusAmountCents', 'bonus_amount_cents']) ?? 0) / 100).toFixed(2));
-
-  const night = $('extraIncomeNightBonus');
-  const nightEnabled = firstBoolean(session, ['nightBonusEnabled', 'night_bonus_enabled']);
-
-  if (night) {
-    night.checked = nightEnabled !== false;
-  }
 
   refreshExtraIncomeRangeDisplay();
 }

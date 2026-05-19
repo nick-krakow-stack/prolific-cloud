@@ -154,6 +154,7 @@ $statements = [
     `ended_at`                 DATETIME NOT NULL,
     `message_count`            INT NOT NULL DEFAULT 0,
     `free_message_count`       INT NOT NULL DEFAULT 0,
+    `night_bonus_message_count` INT NOT NULL DEFAULT 0,
     `night_bonus_enabled`      TINYINT(1) NOT NULL DEFAULT 1,
     `bonus_mode`               VARCHAR(20) NOT NULL DEFAULT 'none',
     `bonus_threshold_messages` INT NOT NULL DEFAULT 0,

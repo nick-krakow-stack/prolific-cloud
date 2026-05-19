@@ -13,6 +13,7 @@ const EXTRA_INCOME_REQUIRED_TABLES = [
 const EXTRA_INCOME_REQUIRED_COLUMNS = [
     'extra_income_sessions' => [
         'free_message_count',
+        'night_bonus_message_count',
     ],
 ];
 
@@ -29,6 +30,7 @@ function ensure_extra_income_schema(PDO $pdo): void {
             ended_at DATETIME NOT NULL,
             message_count INT NOT NULL DEFAULT 0,
             free_message_count INT NOT NULL DEFAULT 0,
+            night_bonus_message_count INT NOT NULL DEFAULT 0,
             night_bonus_enabled TINYINT(1) NOT NULL DEFAULT 1,
             bonus_mode VARCHAR(20) NOT NULL DEFAULT 'none',
             bonus_threshold_messages INT NOT NULL DEFAULT 0,
@@ -229,24 +231,13 @@ function extra_income_calculate_session_bonus_cents(array $session): int {
 }
 
 function extra_income_calculate_night_messages(array $session): int {
-    if (empty($session['night_bonus_enabled'])) {
-        return 0;
-    }
-
     $messages = max(0, (int)($session['message_count'] ?? 0));
     if ($messages === 0) {
         return 0;
     }
 
-    $startedAt = extra_income_parse_datetime((string)$session['started_at']);
-    $endedAt = extra_income_parse_datetime((string)$session['ended_at']);
-    $durationSeconds = max(0, $endedAt->getTimestamp() - $startedAt->getTimestamp());
-    if ($durationSeconds === 0) {
-        return 0;
-    }
-
-    $nightSeconds = extra_income_calculate_night_seconds($startedAt, $endedAt);
-    return min($messages, max(0, (int)round($messages * ($nightSeconds / $durationSeconds))));
+    $nightMessages = max(0, (int)($session['night_bonus_message_count'] ?? $session['nightBonusMessageCount'] ?? 0));
+    return min($messages, $nightMessages);
 }
 
 function extra_income_calculate_night_seconds(DateTimeImmutable $startedAt, DateTimeImmutable $endedAt): int {
@@ -277,10 +268,11 @@ function extra_income_split_session_by_week(array $session): array {
     $endedAt = extra_income_parse_datetime((string)$session['ended_at']);
     $messages = max(0, (int)($session['message_count'] ?? 0));
     $freeMessages = max(0, (int)($session['free_message_count'] ?? 0));
+    $nightBonusMessages = min($messages, max(0, (int)($session['night_bonus_message_count'] ?? 0)));
     $durationSeconds = max(0, $endedAt->getTimestamp() - $startedAt->getTimestamp());
 
     if ($durationSeconds === 0) {
-        $part = extra_income_make_session_part($session, $startedAt, $endedAt, $messages, $freeMessages, $messages, $freeMessages);
+        $part = extra_income_make_session_part($session, $startedAt, $endedAt, $messages, $freeMessages, $nightBonusMessages, $messages, $freeMessages, $nightBonusMessages);
         return [$part];
     }
 
@@ -292,20 +284,24 @@ function extra_income_split_session_by_week(array $session): array {
         $partDuration = max(0, $partEnd->getTimestamp() - $cursor->getTimestamp());
         $rawMessages = $messages * ($partDuration / $durationSeconds);
         $rawFreeMessages = $freeMessages * ($partDuration / $durationSeconds);
+        $rawNightBonusMessages = $nightBonusMessages * ($partDuration / $durationSeconds);
         $parts[] = [
             'started_at_dt' => $cursor,
             'ended_at_dt' => $partEnd,
             'duration_seconds' => $partDuration,
             'raw_messages' => $rawMessages,
             'raw_free_messages' => $rawFreeMessages,
+            'raw_night_bonus_messages' => $rawNightBonusMessages,
             'message_count' => (int)floor($rawMessages),
             'free_message_count' => (int)floor($rawFreeMessages),
+            'night_bonus_message_count' => (int)floor($rawNightBonusMessages),
         ];
         $cursor = $partEnd;
     }
 
     extra_income_allocate_proportional_counts($parts, $messages, 'message_count');
     extra_income_allocate_proportional_counts($parts, $freeMessages, 'free_message_count');
+    extra_income_allocate_proportional_counts($parts, $nightBonusMessages, 'night_bonus_message_count');
 
     $result = [];
     foreach ($parts as $part) {
@@ -315,8 +311,10 @@ function extra_income_split_session_by_week(array $session): array {
             $part['ended_at_dt'],
             (int)$part['message_count'],
             (int)$part['free_message_count'],
+            (int)$part['night_bonus_message_count'],
             $messages,
-            $freeMessages
+            $freeMessages,
+            $nightBonusMessages
         );
     }
 
@@ -345,8 +343,10 @@ function extra_income_make_session_part(
     DateTimeImmutable $endedAt,
     int $messages,
     int $freeMessages,
+    int $nightBonusMessages,
     int $originalMessages,
-    int $originalFreeMessages
+    int $originalFreeMessages,
+    int $originalNightBonusMessages
 ): array {
     $part = $session;
     $part['source_session_id'] = (int)($session['id'] ?? 0);
@@ -354,12 +354,15 @@ function extra_income_make_session_part(
     $part['ended_at'] = extra_income_datetime_string($endedAt);
     $part['message_count'] = $messages;
     $part['free_message_count'] = $freeMessages;
+    $part['night_bonus_message_count'] = $nightBonusMessages;
     $part['original_message_count'] = $originalMessages;
     $part['original_free_message_count'] = $originalFreeMessages;
+    $part['original_night_bonus_message_count'] = $originalNightBonusMessages;
     $part['duration_seconds'] = max(0, $endedAt->getTimestamp() - $startedAt->getTimestamp());
     $part['week_start'] = extra_income_date_string(extra_income_week_start($startedAt));
     $part['week_end'] = extra_income_date_string(extra_income_week_end($startedAt));
-    $part['night_messages'] = extra_income_calculate_night_messages($part);
+    $part['night_bonus_message_count'] = extra_income_calculate_night_messages($part);
+    $part['night_messages'] = $part['night_bonus_message_count'];
     return $part;
 }
 
@@ -594,6 +597,13 @@ function extra_income_validate_session_payload(array $body, bool $allowId): arra
     if ($freeMessageCount < 0) {
         json_error('Free Messages muessen eine ganze Zahl groesser oder gleich 0 sein.', 400);
     }
+    $nightBonusMessageCount = extra_income_int_value($body, ['night_bonus_message_count', 'nightBonusMessageCount'], 0);
+    if ($nightBonusMessageCount < 0) {
+        json_error('Nachtbonus-Nachrichten muessen eine ganze Zahl groesser oder gleich 0 sein.', 400);
+    }
+    if ($nightBonusMessageCount > $messageCount) {
+        json_error('Nachtbonus-Nachrichten duerfen nicht hoeher als normale Nachrichten sein.', 400);
+    }
 
     $bonusMode = (string)($body['bonus_mode'] ?? $body['bonusMode'] ?? 'none');
     $modeMap = [
@@ -627,6 +637,7 @@ function extra_income_validate_session_payload(array $body, bool $allowId): arra
         'ended_at' => extra_income_datetime_string($endedAt),
         'message_count' => $messageCount,
         'free_message_count' => $freeMessageCount,
+        'night_bonus_message_count' => $nightBonusMessageCount,
         'night_bonus_enabled' => extra_income_bool_value($body, ['night_bonus_enabled', 'nightBonusEnabled'], true) ? 1 : 0,
         'bonus_mode' => $bonusMode,
         'bonus_threshold_messages' => $bonusThreshold,
@@ -674,15 +685,16 @@ function extra_income_insert_session(PDO $pdo, array $session): int {
     $now = extra_income_now_string();
     $stmt = $pdo->prepare(
         "INSERT INTO extra_income_sessions
-            (started_at, ended_at, message_count, free_message_count, night_bonus_enabled, bonus_mode,
+            (started_at, ended_at, message_count, free_message_count, night_bonus_message_count, night_bonus_enabled, bonus_mode,
              bonus_threshold_messages, bonus_amount_cents, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     $stmt->execute([
         $session['started_at'],
         $session['ended_at'],
         $session['message_count'],
         $session['free_message_count'],
+        $session['night_bonus_message_count'],
         $session['night_bonus_enabled'],
         $session['bonus_mode'],
         $session['bonus_threshold_messages'],
@@ -700,6 +712,7 @@ function extra_income_update_session(PDO $pdo, int $id, array $session): void {
              ended_at = ?,
              message_count = ?,
              free_message_count = ?,
+             night_bonus_message_count = ?,
              night_bonus_enabled = ?,
              bonus_mode = ?,
              bonus_threshold_messages = ?,
@@ -712,6 +725,7 @@ function extra_income_update_session(PDO $pdo, int $id, array $session): void {
         $session['ended_at'],
         $session['message_count'],
         $session['free_message_count'],
+        $session['night_bonus_message_count'],
         $session['night_bonus_enabled'],
         $session['bonus_mode'],
         $session['bonus_threshold_messages'],
@@ -723,7 +737,7 @@ function extra_income_update_session(PDO $pdo, int $id, array $session): void {
 
 function extra_income_fetch_sessions(PDO $pdo): array {
     $stmt = $pdo->prepare(
-        "SELECT id, started_at, ended_at, message_count, free_message_count, night_bonus_enabled, bonus_mode,
+        "SELECT id, started_at, ended_at, message_count, free_message_count, night_bonus_message_count, night_bonus_enabled, bonus_mode,
                 bonus_threshold_messages, bonus_amount_cents, created_at, updated_at
          FROM extra_income_sessions
          ORDER BY started_at DESC, id DESC"
@@ -734,7 +748,7 @@ function extra_income_fetch_sessions(PDO $pdo): array {
 
 function extra_income_fetch_session_by_id(PDO $pdo, int $id): ?array {
     $stmt = $pdo->prepare(
-        "SELECT id, started_at, ended_at, message_count, free_message_count, night_bonus_enabled, bonus_mode,
+        "SELECT id, started_at, ended_at, message_count, free_message_count, night_bonus_message_count, night_bonus_enabled, bonus_mode,
                 bonus_threshold_messages, bonus_amount_cents, created_at, updated_at
          FROM extra_income_sessions
          WHERE id = ?"
@@ -773,8 +787,8 @@ function extra_income_calculate_summary(array $sessions, array $payouts): array 
     $paidRanges = extra_income_paid_period_ranges($payouts);
     $weeks = [];
     $sessionGrossCents = [];
-    $today = ['grossCents' => 0, 'messageCount' => 0, 'freeMessageCount' => 0, 'durationSeconds' => 0];
-    $month = ['grossCents' => 0, 'messageCount' => 0, 'freeMessageCount' => 0, 'durationSeconds' => 0];
+    $today = ['grossCents' => 0, 'messageCount' => 0, 'freeMessageCount' => 0, 'nightMessages' => 0, 'nightBonusMessageCount' => 0, 'durationSeconds' => 0];
+    $month = ['grossCents' => 0, 'messageCount' => 0, 'freeMessageCount' => 0, 'nightMessages' => 0, 'nightBonusMessageCount' => 0, 'durationSeconds' => 0];
     $tz = new DateTimeZone(date_default_timezone_get());
     $now = new DateTimeImmutable('now', $tz);
     $todayStart = $now->setTime(0, 0, 0);
@@ -794,6 +808,7 @@ function extra_income_calculate_summary(array $sessions, array $payouts): array 
                 'messageCount' => 0,
                 'freeMessageCount' => 0,
                 'nightMessages' => 0,
+                'nightBonusMessageCount' => 0,
                 'durationSeconds' => 0,
                 'grossCents' => 0,
                 'baseCents' => 0,
@@ -809,6 +824,7 @@ function extra_income_calculate_summary(array $sessions, array $payouts): array 
         $weeks[$weekKey]['messageCount'] += $part['message_count'];
         $weeks[$weekKey]['freeMessageCount'] += $part['free_message_count'];
         $weeks[$weekKey]['nightMessages'] += $part['night_messages'];
+        $weeks[$weekKey]['nightBonusMessageCount'] = $weeks[$weekKey]['nightMessages'];
         $weeks[$weekKey]['durationSeconds'] += $part['duration_seconds'];
         $weeks[$weekKey]['grossCents'] += $part['gross_cents'];
         $weeks[$weekKey]['baseCents'] += $part['base_cents'];
@@ -868,6 +884,7 @@ function extra_income_calculate_summary(array $sessions, array $payouts): array 
         'messageCount' => 0,
         'freeMessageCount' => 0,
         'nightMessages' => 0,
+        'nightBonusMessageCount' => 0,
         'durationSeconds' => 0,
         'grossCents' => 0,
         'baseCents' => 0,
@@ -882,6 +899,8 @@ function extra_income_calculate_summary(array $sessions, array $payouts): array 
     return [
         'summary' => [
             'grossCents' => array_sum(array_column($weeks, 'grossCents')),
+            'nightMessages' => array_sum(array_column($weeks, 'nightMessages')),
+            'nightBonusMessageCount' => array_sum(array_column($weeks, 'nightMessages')),
             'openGrossCents' => $openGross,
             'openFeeCents' => $openFee,
             'openNetCents' => max(0, $openGross - $openFee),
@@ -933,6 +952,8 @@ function extra_income_add_period_share(
     $bucket['grossCents'] += (int)round((int)$part['gross_cents'] * $share);
     $bucket['messageCount'] += (int)round((int)$part['message_count'] * $share);
     $bucket['freeMessageCount'] += (int)round((int)$part['free_message_count'] * $share);
+    $bucket['nightMessages'] += (int)round((int)$part['night_messages'] * $share);
+    $bucket['nightBonusMessageCount'] = $bucket['nightMessages'];
     $bucket['durationSeconds'] += $overlap;
 }
 
@@ -1053,6 +1074,7 @@ function extra_income_enrich_sessions(array $sessions, array $sessionGrossCents)
         $startedAt = new DateTimeImmutable((string)$session['started_at']);
         $endedAt = new DateTimeImmutable((string)$session['ended_at']);
         $durationSeconds = max(0, $endedAt->getTimestamp() - $startedAt->getTimestamp());
+        $nightMessages = extra_income_calculate_night_messages($session);
 
         return [
             'id' => $id,
@@ -1060,6 +1082,8 @@ function extra_income_enrich_sessions(array $sessions, array $sessionGrossCents)
             'endedAt' => $session['ended_at'],
             'messageCount' => (int)$session['message_count'],
             'freeMessageCount' => (int)($session['free_message_count'] ?? 0),
+            'nightBonusMessageCount' => $nightMessages,
+            'nightMessages' => $nightMessages,
             'nightBonusEnabled' => (bool)$session['night_bonus_enabled'],
             'bonusMode' => $session['bonus_mode'],
             'bonusThresholdMessages' => (int)$session['bonus_threshold_messages'],
