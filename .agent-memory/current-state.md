@@ -238,7 +238,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   60 seconds, screened-out rows have a 60-second minimum, and incomplete
   negative rows (`RETURNED`/`REJECTED`/`TIMED OUT` without `completed_at`) use
   60 seconds for the unbezahlt bucket so stale open timers do not dominate the
-  dashboard. The dashboard and Telegram wording is `Davon ... unbezahlt`.
+  dashboard. Worktime periods are anchored to `started_at` rather than
+  `completed_at`, so multi-day submissions are not fully assigned to their
+  completion day. Period contributions are capped by the available period
+  window. The dashboard and Telegram wording is `Davon ... unbezahlt`.
 - The submissions status chart uses SVG circle segments instead of inline
   `conic-gradient` styles so the chart remains visible under the strict
   `style-src 'self'` Content-Security-Policy.

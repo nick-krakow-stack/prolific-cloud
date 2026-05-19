@@ -370,3 +370,8 @@
 - 2026-05-19 14:05:00 +02:00 - Fixed the Arbeit-Zuhause range picker calendar click sequence: first calendar click now sets only the start date, second click sets the end date, earlier second dates swap start/end, and clicks after a complete range begin a new range. Widened/rebalanced the modal to a 1080px date-range layout and added focused Node regression coverage plus updated render contract.
 - 2026-05-19 13:44:58 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 13:47:30 +02:00 - Deployed the Arbeit-Zuhause date-range picker fix to production. Verification passed: node syntax check, focused range-picker regression test, extra-income render contract, overview/misc render contracts, git diff check, config.php ignore check, server PHP 8.4 lint for dashboard/app.php and api/data.php, live root HTTP 200, and live app.js HTTP 200.
+- 2026-05-19 13:52:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:07:30 +02:00 - Fixed implausible overview worktime: production diagnosis showed one multi-day approved submission with 158,676 raw seconds was assigned entirely to the completion day. Worktime buckets now anchor to started_at, cap contributions by the period window, and production now reports today as 6,720 paid seconds plus 120 unpaid seconds instead of 165,398 paid seconds. Deployed and verified with Node source/render tests, server PHP 8.4 lint, live HTTP 200, and a server-side aggregate smoke check.
+- 2026-05-19 15:57:40 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 15:59:07 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 16:01:12 +02:00 - Stop hook ran and refreshed central memory snapshot.

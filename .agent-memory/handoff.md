@@ -1,26 +1,26 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 13:49:30 +02:00
+Last updated: 2026-05-19 16:08:00 +02:00
 Update mode: Orchestrator
 
 ## Latest Notes
 
-- Arbeit-Zuhause date-range picker behavior is fixed and deployed.
-- Calendar selection now uses two clicks for a range: first click sets only start, second click sets end, earlier second dates swap start/end, and a new click after a complete range begins a new selection.
-- The dark range-picker modal was widened to a 1080px layout with a stronger preset/calendar balance.
-- Product changes were committed in `527af3c Improve work-home range picker`.
-- Verification passed: Node syntax check, focused range-picker regression test, extra-income/overview/misc render contracts, git diff check, config.php ignore check, server PHP 8.4 lint, and live HTTP checks.
+- Implausible `Arbeitszeit heute` value was diagnosed and fixed.
+- Root cause: worktime period filtering used completion date semantics, so a multi-day approved submission with 158,676 raw seconds was counted fully on its completion day.
+- Worktime periods now anchor to `started_at` and cap each row by the available period window.
+- Production smoke check after deploy: today worktime is `paid_seconds = 6720`, `unpaid_seconds = 120`.
+- Product changes were committed in `b81a65a Fix worktime period aggregation`; memory commit/push is pending.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 527af3c Improve work-home range picker
+- Last commit: b81a65a Fix worktime period aggregation
 
 ## Working Tree
 
 ~~~text
- M .agent-memory/current-state.md
  M .agent-memory/current-task.md
+ M .agent-memory/current-state.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
