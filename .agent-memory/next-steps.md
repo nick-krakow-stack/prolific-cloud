@@ -37,13 +37,11 @@ Last updated: 2026-05-17
     1501-2000 => 0.15; 2001+ => 0.17.
   - Free Messages do not count toward the normal weekly message tier.
   - Standard night bonus applies only to normal sent/paid messages, not to
-    unpayable special message types or Free Messages. Night window is
-    00:00-07:00.
-  - Standard night bonus is enabled by default for each work session, but can be
-    disabled per session with a `Nachtbonus anwenden` checkbox.
-  - If a session crosses night/non-night windows, estimate night messages
-    proportionally by time share. Owner will try to cut sessions at midnight for
-    cleaner data.
+    unpayable special message types or Free Messages.
+  - Standard night bonus is entered explicitly as `Nachtbonus-Nachrichten`.
+    The system pays 0.01 EUR per entered night-bonus message and caps the value
+    to the normal paid message count. There is no automatic time-window
+    proportion calculation for the bonus amount anymore.
   - Special message categories such as favorites, likes, flirts, matches, etc.
     should not be tracked individually. Only the paid message count from the
     provider backend matters.
@@ -64,9 +62,10 @@ Last updated: 2026-05-17
     receive special bonus payments.
   - Bonus parameters vary by session and must be editable when entering or
     finishing a session.
-  - The stop dialog should ask for paid message count, night-bonus checkbox,
-    optional bonus type (`keiner`, `einmalig`, `fortlaufend`), bonus threshold
-    in messages, and bonus amount. No notes field is needed.
+  - The stop dialog should ask for paid message count, Free Messages,
+    night-bonus message count, optional bonus type (`keiner`, `einmalig`,
+    `fortlaufend`), bonus threshold in messages, and bonus amount. No notes
+    field is needed.
   - Manual backfill form uses the same fields as the stop dialog, with manually
     selectable start and end datetime.
   - Saved work sessions must be editable and deletable. Deleting requires a

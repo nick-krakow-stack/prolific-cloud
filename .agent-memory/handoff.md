@@ -1,28 +1,29 @@
 # Handoff
 
-Last updated: 2026-05-19 10:12:00 +02:00
+Last updated: 2026-05-19 10:58:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Latest task added `Zusatzeinkommen` Free Messages. Each session now has
-`free_message_count`, worth 10 cents per message. Free Messages count toward
-gross/net payout and hourly rate, but do not affect the normal weekly message
-tier, night bonus, or special bonus thresholds. Production was deployed and the
-server DB was migrated with `extra_income_sessions.free_message_count INT NOT
-NULL DEFAULT 0`.
+Zusatzeinkommen night bonus is now an explicit entered count instead of an
+automatic time-window checkbox. UI uses `Nachtbonus-Nachrichten`; backend stores
+`extra_income_sessions.night_bonus_message_count`, validates it against normal
+paid `message_count`, and calculates 1 cent per entered night-bonus message.
+Production DB was migrated and runtime files were deployed.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit before final staging: f359799 Update memory for extra income picker fix
+- Last commit: 235e96e Update memory for free messages
 
 ## Working Tree
 
 ~~~text
+ M .agent-memory/current-state.md
  M .agent-memory/current-task.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
+ M .agent-memory/next-steps.md
  M .agent-memory/progress.md
  M api/_extra_income.php
  M dashboard/assets/app.js
@@ -38,7 +39,8 @@ See .agent-memory/current-state.md.
 
 ## Next Planned Work
 
-See .agent-memory/next-steps.md.
+Run final checks, commit product changes separately from memory changes, and
+push `main`.
 
 ## Required Startup For Next Agent
 

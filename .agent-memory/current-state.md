@@ -255,6 +255,12 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   fixed 10 cents each and are included in gross/net payout and hourly-rate
   calculations, but excluded from the normal weekly tier, night bonus, and
   special bonus thresholds. Production has the `free_message_count` DB column.
+- `Zusatzeinkommen` night bonus is implemented as explicit per-session
+  `night_bonus_message_count`. New calculations ignore the legacy
+  `night_bonus_enabled` checkbox for bonus amount, cap night-bonus messages to
+  normal paid `message_count`, and split night-bonus counts proportionally across
+  billing weeks while preserving whole-count sums. Production has the
+  `night_bonus_message_count` DB column.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` in the runtime
   deploy list. Normal deploys still exclude `install.php`,
   `hash-generator.php`, `config.example.php`, and `config.php`.

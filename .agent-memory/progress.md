@@ -338,3 +338,11 @@
 - 2026-05-19 09:55:00 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 10:00:25 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 10:12:00 +02:00 - Added `Zusatzeinkommen` Free Messages: separate `free_message_count` input for manual sessions and timer stop, fixed 10-cent calculation in `api/_extra_income.php`, separate weekly/session summary fields, install schema update, backend/render tests, production deploy, deliberate `extra_income_sessions.free_message_count` migration, server PHP 8.4 lint, schema check, and live HTTP 200 verification.
+- 2026-05-19 10:14:33 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:30:03 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 10:31:05 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:32:59 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-19 10:34:36 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-19 10:50:00 +02:00 - Updated `Zusatzeinkommen` backend contracts and implementation for explicit `extra_income_sessions.night_bonus_message_count`: source contract was made red first, the schema/install/payload/persistence/split/calculation/response paths were updated, and local verification passed with `node tests/extra-income-backend-source.test.js`; local PHP CLI was unavailable.
+- 2026-05-19 10:58:00 +02:00 - Completed explicit `Zusatzeinkommen` night-bonus message count end to end: replaced the UI checkbox with `Nachtbonus-Nachrichten`, added `night_bonus_message_count` to payloads and session display, deployed runtime files, migrated production schema, verified server PHP 8.4 lint, calculation contract, schema readiness, example calculation `113:3:39:1425`, and live HTTP 200.
+- 2026-05-19 10:40:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
