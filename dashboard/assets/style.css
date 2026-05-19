@@ -2158,7 +2158,8 @@ a:not(.icon-btn):hover {
   max-width: 420px;
 }
 .extra-income-range-modal .telegram-modal {
-  max-width: 920px;
+  width: min(1080px, calc(100vw - 32px));
+  max-width: 1080px;
 }
 .extra-income-range-top {
   display: flex;
@@ -2168,14 +2169,18 @@ a:not(.icon-btn):hover {
 }
 .extra-income-range-layout {
   display: grid;
-  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
 .extra-income-range-presets {
   display: grid;
   gap: 8px;
   min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 30%, var(--bg-card));
 }
 .extra-income-range-presets button {
   justify-content: flex-start;
@@ -2183,7 +2188,7 @@ a:not(.icon-btn):hover {
 }
 .extra-income-range-main {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   min-width: 0;
 }
 .extra-income-range-grid {
@@ -2195,7 +2200,7 @@ a:not(.icon-btn):hover {
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 10px;
+  padding: 14px;
   background: color-mix(in srgb, var(--bg) 44%, var(--bg-card));
 }
 .extra-income-calendar-head {
@@ -2216,7 +2221,7 @@ a:not(.icon-btn):hover {
 .extra-income-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
+  gap: 6px;
 }
 .extra-income-calendar-weekdays {
   margin-bottom: 6px;
@@ -2227,7 +2232,7 @@ a:not(.icon-btn):hover {
 }
 .extra-income-calendar-day {
   min-width: 0;
-  min-height: 34px;
+  min-height: 42px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;

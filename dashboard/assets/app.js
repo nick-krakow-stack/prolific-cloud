@@ -1721,9 +1721,9 @@ function selectExtraIncomeCalendarDate(form, value) {
 
   if (!startField || !endField) return;
 
-  if (!startField.value || (startField.value && endField.value)) {
+  if (!startField.value || endField.value) {
     startField.value = value;
-    endField.value = value;
+    endField.value = '';
   } else if (value < startField.value) {
     endField.value = startField.value;
     startField.value = value;

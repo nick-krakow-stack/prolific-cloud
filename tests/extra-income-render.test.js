@@ -118,7 +118,7 @@ assert(
   'calendar icon should be white'
 );
 assert(
-  /\.extra-income-range-modal \.telegram-modal\s*\{[\s\S]*max-width:\s*920px/.test(css),
+  /\.extra-income-range-modal \.telegram-modal\s*\{[\s\S]*width:\s*min\(1080px,\s*calc\(100vw - 32px\)\)/.test(css),
   'work-home range picker should use a wider modal'
 );
 assert(!css.includes('repeat(3, minmax(180px, 1fr))'));
