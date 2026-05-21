@@ -387,3 +387,14 @@
 - 2026-05-19 16:17:51 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-19 16:35:00 +02:00 - Completed the dashboard-wide worktime audit/fix. Backend hourly aggregations now use the shared started-at worktime helper instead of direct SQL seconds sums, requester stats and monthly report use the same corrected path, CSV and Telegram top/effective paths get study estimates, and implausible stale timers are capped against study estimates. Deployed to production and verified with Node tests, server PHP 8.4 lint, live root HTTP 200, expected unauthenticated API 401, and server-side worktime smoke checks.
 - 2026-05-19 16:50:00 +02:00 - Polished the overview monthly forecast verdict: the forecast outcome is now a large bottom-aligned green/red callout with subtle glow, mobile sizing, and render/CSS regression coverage. Deployed to production and verified live assets plus root/API responses.
+- 2026-05-19 16:54:27 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-21 21:09:08 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-21 21:10:10 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-21 21:10:13 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-21 21:10:19 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-21 21:10:23 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-21 21:10:27 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-21 21:10:30 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-21 21:12:06 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-21 21:12:37 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-21 21:25:00 +02:00 - Fixed Pending exclusion in effective hourly calculations. Dashboard overview now uses paid reward statuses for today/month stats, efficiency cards, top studies, and monthly report requester/hourly/top calculations; the effective hourly KPI cards include pending reward in their numerator; Telegram `/effective` uses the same paid status set. Deployed to production and verified with all Node tests, remote PHP 8.4 lint, live root HTTP 200, and unauthenticated overview API 401.

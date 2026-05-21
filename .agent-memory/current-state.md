@@ -290,6 +290,12 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   bottom-aligned callout: green/glowing when the goal is projected to be reached,
   red/glowing when it is projected to be missed, and muted when no verdict is
   available.
+- Effective hourly-rate calculations now use the same paid status basis as
+  paid worktime: `APPROVED`, `SCREENED OUT`, `SCREENED-OUT`, and
+  `AWAITING REVIEW`. This applies to overview goal details, efficiency cards,
+  effective hourly KPI cards, monthly report hourly/top/requester stats, and
+  Telegram `/effective`. Visible `earned` and `pending` display buckets remain
+  separate.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,

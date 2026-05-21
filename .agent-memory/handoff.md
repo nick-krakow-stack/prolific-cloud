@@ -1,18 +1,19 @@
 ﻿# Handoff
 
-Last updated: 2026-05-19 16:50:00 +02:00
-Update mode: Stop
+Last updated: 2026-05-21 21:25:00 +02:00
+Update mode: Manual
 
 ## Latest Notes
 
-Automatic handoff snapshot written by .codex/hooks/agent-protocol.ps1.
-Current task status is tracked in .agent-memory/current-task.md.
-Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
+Pending was excluded from several effective hourly reward numerators while
+paid worktime already included it. This is now fixed and deployed. Current task
+status is tracked in .agent-memory/current-task.md. Owner, browser, and review
+feedback are persisted in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 4b2854a Update memory for worktime aggregation fix
+- Last commit: a7deec7 Update memory for forecast verdict
 
 ## Working Tree
 
@@ -21,9 +22,13 @@ Owner, browser, and review feedback are persisted in .agent-memory/feedback.md.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/_telegram_commands.php
+ M api/data.php
  M dashboard/assets/app.js
- M dashboard/assets/style.css
+ M tests/month-stats-source.test.js
  M tests/overview-render.test.js
+ M tests/telegram-worktime-source.test.js
+ M tests/worktime-backend-source.test.js
 ~~~
 
 ## Current State Summary
@@ -33,14 +38,6 @@ See .agent-memory/current-state.md.
 ## Next Planned Work
 
 See .agent-memory/next-steps.md.
-
-## Current Turn Note
-
-The monthly forecast verdict UI has been changed locally and deployed:
-`dashboard/assets/app.js` now renders a `forecast-verdict` callout inside the
-forecast card, `dashboard/assets/style.css` provides green/red/neutral glow
-styles plus mobile sizing, and `tests/overview-render.test.js` covers the new
-contract. Verification passed locally and against live assets.
 
 ## Required Startup For Next Agent
 

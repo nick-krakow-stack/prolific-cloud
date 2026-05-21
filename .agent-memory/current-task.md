@@ -1,31 +1,39 @@
 # Current Task
 
-Last updated: 2026-05-19 16:50:00 +02:00
+Last updated: 2026-05-21 21:25:00 +02:00
 
 ## Task
 
-Polish the monthly forecast verdict in the overview dashboard.
+Fix effective hourly-rate calculations so Pending rewards are included wherever
+paid worktime already includes Pending.
 
 ## Scope
 
+- `api/data.php`
+- `api/_telegram_commands.php`
 - `dashboard/assets/app.js`
-- `dashboard/assets/style.css`
-- `tests/overview-render.test.js`
+- related Node source/render tests
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Inspect forecast renderer and existing status-card CSS.
-- [x] Move the forecast verdict from a normal status row into a large centered callout.
-- [x] Color forecast verdict green/red/neutral based on forecast outcome.
-- [x] Add responsive CSS so the card remains readable on mobile.
-- [x] Add regression coverage for the forecast callout and CSS hooks.
-- [x] Deploy and verify live assets.
+- [x] Delegate backend and frontend read-only audits to focused Sub-Agents.
+- [x] Identify the mixed status basis: paid worktime included `AWAITING REVIEW`,
+  but several reward sums used only `APPROVED` and `SCREENED OUT`.
+- [x] Add failing regression checks for overview, month stats, worktime source,
+  and Telegram effective hourly.
+- [x] Route dashboard effective hourly, efficiency, goal detail stats,
+  monthly report hourly/top/requester stats, and Telegram `/effective` through
+  paid reward statuses.
+- [x] Deploy runtime files to the live webspace.
+- [x] Verify JavaScript tests, server PHP 8.4 lint, live root HTTP 200, and
+  unauthenticated API 401.
 
 ## Notes
 
-- The forecast card now renders `Ziel wird voraussichtlich erreicht` or
-  `Ziel wird voraussichtlich verfehlt` as a prominent bottom-aligned verdict.
-- The callout uses green glow for reached, red glow for missed, and muted neutral
-  styling if no forecast verdict is available.
+- `paid_reward_statuses()` is now the shared dashboard status set for effective
+  paid work: `APPROVED`, `SCREENED OUT`, `SCREENED-OUT`, and `AWAITING REVIEW`.
+- The separated visible `earned` and `pending` maps are unchanged; only the
+  calculations that are supposed to represent achieved/paid work now use the
+  combined status basis.
