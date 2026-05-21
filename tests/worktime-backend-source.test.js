@@ -110,6 +110,13 @@ const checks = [
     overviewSource.includes("'worktime'        => $worktime")
   ],
   [
+    'overview effective hourly calculations use paid statuses including pending',
+    overviewSource.includes('$paidStatuses = paid_reward_statuses($earnedStatuses, $pendingStatuses);') &&
+      overviewSource.includes('$todayStats = build_today_stats($pdo, $paidStatuses, $today, $earnedToday, $pendingToday);') &&
+      overviewSource.includes('$monthStats = build_period_stats($pdo, $paidStatuses, $monthStart, $earnedMonth, $pendingMonth);') &&
+      overviewSource.includes('$efficiency = build_efficiency_stats($pdo, $paidStatuses, $today, $weekStart, $monthStart);')
+  ],
+  [
     'deploy uploads shared worktime helper',
     deploySource.includes('"api/_worktime.php"')
   ],

@@ -34,10 +34,10 @@ const checks = [
       !/function telegram_worktime_line[\s\S]*\\\\\+[\s\S]*return \$line;/.test(commands)
   ],
   [
-    'effective message compares earned statuses against paid worktime seconds',
+    'effective message compares paid statuses including pending against paid worktime seconds',
     /function telegram_effective_message\(PDO \$pdo\): string/.test(commands) &&
-      commands.includes('$earnedStatuses = telegram_earned_statuses();') &&
-      commands.includes('telegram_sum_by_started_period($pdo, $earnedStatuses') &&
+      commands.includes('$paidStatuses = telegram_paid_statuses();') &&
+      commands.includes('telegram_sum_by_started_period($pdo, $paidStatuses') &&
       commands.includes('telegram_effective_period_line(') &&
       commands.includes("['paid_seconds']") &&
       commands.includes('paidSeconds <= 0') &&

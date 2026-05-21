@@ -216,6 +216,7 @@ function build_overview(PDO $pdo): array {
     // "pending": AWAITING REVIEW
     $earnedStatuses  = ['APPROVED', 'SCREENED OUT', 'SCREENED-OUT'];
     $pendingStatuses = ['AWAITING REVIEW'];
+    $paidStatuses = paid_reward_statuses($earnedStatuses, $pendingStatuses);
 
     $earnedToday  = sum_by_period($pdo, $earnedStatuses, $today, null);
     $pendingToday = sum_by_period($pdo, $pendingStatuses, $today, null);
@@ -264,10 +265,10 @@ function build_overview(PDO $pdo): array {
     $forecast = build_month_forecast($now, $goalMonthGbp, $monthlyGoalGbpMinor);
     $pendingStats = build_pending_stats($pdo, $pendingStatuses, $now);
     $statusStats = build_status_stats($subCounts);
-    $todayStats = build_today_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
-    $monthStats = build_period_stats($pdo, $earnedStatuses, $monthStart, $earnedMonth, $pendingMonth);
-    $efficiency = build_efficiency_stats($pdo, $earnedStatuses, $today, $weekStart, $monthStart);
-    $topStudies = build_top_studies($pdo, $earnedStatuses);
+    $todayStats = build_today_stats($pdo, $paidStatuses, $today, $earnedToday, $pendingToday);
+    $monthStats = build_period_stats($pdo, $paidStatuses, $monthStart, $earnedMonth, $pendingMonth);
+    $efficiency = build_efficiency_stats($pdo, $paidStatuses, $today, $weekStart, $monthStart);
+    $topStudies = build_top_studies($pdo, $paidStatuses);
     $dailyStats = build_daily_stats($pdo, $earnedStatuses, $pendingStatuses, $today);
     $worktime = [
         'today'     => sum_worktime_by_period($pdo, $today, null),
@@ -516,19 +517,23 @@ function percentage(int $part, int $total): float {
     return round(($part / $total) * 100, 1);
 }
 
+function paid_reward_statuses(array $earnedStatuses, array $pendingStatuses): array {
+    return array_values(array_unique(array_merge($earnedStatuses, $pendingStatuses)));
+}
+
 function build_today_stats(
     PDO $pdo,
-    array $earnedStatuses,
+    array $paidStatuses,
     DateTime $today,
     array $earnedToday,
     array $pendingToday
 ): array {
-    return build_period_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);
+    return build_period_stats($pdo, $paidStatuses, $today, $earnedToday, $pendingToday);
 }
 
 function build_period_stats(
     PDO $pdo,
-    array $earnedStatuses,
+    array $paidStatuses,
     DateTime $periodStart,
     array $earned,
     array $pending
@@ -548,8 +553,8 @@ function build_period_stats(
         'earned' => $earned,
         'pending' => $pending,
         'submissionsCount' => $submissionsCount,
-        'averageReward' => build_period_average_reward($pdo, $earnedStatuses, $periodStartSql),
-        'effectiveHourlyRate' => build_period_effective_hourly_rate($pdo, $earnedStatuses, $periodStart, null),
+        'averageReward' => build_period_average_reward($pdo, $paidStatuses, $periodStartSql),
+        'effectiveHourlyRate' => build_period_effective_hourly_rate($pdo, $paidStatuses, $periodStart, null),
     ];
 }
 
@@ -812,13 +817,14 @@ function build_stats_response(PDO $pdo): array {
 
     $earnedStatuses = ['APPROVED', 'SCREENED OUT', 'SCREENED-OUT'];
     $pendingStatuses = ['AWAITING REVIEW'];
+    $paidStatuses = paid_reward_statuses($earnedStatuses, $pendingStatuses);
 
     return [
         'ok' => true,
         'monthlyComparison' => build_monthly_comparison($pdo, $earnedStatuses, $monthStart, $nextMonthStart, $previousMonthStart),
         'heatmap' => build_heatmap_history($pdo, $earnedStatuses, $pendingStatuses, $today),
-        'requesterStats' => build_requester_stats($pdo, $earnedStatuses),
-        'monthlyReport' => build_monthly_report($pdo, $earnedStatuses, $pendingStatuses, $monthStart, $nextMonthStart),
+        'requesterStats' => build_requester_stats($pdo, $paidStatuses),
+        'monthlyReport' => build_monthly_report($pdo, $earnedStatuses, $pendingStatuses, $paidStatuses, $monthStart, $nextMonthStart),
         'serverTime' => date('c'),
     ];
 }
@@ -1288,6 +1294,7 @@ function build_monthly_report(
     PDO $pdo,
     array $earnedStatuses,
     array $pendingStatuses,
+    array $paidStatuses,
     DateTime $monthStart,
     DateTime $nextMonthStart
 ): array {
@@ -1297,9 +1304,9 @@ function build_monthly_report(
         'pending' => sum_by_period($pdo, $pendingStatuses, $monthStart, $nextMonthStart),
         'submissionsCount' => count_submissions_by_period($pdo, $monthStart, $nextMonthStart),
         'statusCounts' => count_statuses_by_period($pdo, $monthStart, $nextMonthStart),
-        'hourlyRate' => build_efficiency_period($pdo, $earnedStatuses, $monthStart, $nextMonthStart),
-        'topStudies' => build_top_studies_for_period($pdo, $earnedStatuses, $monthStart, $nextMonthStart),
-        'requesterStats' => build_requester_stats($pdo, $earnedStatuses, $monthStart, $nextMonthStart, 5),
+        'hourlyRate' => build_efficiency_period($pdo, $paidStatuses, $monthStart, $nextMonthStart),
+        'topStudies' => build_top_studies_for_period($pdo, $paidStatuses, $monthStart, $nextMonthStart),
+        'requesterStats' => build_requester_stats($pdo, $paidStatuses, $monthStart, $nextMonthStart, 5),
     ];
 }
 

@@ -372,9 +372,9 @@ function telegram_worktime_message(PDO $pdo): string {
 
 function telegram_effective_message(PDO $pdo): string {
     $periods = telegram_current_periods();
-    $earnedStatuses = telegram_earned_statuses();
-    $monthEarned = telegram_sum_by_started_period($pdo, $earnedStatuses, $periods['monthStart'], null);
-    $allTimeEarned = telegram_sum_by_started_period($pdo, $earnedStatuses, null, null);
+    $paidStatuses = telegram_paid_statuses();
+    $monthEarned = telegram_sum_by_started_period($pdo, $paidStatuses, $periods['monthStart'], null);
+    $allTimeEarned = telegram_sum_by_started_period($pdo, $paidStatuses, null, null);
     $worktime = telegram_worktime_periods($pdo);
 
     return implode("\n", [
@@ -1075,6 +1075,10 @@ function telegram_earned_statuses(): array {
 
 function telegram_pending_statuses(): array {
     return ['AWAITING REVIEW'];
+}
+
+function telegram_paid_statuses(): array {
+    return array_values(array_unique(array_merge(telegram_earned_statuses(), telegram_pending_statuses())));
 }
 
 function telegram_load_dashboard_settings(): array {

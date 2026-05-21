@@ -7,7 +7,7 @@ const buildOverview = buildOverviewMatch ? buildOverviewMatch[0] : '';
 const checks = [
   [
     'overview builds month stats from the current month start',
-    buildOverview.includes('$monthStats = build_period_stats($pdo, $earnedStatuses, $monthStart, $earnedMonth, $pendingMonth);')
+    buildOverview.includes('$monthStats = build_period_stats($pdo, $paidStatuses, $monthStart, $earnedMonth, $pendingMonth);')
   ],
   [
     'overview response exposes monthStats',
@@ -15,11 +15,11 @@ const checks = [
   ],
   [
     'period stats helper exists',
-    /function build_period_stats\(\s*PDO \$pdo,\s*array \$earnedStatuses,\s*DateTime \$periodStart,\s*array \$earned,\s*array \$pending\s*\): array/.test(source)
+    /function build_period_stats\(\s*PDO \$pdo,\s*array \$paidStatuses,\s*DateTime \$periodStart,\s*array \$earned,\s*array \$pending\s*\): array/.test(source)
   ],
   [
     'today stats uses shared period stats helper',
-    source.includes('return build_period_stats($pdo, $earnedStatuses, $today, $earnedToday, $pendingToday);')
+    source.includes('return build_period_stats($pdo, $paidStatuses, $today, $earnedToday, $pendingToday);')
   ],
   [
     'period stats counts submissions by started or completed date',
@@ -28,6 +28,13 @@ const checks = [
   [
     'effective hourly exposes reward totals for combined rate',
     source.includes("'rewardByCurrency' => $rewardByCurrency")
+  ],
+  [
+    'monthly report hourly stats use paid statuses including pending',
+    /function build_monthly_report\(\s*PDO \$pdo,\s*array \$earnedStatuses,\s*array \$pendingStatuses,\s*array \$paidStatuses,/.test(source) &&
+      source.includes("'hourlyRate' => build_efficiency_period($pdo, $paidStatuses, $monthStart, $nextMonthStart)") &&
+      source.includes("'topStudies' => build_top_studies_for_period($pdo, $paidStatuses, $monthStart, $nextMonthStart)") &&
+      source.includes("'requesterStats' => build_requester_stats($pdo, $paidStatuses, $monthStart, $nextMonthStart, 5)")
   ]
 ];
 

@@ -2893,7 +2893,7 @@ function fmtEffectiveHourlyKpi(earningsPeriod, worktimePeriod, fxRates) {
     return { rate: DASH, basis: DASH };
   }
 
-  const earned = asObject(earningsPeriod?.earned);
+  const earned = sumCurrencyMaps(earningsPeriod?.earned, earningsPeriod?.pending);
   const eurMinor = convertToEur(earned, fxRates);
 
   if (eurMinor != null) {
