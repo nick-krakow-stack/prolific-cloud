@@ -398,3 +398,6 @@
 - 2026-05-21 21:12:06 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-21 21:12:37 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-21 21:25:00 +02:00 - Fixed Pending exclusion in effective hourly calculations. Dashboard overview now uses paid reward statuses for today/month stats, efficiency cards, top studies, and monthly report requester/hourly/top calculations; the effective hourly KPI cards include pending reward in their numerator; Telegram `/effective` uses the same paid status set. Deployed to production and verified with all Node tests, remote PHP 8.4 lint, live root HTTP 200, and unauthenticated overview API 401.
+- 2026-05-21 21:26:53 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-05-22 13:16:52 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-22 13:27:06 +02:00 - Removed the duplicate two-card effective-hourly row from the overview and moved the four-card `Effizienz / Stundenlohn` row into its former position after the worktime cards. Added render contract coverage, deployed runtime files, and verified Node tests, browser DOM on production, server PHP 8.4 lint, live HTTP 200, and unauthenticated API 401.

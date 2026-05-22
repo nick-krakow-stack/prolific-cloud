@@ -1,34 +1,32 @@
-﻿# Handoff
+# Handoff
 
-Last updated: 2026-05-21 21:25:00 +02:00
-Update mode: Manual
+Last updated: 2026-05-22 13:27:06 +02:00
+Update mode: Stop
 
 ## Latest Notes
 
-Pending was excluded from several effective hourly reward numerators while
-paid worktime already included it. This is now fixed and deployed. Current task
-status is tracked in .agent-memory/current-task.md. Owner, browser, and review
-feedback are persisted in .agent-memory/feedback.md.
+The duplicate two-card effective-hourly row was removed from the overview.
+The four-card `Effizienz / Stundenlohn` row now renders directly after the
+worktime cards and before the goal cards. Runtime files were deployed to
+production and verified.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: a7deec7 Update memory for forecast verdict
+- Last commit: 5df57cf Update memory for pending hourly fix
 
 ## Working Tree
 
 ~~~text
+ M .agent-memory/current-state.md
  M .agent-memory/current-task.md
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/_telegram_commands.php
- M api/data.php
  M dashboard/assets/app.js
- M tests/month-stats-source.test.js
+ M dashboard/assets/style.css
  M tests/overview-render.test.js
- M tests/telegram-worktime-source.test.js
- M tests/worktime-backend-source.test.js
+ M tests/roadmap-rest-render.test.js
 ~~~
 
 ## Current State Summary

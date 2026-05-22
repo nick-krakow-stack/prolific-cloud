@@ -293,9 +293,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - Effective hourly-rate calculations now use the same paid status basis as
   paid worktime: `APPROVED`, `SCREENED OUT`, `SCREENED-OUT`, and
   `AWAITING REVIEW`. This applies to overview goal details, efficiency cards,
-  effective hourly KPI cards, monthly report hourly/top/requester stats, and
-  Telegram `/effective`. Visible `earned` and `pending` display buckets remain
-  separate.
+  monthly report hourly/top/requester stats, and Telegram `/effective`.
+  Visible `earned` and `pending` display buckets remain separate. The former
+  duplicate two-card effective-hourly overview row was removed; the four-card
+  `Effizienz / Stundenlohn` row now appears directly after the worktime cards.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,
