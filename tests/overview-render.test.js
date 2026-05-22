@@ -240,6 +240,7 @@ const checks = [
   ['formats singular study count', sandbox.fmtStudyCount(1) === '1 Studie'],
   ['does not render system health in overview', !html.includes('System-Health') && !html.includes('health-grid')],
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
+  ['links cashout tile to Prolific balance hub in a new tab', html.includes('<a class="earning-tile earning-tile-link" href="https://app.prolific.com/balance-hub" target="_blank" rel="noopener noreferrer">') && html.includes('<div class="label">Auszahlbar</div>')],
   ['period tiles include awaiting review in the main amount', html.includes(`<div class="value">${gbp800} + ${usd127}</div>`) && html.includes(`<div class="value">${gbp2500} + ${usd635}</div>`) && html.includes(`<div class="value">${gbp8750} + ${usd1270}</div>`) && html.includes(`<div class="value">${gbp15500} + ${usd1270}</div>`)],
   ['period tiles label pending as included share', html.includes(`Davon ${gbp300} + ${usd127} ausstehend`) && html.includes(`Davon ${usd635} ausstehend`) && html.includes(`Davon ${gbp1250} + ${usd1270} ausstehend`) && html.includes(`Davon ${gbp500} + ${usd1270} ausstehend`) && !html.includes(`+ ${gbp300} ausstehend`)],
   ['renders worktime cards directly after earnings cards', html.includes('class="earnings-grid worktime-grid"') && html.indexOf('ARBEITSZEIT HEUTE') > html.indexOf('</div>') && html.indexOf('ARBEITSZEIT HEUTE') < html.indexOf('class="goal-card-grid"')],

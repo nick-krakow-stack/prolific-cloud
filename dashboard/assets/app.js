@@ -3142,9 +3142,12 @@ function renderExpandedOverview(data) {
 
   const tile = (label, earned, pending, subline, options = {}) => {
     const displayValue = options.includePending ? sumCurrencyMaps(earned, pending) : earned;
+    const tagName = options.href ? 'a' : 'div';
+    const linkAttrs = options.href ? ` href="${escapeHtml(options.href)}" target="_blank" rel="noopener noreferrer"` : '';
+    const tileClass = options.href ? 'earning-tile earning-tile-link' : 'earning-tile';
 
     return `
-      <div class="earning-tile">
+      <${tagName} class="${tileClass}"${linkAttrs}>
         <div class="label">${label}</div>
         <div class="value">${fmtMulti(displayValue)}</div>
         ${
@@ -3153,7 +3156,7 @@ function renderExpandedOverview(data) {
             : ''
         }
         ${subline ? `<div class="pending">${escapeHtml(subline)}</div>` : ''}
-      </div>
+      </${tagName}>
     `;
   };
   const comparisonTile = () => {
@@ -3174,7 +3177,7 @@ function renderExpandedOverview(data) {
   html += tile('Diese Woche', week.earned, week.pending, null, { includePending: true });
   html += tile('Dieser Monat', month.earned, month.pending, null, { includePending: true });
   html += tile('Gesamt', allTime.earned, allTime.pending, null, { includePending: true });
-  html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)));
+  html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)), { href: 'https://app.prolific.com/balance-hub' });
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
   if (Object.keys(lastMonth.earned || {}).length) {
     html += comparisonTile();

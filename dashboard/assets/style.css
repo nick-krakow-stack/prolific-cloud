@@ -204,6 +204,17 @@ a:not(.icon-btn):hover {
   background: var(--bg-card); border-radius: var(--radius); padding: 14px;
   box-shadow: var(--shadow);
 }
+.earning-tile-link {
+  color: inherit;
+  display: block;
+  text-decoration: none;
+}
+.earning-tile-link:hover,
+.earning-tile-link:focus-visible {
+  color: inherit;
+  outline: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 45%, var(--border)), var(--shadow);
+}
 .earning-tile.additional-income-tile {
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--bg-card) 84%, #134e4a), var(--bg-card));
