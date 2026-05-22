@@ -2886,55 +2886,6 @@ function renderWorktimeCards(worktime) {
   return `<div class="earnings-grid worktime-grid">${tiles}</div>`;
 }
 
-function fmtEffectiveHourlyKpi(earningsPeriod, worktimePeriod, fxRates) {
-  const paidSeconds = Number(readWorktimePeriod(worktimePeriod).paidSeconds);
-
-  if (!Number.isFinite(paidSeconds) || paidSeconds <= 0) {
-    return { rate: DASH, basis: DASH };
-  }
-
-  const earned = sumCurrencyMaps(earningsPeriod?.earned, earningsPeriod?.pending);
-  const eurMinor = convertToEur(earned, fxRates);
-
-  if (eurMinor != null) {
-    return {
-      rate: fmtAmount(Math.round((eurMinor * 3600) / paidSeconds), 'EUR') + '/h',
-      basis: `${fmtAmount(eurMinor, 'EUR')} in ${fmtWorktime(paidSeconds)}`
-    };
-  }
-
-  const gbpMinor = currencyMinor(earned, 'GBP');
-
-  if (gbpMinor == null) {
-    return { rate: DASH, basis: DASH };
-  }
-
-  return {
-    rate: fmtAmount(Math.round((gbpMinor * 3600) / paidSeconds), 'GBP') + '/h',
-    basis: `${fmtAmount(gbpMinor, 'GBP')} in ${fmtWorktime(paidSeconds)}`
-  };
-}
-
-function renderEffectiveHourlyKpis(earnings, worktime, fxRates) {
-  const monthKpi = fmtEffectiveHourlyKpi(earnings.month, worktime.month, fxRates);
-  const allTimeKpi = fmtEffectiveHourlyKpi(earnings.allTime, worktime.allTime, fxRates);
-
-  return `
-    <div class="effective-hourly-grid">
-      <div class="earning-tile">
-        <div class="label">EFFEKTIVER STUNDENLOHN MONAT</div>
-        <div class="value">${monthKpi.rate}</div>
-        <div class="secondary">${monthKpi.basis}</div>
-      </div>
-      <div class="earning-tile">
-        <div class="label">EFFEKTIVER STUNDENLOHN GESAMT</div>
-        <div class="value">${allTimeKpi.rate}</div>
-        <div class="secondary">${allTimeKpi.basis}</div>
-      </div>
-    </div>
-  `;
-}
-
 function fmtStudyRewardEur(study, fxRates) {
   const eurMinor = convertToEur({ [study.rewardCurrency || 'GBP']: study.rewardMinor }, fxRates);
 
@@ -3231,7 +3182,7 @@ function renderExpandedOverview(data) {
   html += renderExtraIncomeOverviewTile(data.extraIncome || data.extra_income, data.miscIncome || data.misc_income, fxRates);
   html += '</div>';
   html += renderWorktimeCards(worktimeStats);
-  html += renderEffectiveHourlyKpis(e, worktimeStats, fxRates);
+  html += renderEfficiencyCard(efficiencyStats, fxRates);
 
   const extraIncomeSummary = readExtraIncomeSummary(data.extraIncome || data.extra_income);
   const todayDetailRows = renderGoalDetailRows(todayStats, fxRates) + renderExtraIncomeGoalRow(extraIncomeSummary.todayGrossCents);
@@ -3350,7 +3301,6 @@ function renderExpandedOverview(data) {
     </div>
   `;
 
-  html += renderEfficiencyCard(efficiencyStats, fxRates);
   html += renderTopStudiesCard(topStudies, fxRates);
 
   return html;
