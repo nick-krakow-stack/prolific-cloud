@@ -1,36 +1,34 @@
 # Current Task
 
-Last updated: 2026-05-22 13:27:06 +02:00
+Last updated: 2026-05-22 13:39:56 +02:00
 
 ## Task
 
-Remove the duplicate two-card effective-hourly row and move the four-card
-`Effizienz / Stundenlohn` row into that position in the overview.
+Make the overview `Auszahlbar` tile open the Prolific Balance Hub in a new
+browser tab.
 
 ## Scope
 
 - `dashboard/assets/app.js`
 - `dashboard/assets/style.css`
 - `tests/overview-render.test.js`
-- `tests/roadmap-rest-render.test.js`
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Keep the change local because the task touches one shared frontend file
-  and cannot be split into disjoint implementation write scopes.
-- [x] Add failing render contract checks for the requested row position and
-  removal of the duplicate KPI row.
-- [x] Remove the old `effective-hourly-grid` renderer and CSS.
-- [x] Render the four-tile efficiency card immediately after the worktime cards.
+- [x] Keep the change local because it is a small shared frontend render change
+  with no safe parallel write split.
+- [x] Add a failing render contract for the external balance-hub link.
+- [x] Extend the overview tile helper to support link tiles.
+- [x] Link `Auszahlbar` to `https://app.prolific.com/balance-hub` with
+  `target="_blank"` and `rel="noopener noreferrer"`.
+- [x] Preserve the tile visual style and avoid default blue link styling.
 - [x] Deploy runtime files to production.
-- [x] Verify Node render tests, JS syntax, browser DOM on production, server
-  PHP 8.4 lint, live root HTTP 200, and unauthenticated API 401.
+- [x] Verify Node render tests, JS syntax, and live production DOM attributes.
 
 ## Notes
 
-- The `Effizienz / Stundenlohn` row remains the single source for today, week,
-  month, and total hourly metrics.
-- The removed row had duplicated month and total values already shown in the
-  four-card efficiency row.
+- The `In Prüfung` balance tile remains a normal dashboard tile.
+- The linked tile uses the same `earning-tile` structure plus
+  `earning-tile-link`.

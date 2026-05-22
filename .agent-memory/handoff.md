@@ -1,19 +1,19 @@
 # Handoff
 
-Last updated: 2026-05-22 13:27:06 +02:00
+Last updated: 2026-05-22 13:39:56 +02:00
 Update mode: Stop
 
 ## Latest Notes
 
-The duplicate two-card effective-hourly row was removed from the overview.
-The four-card `Effizienz / Stundenlohn` row now renders directly after the
-worktime cards and before the goal cards. Runtime files were deployed to
-production and verified.
+The overview `Auszahlbar` tile now links to
+`https://app.prolific.com/balance-hub` in a new browser tab while keeping the
+existing tile styling. Runtime files were deployed and the live DOM attributes
+were verified.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 5df57cf Update memory for pending hourly fix
+- Last commit: 53f3c37 Update memory for efficiency card move
 
 ## Working Tree
 
@@ -26,7 +26,6 @@ production and verified.
  M dashboard/assets/app.js
  M dashboard/assets/style.css
  M tests/overview-render.test.js
- M tests/roadmap-rest-render.test.js
 ~~~
 
 ## Current State Summary
