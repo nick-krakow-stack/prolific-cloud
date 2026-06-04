@@ -1,20 +1,20 @@
 # Handoff
 
-Last updated: 2026-06-04 12:48:28 +02:00
+Last updated: 2026-06-04 22:45:00 +02:00
 Update mode: Stop
 
 ## Latest Notes
 
-The overview `Entwicklung zum Vormonat` tile now converts current and previous
-month to EUR through the existing Frankfurter `fxRates` before calculating the
-percentage. The displayed percentage is the actual revenue delta relative to
-previous month, and the previous-month subline is shown as EUR when FX rates are
-available. Runtime files were deployed.
+`Testable Minds` is implemented in the generic `Zusatzeinkommen` tab as a USD
+date/amount entry source. The tab now also uses local Testable Minds and
+UserTesting logos. Existing Frankfurter `fxRates` conversion remains the path
+for EUR display and monthly overview aggregation. Runtime files were deployed
+to production.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 11b33b8 Update memory for balance tile link
+- Last commit: 9b2cb90 Update memory for monthly comparison fix
 
 ## Working Tree
 
@@ -24,8 +24,14 @@ available. Runtime files were deployed.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
+ M api/_misc_income.php
  M dashboard/assets/app.js
- M tests/overview-render.test.js
+ M dashboard/assets/style.css
+ M scripts/deploy-webspace.ps1
+ M tests/misc-income-backend-source.test.js
+ M tests/misc-income-render.test.js
+?? dashboard/assets/testable-minds-logo.svg
+?? dashboard/assets/user-testing-logo.svg
 ~~~
 
 ## Current State Summary

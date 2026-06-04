@@ -4,13 +4,13 @@
   settings money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
   `Top-Studien` now render money values and effective hourly averages in Euro
   using the stored Frankfurter/fxRates data. The top earnings tiles and
-  `Pending-Übersicht` remain in original currencies.
+  `Pending-Ãœbersicht` remain in original currencies.
 - 2026-05-17 - Browser review fix deployed: overview now shows `Heute` and
   `Aktueller Monat` as two side-by-side goal cards with circular progress
   rings instead of bars. Rings are red below 50%, yellow below 95%, green from
   95%, and support a blue outer overflow ring above 100%. The overview API now
   exposes `monthStats`, and the monthly card includes `Teilnahmen`,
-  `Ø pro Teilnahme`, and `Effektiver Stundenlohn`.
+  `Ã˜ pro Teilnahme`, and `Effektiver Stundenlohn`.
 - 2026-05-17 - Browser review fix deployed: the top overview comparison tile
   is now labelled `Vormonat`, shows previous month sums without a repeated
   prefix, and color-codes the comparison percentage: red below 95%, yellow from
@@ -21,20 +21,20 @@
   dashboard renderer.
 - 2026-05-17 - Browser review fix deployed: replaced dashboard UI wording
   `Samples` with German `Studie`/`Studien` for efficiency basis and monthly
-  report hourly-rate basis. Live browser verification showed `1 Studie · 10 Min`
+  report hourly-rate basis. Live browser verification showed `1 Studie Â· 10 Min`
   and no `Samples` text.
 - 2026-05-17 - Browser review fix deployed: overview now merges the former
   `Tagesziel` card and the separate `Heute` stats card. The card title is
   `Heute`, keeps `Fortschritt`, `Erreicht`, and `Noch offen`, then shows
-  `Teilnahmen`, `Ø pro Teilnahme`, and `Effektiver Stundenlohn`. The old
+  `Teilnahmen`, `Ã˜ pro Teilnahme`, and `Effektiver Stundenlohn`. The old
   `Verdient` and `Ausstehend` rows in the separate today detail card are gone.
   Live browser verification showed one `HEUTE` status card and no `TAGESZIEL`.
 - 2026-05-17 - Browser review fix deployed: overview Tagesziel and Monatsziel
   now calculate progress from `earned + pending` in GBP. `earned` already
   includes `APPROVED`, `SCREENED OUT`, and `SCREENED-OUT` with effective reward
   adjustments; pending adds `AWAITING REVIEW`. The goal label remains
-  `Erreicht`. Live browser verification showed `TAGESZIEL` at `£7,16 von
-  £30,00` and `MONATSZIEL` at `£157,13 von £600,00`.
+  `Erreicht`. Live browser verification showed `TAGESZIEL` at `Â£7,16 von
+  Â£30,00` and `MONATSZIEL` at `Â£157,13 von Â£600,00`.
 - 2026-05-17 - Browser review fix deployed: overview `Vergleich` now renders as
   a top earnings tile. The main value compares current month to previous month
   as a percentage using FX-aware EUR conversion when rates are available, and
@@ -42,8 +42,8 @@
   removed.
 - 2026-05-17 - Browser review fix deployed: overview daily/monthly goal cards
   now read saved `dashboardGoals` via `load_dashboard_settings()` instead of
-  using config defaults. Live browser verification showed `£30,00` daily and
-  `£600,00` monthly targets.
+  using config defaults. Live browser verification showed `Â£30,00` daily and
+  `Â£600,00` monthly targets.
 - 2026-05-17 - Browser review fix deployed: manual refresh now spins the
   refresh icon, disables double-click refresh during the request, and shows a
   subtle page-level `Aktualisiere...` loading overlay for the active tab.
@@ -85,7 +85,7 @@
 - 2026-05-17 - Server PHP lint and live unauthenticated HTTP checks passed after deploy.
 - 2026-05-17 - Topbar sync lamp changed to green for fresh Watcher sync and red otherwise.
 - 2026-05-17 - Prolific account overview simplified: `Auszahlbar` and
-  `In Prüfung` now render as overview tiles; the old account status box was removed.
+  `In PrÃ¼fung` now render as overview tiles; the old account status box was removed.
 - 2026-05-17 - Remaining overview roadmap block implemented locally:
   efficiency, top studies, daily earnings chart, system health, and EUR
   equivalents based on the `prolific-watcher` Frankfurter.app `fxRates` structure.
@@ -219,7 +219,7 @@
   calculations now use `time_taken_seconds` with a 60-second fallback for raw
   zero/missing values and a 60-second minimum for screened-out submissions.
   Full JS/source tests, remote PHP 8.4 lint, and the deployment helper passed.
-- 2026-05-18 - Corrected misleading `+ 1478 h 30 min ohne Vergütung` worktime
+- 2026-05-18 - Corrected misleading `+ 1478 h 30 min ohne VergÃ¼tung` worktime
   display. Root cause was stale large `time_taken_seconds` values on
   `RETURNED`/`TIMED-OUT` rows without `completed_at`. Unpaid worktime for those
   incomplete negative rows now uses the one-minute fallback; dashboard and
@@ -408,3 +408,6 @@
 - 2026-06-04 12:38:35 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-04 12:39:16 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-04 12:48:28 +02:00 - Fixed overview monthly comparison semantics: current and previous month are converted to EUR via Frankfurter `fxRates`, percentage now shows actual revenue delta relative to previous month, previous-month subline renders as EUR, and negative/zero/positive deltas map to red/yellow/green. Deployed runtime files and verified focused/full JS tests plus live asset/server checks.
+- 2026-06-04 12:53:42 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-04 22:27:06 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 22:45:00 +02:00 - Added Testable Minds to the generic `Zusatzeinkommen` tab as a USD date/amount source, added local Testable Minds and UserTesting logo assets, kept EUR display on the existing Frankfurter `fxRates` path, deployed runtime files, and verified focused/full JS tests plus live asset/server checks.

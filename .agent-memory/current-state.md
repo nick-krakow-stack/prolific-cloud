@@ -305,6 +305,12 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   the existing Frankfurter `fxRates`. Its percentage is now the actual revenue
   delta relative to previous month, not the reached share of previous month.
   The previous-month subline renders as a EUR amount when FX rates are present.
+- The generic `Zusatzeinkommen` tab supports `Tech-Support`, `User Testing`,
+  and `Testable Minds`. Testable Minds stores date plus USD amount in the
+  existing `misc_income_entries` table, uses the same `fxRates` response for EUR
+  display, and is included in the monthly additional-income overview tile.
+  Testable Minds and UserTesting logos are local runtime assets under
+  `dashboard/assets/`.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,
