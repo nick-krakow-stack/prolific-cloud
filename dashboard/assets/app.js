@@ -204,15 +204,15 @@ function monthComparisonPercent(currentEarned, previousEarned, fxRates) {
     return null;
   }
 
-  return (currentValue / previousValue) * 100;
+  return ((currentValue - previousValue) / previousValue) * 100;
 }
 
 function comparisonPercentClass(percent) {
   const numeric = Number(percent);
 
   if (!Number.isFinite(numeric)) return 'is-neutral';
-  if (numeric < 95) return 'is-danger';
-  if (numeric <= 105) return 'is-warn';
+  if (numeric < 0) return 'is-danger';
+  if (numeric === 0) return 'is-warn';
 
   return 'is-good';
 }
@@ -222,10 +222,9 @@ function fmtComparisonPercent(value) {
 
   if (!Number.isFinite(numeric)) return DASH;
 
-  const percent = Math.abs(numeric) <= 1 && numeric !== 0 ? numeric * 100 : numeric;
-  const rounded = Math.round(percent * 10) / 10;
-  const sign = rounded < 100 ? '-' : rounded === 100 ? '=' : '+';
-  const formatted = rounded.toLocaleString('de-DE', {
+  const rounded = Math.round(numeric * 10) / 10;
+  const sign = rounded < 0 ? '-' : rounded === 0 ? '=' : '+';
+  const formatted = Math.abs(rounded).toLocaleString('de-DE', {
     minimumFractionDigits: Number.isInteger(rounded) ? 0 : 1,
     maximumFractionDigits: 1
   });
@@ -3161,12 +3160,13 @@ function renderExpandedOverview(data) {
   };
   const comparisonTile = () => {
     const percent = monthComparisonPercent(month.earned, lastMonth.earned, fxRates);
+    const lastMonthEur = convertToEur(lastMonth.earned, fxRates);
 
     return `
       <div class="earning-tile comparison-tile">
         <div class="label">Entwicklung zum Vormonat</div>
         <div class="value comparison-value ${comparisonPercentClass(percent)}">${fmtComparisonPercent(percent)}</div>
-        <div class="secondary">${fmtMulti(lastMonth.earned)}</div>
+        <div class="secondary">${lastMonthEur == null ? fmtMulti(lastMonth.earned) : fmtEurAmount(lastMonthEur)}</div>
       </div>
     `;
   };
