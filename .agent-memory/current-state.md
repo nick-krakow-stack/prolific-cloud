@@ -311,6 +311,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   display, and is included in the monthly additional-income overview tile.
   Testable Minds and UserTesting logos are local runtime assets under
   `dashboard/assets/`.
+- User Testing and Testable Minds are now entered through one reusable portal
+  form in `Zusatzeinkommen`: provider dropdown, type dropdown (`Umfrage` or
+  `Aufgabe`), date, and USD amount. Provider identity is still stored in the
+  existing `category` column (`user_testing`, `testable_minds`), so no schema
+  migration was required. Existing legacy `test` entry types remain readable.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,

@@ -2439,10 +2439,38 @@ function miscIncomeCategoryLabel(category) {
   return category ? String(category) : DASH;
 }
 
+const MISC_INCOME_PORTAL_PROVIDERS = [
+  {
+    value: 'user_testing',
+    label: 'User Testing',
+    logo: '/assets/user-testing-logo.svg',
+    logoClass: 'misc-income-logo-user-testing'
+  },
+  {
+    value: 'testable_minds',
+    label: 'Testable Minds',
+    logo: '/assets/testable-minds-logo.svg',
+    logoClass: 'misc-income-logo-testable-minds'
+  }
+];
+
+function miscIncomePortalProvider(value) {
+  const normalized = String(value || '').toLowerCase();
+  return MISC_INCOME_PORTAL_PROVIDERS.find(provider => provider.value === normalized) || MISC_INCOME_PORTAL_PROVIDERS[0];
+}
+
+function renderMiscIncomePortalOptions() {
+  return `
+              <option value="user_testing" data-logo="/assets/user-testing-logo.svg" data-label="User Testing" data-logo-class="misc-income-logo-user-testing">User Testing</option>
+              <option value="testable_minds" data-logo="/assets/testable-minds-logo.svg" data-label="Testable Minds" data-logo-class="misc-income-logo-testable-minds">Testable Minds</option>
+  `;
+}
+
 function miscIncomeTypeLabel(type) {
   const normalized = String(type || '').toLowerCase();
 
   if (normalized === 'survey' || normalized === 'umfrage') return 'Umfrage';
+  if (normalized === 'task' || normalized === 'aufgabe') return 'Aufgabe';
   if (normalized === 'test') return 'Test';
 
   return type ? String(type) : '';
@@ -2513,14 +2541,20 @@ function renderMiscIncomeForms() {
           <button type="submit">Speichern</button>
         </div>
       </form>
-      <form id="miscIncomeUserTestingForm" class="settings-form misc-income-form">
-        <input type="hidden" name="category" value="user_testing">
+      <form id="miscIncomePortalForm" class="settings-form misc-income-form">
         <div class="extra-income-form-head">
+          <h3>Umfrageportale / Aufgabenportale</h3>
           <div class="misc-income-brand">
-            <img class="misc-income-logo misc-income-logo-user-testing" src="/assets/user-testing-logo.svg" alt="User Testing">
+            <img class="misc-income-logo misc-income-logo-user-testing" data-misc-income-provider-logo src="/assets/user-testing-logo.svg" alt="User Testing">
           </div>
         </div>
         <div class="extra-income-field-grid">
+          <label class="extra-income-field">
+            <span>Anbieter</span>
+            <select name="category" data-misc-income-provider>
+              ${renderMiscIncomePortalOptions()}
+            </select>
+          </label>
           <label class="extra-income-field">
             <span>Datum</span>
             <input name="date" type="date" value="${today}" required>
@@ -2528,30 +2562,9 @@ function renderMiscIncomeForms() {
           <label class="extra-income-field">
             <span>Typ</span>
             <select name="type">
-              <option value="test">Test</option>
               <option value="survey">Umfrage</option>
+              <option value="task">Aufgabe</option>
             </select>
-          </label>
-          <label class="extra-income-field">
-            <span>Betrag USD</span>
-            <input name="amount_usd" type="number" min="0" step="0.01" required>
-          </label>
-        </div>
-        <div class="form-actions extra-income-actions">
-          <button type="submit">Speichern</button>
-        </div>
-      </form>
-      <form id="miscIncomeTestableMindsForm" class="settings-form misc-income-form">
-        <input type="hidden" name="category" value="testable_minds">
-        <div class="extra-income-form-head">
-          <div class="misc-income-brand">
-            <img class="misc-income-logo misc-income-logo-testable-minds" src="/assets/testable-minds-logo.svg" alt="Testable Minds">
-          </div>
-        </div>
-        <div class="extra-income-field-grid">
-          <label class="extra-income-field">
-            <span>Datum</span>
-            <input name="date" type="date" value="${today}" required>
           </label>
           <label class="extra-income-field">
             <span>Betrag USD</span>
@@ -2660,31 +2673,25 @@ async function submitMiscIncomeTechSupport(event) {
   }
 }
 
-async function submitMiscIncomeUserTesting(event) {
-  event.preventDefault();
+function updateMiscIncomePortalBrand(formOrElement) {
+  const root = formOrElement?.closest?.('form') || formOrElement;
+  const select = root?.querySelector?.('[data-misc-income-provider]');
+  const image = root?.querySelector?.('[data-misc-income-provider-logo]');
 
-  const form = event.target?.closest('form');
+  if (!select || !image) return;
 
-  if (!form) return;
+  const option = select.selectedOptions?.[0];
+  const provider = miscIncomePortalProvider(option?.value || select.value);
+  const logo = option?.dataset?.logo || provider.logo;
+  const label = option?.dataset?.label || provider.label;
+  const logoClass = option?.dataset?.logoClass || provider.logoClass;
 
-  const data = new FormData(form);
-  const payload = {
-    ...miscIncomeBasePayload(form),
-    type: data.get('type') || 'test',
-    amount_usd: Number(data.get('amount_usd') || 0)
-  };
-  const response = await postJson(`${API_BASE}?type=miscIncomeSave`, payload);
-
-  if (ensureExtraIncomeOk(response)) {
-    form.reset();
-    const date = form.querySelector('[name="date"]');
-
-    if (date) date.value = localDateKey(new Date());
-    await loadMiscIncome({ showPageLoader: true });
-  }
+  image.src = logo;
+  image.alt = label;
+  image.className = `misc-income-logo ${logoClass}`;
 }
 
-async function submitMiscIncomeTestableMinds(event) {
+async function submitMiscIncomePortal(event) {
   event.preventDefault();
 
   const form = event.target?.closest('form');
@@ -2694,6 +2701,7 @@ async function submitMiscIncomeTestableMinds(event) {
   const data = new FormData(form);
   const payload = {
     ...miscIncomeBasePayload(form),
+    type: data.get('type') || 'survey',
     amount_usd: Number(data.get('amount_usd') || 0)
   };
   const response = await postJson(`${API_BASE}?type=miscIncomeSave`, payload);
@@ -2703,6 +2711,7 @@ async function submitMiscIncomeTestableMinds(event) {
     const date = form.querySelector('[name="date"]');
 
     if (date) date.value = localDateKey(new Date());
+    updateMiscIncomePortalBrand(form);
     await loadMiscIncome({ showPageLoader: true });
   }
 }
@@ -2729,13 +2738,13 @@ function bindMiscIncomeControls() {
       return;
     }
 
-    if (event.target?.id === 'miscIncomeUserTestingForm') {
-      submitMiscIncomeUserTesting(event).catch(error => alert(error.message));
-      return;
+    if (event.target?.id === 'miscIncomePortalForm') {
+      submitMiscIncomePortal(event).catch(error => alert(error.message));
     }
-
-    if (event.target?.id === 'miscIncomeTestableMindsForm') {
-      submitMiscIncomeTestableMinds(event).catch(error => alert(error.message));
+  });
+  root.addEventListener('change', event => {
+    if (event.target?.matches?.('[data-misc-income-provider]')) {
+      updateMiscIncomePortalBrand(event.target);
     }
   });
   root.addEventListener('click', event => {

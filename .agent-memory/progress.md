@@ -411,3 +411,15 @@
 - 2026-06-04 12:53:42 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-06-04 22:27:06 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-04 22:45:00 +02:00 - Added Testable Minds to the generic `Zusatzeinkommen` tab as a USD date/amount source, added local Testable Minds and UserTesting logo assets, kept EUR display on the existing Frankfurter `fxRates` path, deployed runtime files, and verified focused/full JS tests plus live asset/server checks.
+- 2026-06-04 22:39:55 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-04 22:45:19 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 22:45:50 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-04 23:19:05 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 23:24:54 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 23:38:00 +02:00 - Consolidated User Testing and Testable Minds
+  in the generic `Zusatzeinkommen` tab into one portal form with provider
+  dropdown, type dropdown (`Umfrage`/`Aufgabe`), date, USD amount, and dynamic
+  logo switching. Kept provider storage in the existing category column, kept
+  legacy `test` types readable, deployed runtime files, and verified full Node
+  tests plus server PHP 8.4 lint and live asset delivery. Authenticated browser
+  DOM verification was blocked by the in-app browser being on the login page.
