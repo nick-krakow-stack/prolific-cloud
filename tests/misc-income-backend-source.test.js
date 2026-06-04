@@ -28,9 +28,11 @@ assert(helper.includes('decode_setting_value'));
 assert(helper.includes('category'));
 assert(helper.includes('tech_support'));
 assert(helper.includes('user_testing'));
+assert(helper.includes('testable_minds'));
 assert(helper.includes('entry_type'));
 assert(helper.includes('test'));
 assert(helper.includes('survey'));
+assert(helper.includes('MISC_INCOME_USD_AMOUNT_CATEGORIES'));
 assert(helper.includes('hours_hundredths'));
 assert(helper.includes('hourly_rate_cents'));
 assert(helper.includes('amount_minor'));
@@ -87,5 +89,7 @@ assert(install.includes('`amount_minor`         INT NOT NULL DEFAULT 0'));
 assert(install.includes('`currency`             VARCHAR(3) NOT NULL'));
 
 assert(deploy.includes('"api/_misc_income.php"'));
+assert(deploy.includes('"dashboard/assets/testable-minds-logo.svg"'));
+assert(deploy.includes('"dashboard/assets/user-testing-logo.svg"'));
 
 console.log('misc income backend source contract ok');

@@ -2434,6 +2434,7 @@ function miscIncomeCategoryLabel(category) {
 
   if (normalized === 'tech_support' || normalized === 'tech-support') return 'Tech-Support';
   if (normalized === 'user_testing' || normalized === 'user-testing') return 'User Testing';
+  if (normalized === 'testable_minds' || normalized === 'testable-minds') return 'Testable Minds';
 
   return category ? String(category) : DASH;
 }
@@ -2466,7 +2467,7 @@ function miscIncomeAmountParts(entry, fxRates) {
     amountCents = Math.round(normalizedHours * normalizedHourly * 100);
   }
 
-  if (amountCents == null && category === 'user_testing') {
+  if (amountCents == null && (category === 'user_testing' || category === 'testable_minds')) {
     const amountUsd = firstNumber(entry, ['amountUsd', 'amount_usd', 'amount']) ?? 0;
     amountCents = Math.round(amountUsd * 100);
   }
@@ -2515,7 +2516,9 @@ function renderMiscIncomeForms() {
       <form id="miscIncomeUserTestingForm" class="settings-form misc-income-form">
         <input type="hidden" name="category" value="user_testing">
         <div class="extra-income-form-head">
-          <h3>User Testing</h3>
+          <div class="misc-income-brand">
+            <img class="misc-income-logo misc-income-logo-user-testing" src="/assets/user-testing-logo.svg" alt="User Testing">
+          </div>
         </div>
         <div class="extra-income-field-grid">
           <label class="extra-income-field">
@@ -2528,6 +2531,27 @@ function renderMiscIncomeForms() {
               <option value="test">Test</option>
               <option value="survey">Umfrage</option>
             </select>
+          </label>
+          <label class="extra-income-field">
+            <span>Betrag USD</span>
+            <input name="amount_usd" type="number" min="0" step="0.01" required>
+          </label>
+        </div>
+        <div class="form-actions extra-income-actions">
+          <button type="submit">Speichern</button>
+        </div>
+      </form>
+      <form id="miscIncomeTestableMindsForm" class="settings-form misc-income-form">
+        <input type="hidden" name="category" value="testable_minds">
+        <div class="extra-income-form-head">
+          <div class="misc-income-brand">
+            <img class="misc-income-logo misc-income-logo-testable-minds" src="/assets/testable-minds-logo.svg" alt="Testable Minds">
+          </div>
+        </div>
+        <div class="extra-income-field-grid">
+          <label class="extra-income-field">
+            <span>Datum</span>
+            <input name="date" type="date" value="${today}" required>
           </label>
           <label class="extra-income-field">
             <span>Betrag USD</span>
@@ -2660,6 +2684,29 @@ async function submitMiscIncomeUserTesting(event) {
   }
 }
 
+async function submitMiscIncomeTestableMinds(event) {
+  event.preventDefault();
+
+  const form = event.target?.closest('form');
+
+  if (!form) return;
+
+  const data = new FormData(form);
+  const payload = {
+    ...miscIncomeBasePayload(form),
+    amount_usd: Number(data.get('amount_usd') || 0)
+  };
+  const response = await postJson(`${API_BASE}?type=miscIncomeSave`, payload);
+
+  if (ensureExtraIncomeOk(response)) {
+    form.reset();
+    const date = form.querySelector('[name="date"]');
+
+    if (date) date.value = localDateKey(new Date());
+    await loadMiscIncome({ showPageLoader: true });
+  }
+}
+
 async function deleteMiscIncomeEntry(id) {
   if (!id || !window.confirm('Diesen Eintrag wirklich l\u00f6schen?')) return;
 
@@ -2684,6 +2731,11 @@ function bindMiscIncomeControls() {
 
     if (event.target?.id === 'miscIncomeUserTestingForm') {
       submitMiscIncomeUserTesting(event).catch(error => alert(error.message));
+      return;
+    }
+
+    if (event.target?.id === 'miscIncomeTestableMindsForm') {
+      submitMiscIncomeTestableMinds(event).catch(error => alert(error.message));
     }
   });
   root.addEventListener('click', event => {

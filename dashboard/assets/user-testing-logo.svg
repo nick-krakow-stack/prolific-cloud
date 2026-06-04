@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 366 144" role="img" aria-labelledby="title desc">
+  <title id="title">UserTesting</title>
+  <desc id="desc">UserTesting logo</desc>
+  <rect width="366" height="144" rx="0" fill="#3158f4"/>
+  <path d="M39 37c0-9.4 7.6-17 17-17h90c9.4 0 17 7.6 17 17v44c0 9.4-7.6 17-17 17h-21l19 20-37-20H56c-9.4 0-17-7.6-17-17V37z" fill="#fff"/>
+  <text x="54" y="73" fill="#3158f4" font-family="Arial, Helvetica, sans-serif" font-size="41" font-weight="700">User</text>
+  <text x="171" y="74" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="41" font-weight="700">Testing</text>
+  <text x="319" y="45" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">®</text>
+</svg>

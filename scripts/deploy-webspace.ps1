@@ -30,7 +30,9 @@ $runtimeFiles = @(
   "dashboard/logout.php",
   "dashboard/session.php",
   "dashboard/assets/app.js",
-  "dashboard/assets/style.css"
+  "dashboard/assets/style.css",
+  "dashboard/assets/testable-minds-logo.svg",
+  "dashboard/assets/user-testing-logo.svg"
 )
 
 if ($IncludeConfig) {

@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 const MISC_INCOME_TABLE = 'misc_income_entries';
-const MISC_INCOME_CATEGORIES = ['tech_support', 'user_testing'];
+const MISC_INCOME_CATEGORIES = ['tech_support', 'user_testing', 'testable_minds'];
 const MISC_INCOME_USER_TESTING_TYPES = ['test', 'survey'];
+const MISC_INCOME_USD_AMOUNT_CATEGORIES = ['user_testing', 'testable_minds'];
 const MISC_INCOME_REQUIRED_COLUMNS = [
     'id',
     'category',
@@ -206,9 +207,14 @@ function misc_income_validate_entry_payload(array $body): array {
         ];
     }
 
-    $entryType = (string)($body['entry_type'] ?? $body['entryType'] ?? $body['type'] ?? '');
-    if (!in_array($entryType, MISC_INCOME_USER_TESTING_TYPES, true)) {
-        json_error('Ungueltiger User-Testing-Typ.', 400);
+    $entryType = null;
+    if ($category === 'user_testing') {
+        $entryType = (string)($body['entry_type'] ?? $body['entryType'] ?? $body['type'] ?? '');
+        if (!in_array($entryType, MISC_INCOME_USER_TESTING_TYPES, true)) {
+            json_error('Ungueltiger User-Testing-Typ.', 400);
+        }
+    } elseif (!in_array($category, MISC_INCOME_USD_AMOUNT_CATEGORIES, true)) {
+        json_error('Ungueltige Zusatzeinkommen-Kategorie.', 400);
     }
 
     $amountMinor = misc_income_money_cents_value($body, ['amount_minor', 'amountMinor', 'amount_usd', 'amountUsd', 'amount'], 0);
@@ -346,6 +352,7 @@ function misc_income_calculate_summary(array $entries): array {
         'totalByCategoryCurrency' => [
             'tech_support' => [],
             'user_testing' => [],
+            'testable_minds' => [],
         ],
         'totalByCurrency' => [],
         'todayByCurrency' => [],
@@ -353,10 +360,12 @@ function misc_income_calculate_summary(array $entries): array {
         'countByCategory' => [
             'tech_support' => 0,
             'user_testing' => 0,
+            'testable_minds' => 0,
         ],
         'hoursHundredthsByCategory' => [
             'tech_support' => 0,
             'user_testing' => 0,
+            'testable_minds' => 0,
         ],
     ];
 
