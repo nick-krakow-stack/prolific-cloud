@@ -1,41 +1,34 @@
 # Current Task
 
-Last updated: 2026-06-04 23:38:00 +02:00
+Last updated: 2026-06-05 01:05:00 +02:00
 
 ## Task
 
-Consolidate generic `Zusatzeinkommen` survey/task portals into one reusable
-portal form with provider dropdown, type dropdown, date, and USD amount.
+Move the generic `Zusatzeinkommen` portal logo out of the form flow and place it
+unobtrusively in the top-right corner of the portal card.
 
 ## Scope
 
-- `api/_misc_income.php`
 - `dashboard/assets/app.js`
-- `tests/misc-income-backend-source.test.js`
+- `dashboard/assets/style.css`
 - `tests/misc-income-render.test.js`
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Add/update failing contracts for a generic portal form.
-- [x] Keep `Tech-Support` as its own EUR hours/rate form.
-- [x] Replace separate `User Testing` and `Testable Minds` forms with one
-  `miscIncomePortalForm`.
-- [x] Add provider dropdown for `User Testing` and `Testable Minds`.
-- [x] Add type dropdown with `Umfrage` and `Aufgabe`; keep backend support for
-  legacy `test` entries.
-- [x] Update portal logo switching when provider changes.
+- [x] Add a failing render contract for the portal/corner classes.
+- [x] Add a portal-specific form class.
+- [x] Add a corner-specific logo container class.
+- [x] Position the logo absolutely in the top-right of the portal card.
+- [x] Keep mobile layout protected with right padding and smaller max-width.
 - [x] Deploy runtime files to production.
-- [x] Verify focused tests, full JS test suite, JS syntax, server PHP 8.4 lint,
-  live asset delivery, and browser login-state limitation.
+- [x] Verify focused render test, full JS test suite, JS syntax, server PHP 8.4
+  lint, live asset delivery, and browser login-state limitation.
 
 ## Notes
 
-- No DB migration is required. Provider identity remains stored in the existing
-  `category` column (`user_testing`, `testable_minds`).
-- Portal entries use USD amounts and the existing Frankfurter `fxRates` path for
-  EUR display and overview aggregation.
+- The logos remain available, but no longer sit in the normal field layout.
 - Browser DOM verification could not inspect the authenticated dashboard because
-  the in-app browser was on the login page. Live asset verification confirmed
-  the deployed JS contains the new form and no old separated form IDs.
+  the in-app browser was on the login page. Live JS/CSS asset checks confirmed
+  the deployed corner classes are present.

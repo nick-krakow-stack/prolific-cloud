@@ -34,6 +34,8 @@ assert(js.includes('type=miscIncomeDelete'));
 assert(js.includes('miscIncomeContent'));
 assert(js.includes('miscIncomeTechSupportForm'));
 assert(js.includes('miscIncomePortalForm'));
+assert(js.includes('misc-income-form--portal'));
+assert(js.includes('misc-income-brand--corner'));
 assert(!js.includes('miscIncomeUserTestingForm'));
 assert(!js.includes('miscIncomeTestableMindsForm'));
 assert(js.includes('name="category" value="tech_support"'));
@@ -60,6 +62,7 @@ for (const cls of [
   '.misc-income-forms',
   '.misc-income-form',
   '.misc-income-brand',
+  '.misc-income-brand--corner',
   '.misc-income-logo',
   '.misc-income-entry-list',
   '.misc-income-entry',

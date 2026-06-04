@@ -1,22 +1,21 @@
 # Handoff
 
-Last updated: 2026-06-04 23:38:00 +02:00
+Last updated: 2026-06-05 01:05:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Generic `Zusatzeinkommen` portal entries are now handled by one form with
-provider dropdown, type dropdown (`Umfrage`/`Aufgabe`), date, USD amount, and
-dynamic logo switching. Provider identity remains stored in `category`, so no
-DB migration was required. Existing legacy `test` entry types remain readable.
-Runtime files were deployed to production and checked with Node tests, server
-PHP 8.4 lint, and live asset inspection. Authenticated browser DOM verification
-was blocked because the in-app browser was on the login page.
+The generic `Zusatzeinkommen` portal logo was moved out of the form flow and
+into the top-right corner of the portal card via `misc-income-form--portal` and
+`misc-income-brand--corner`. Runtime files were deployed to production. Full
+Node tests, JS syntax, server PHP 8.4 lint, and live JS/CSS asset checks passed.
+Authenticated browser DOM verification was blocked because the in-app browser
+was on the login page.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 6ca43fd Update memory for Testable Minds income
+- Last commit: 10660cf Consolidate additional income portals
 
 ## Working Tree
 
@@ -26,9 +25,8 @@ was blocked because the in-app browser was on the login page.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M api/_misc_income.php
  M dashboard/assets/app.js
- M tests/misc-income-backend-source.test.js
+ M dashboard/assets/style.css
  M tests/misc-income-render.test.js
 ~~~
 

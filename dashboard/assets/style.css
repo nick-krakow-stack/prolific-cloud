@@ -2365,12 +2365,30 @@ a:not(.icon-btn):hover {
 .misc-income-form {
   margin-bottom: 0;
 }
+.misc-income-form--portal {
+  position: relative;
+  overflow: hidden;
+}
 
 .misc-income-brand {
   display: flex;
   align-items: center;
   min-height: 34px;
   min-width: 0;
+}
+.misc-income-brand--corner {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  justify-content: flex-end;
+  min-height: 0;
+  max-width: min(34%, 210px);
+  opacity: 0.86;
+  pointer-events: none;
+}
+.misc-income-form--portal .extra-income-form-head {
+  min-height: 44px;
+  padding-right: min(42%, 240px);
 }
 
 .misc-income-logo {
@@ -2411,6 +2429,15 @@ a:not(.icon-btn):hover {
   }
   .misc-income-brand {
     min-height: 30px;
+  }
+  .misc-income-brand--corner {
+    top: 14px;
+    right: 14px;
+    max-width: min(42%, 170px);
+  }
+  .misc-income-form--portal .extra-income-form-head {
+    min-height: 38px;
+    padding-right: min(46%, 190px);
   }
   .misc-income-entry {
     align-items: stretch;

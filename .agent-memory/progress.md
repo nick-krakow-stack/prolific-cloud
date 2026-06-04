@@ -423,3 +423,12 @@
   legacy `test` types readable, deployed runtime files, and verified full Node
   tests plus server PHP 8.4 lint and live asset delivery. Authenticated browser
   DOM verification was blocked by the in-app browser being on the login page.
+- 2026-06-04 23:38:27 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 00:51:15 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 01:05:00 +02:00 - Moved the generic `Zusatzeinkommen` portal
+  logo into the top-right corner of the portal card with a dedicated
+  `misc-income-brand--corner` class and responsive padding. Added render
+  contract coverage, deployed runtime files, verified the full Node test suite,
+  JS syntax, server PHP 8.4 lint, and live JS/CSS asset delivery. Authenticated
+  browser DOM verification was blocked by the in-app browser being on the login
+  page.

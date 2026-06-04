@@ -316,6 +316,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   `Aufgabe`), date, and USD amount. Provider identity is still stored in the
   existing `category` column (`user_testing`, `testable_minds`), so no schema
   migration was required. Existing legacy `test` entry types remain readable.
+- The portal logo in the generic `Zusatzeinkommen` card is positioned as a small
+  non-interactive top-right corner mark (`misc-income-brand--corner`) instead of
+  sitting in the normal form flow. This keeps the provider hint without
+  dominating the form layout.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,

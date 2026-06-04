@@ -2541,10 +2541,10 @@ function renderMiscIncomeForms() {
           <button type="submit">Speichern</button>
         </div>
       </form>
-      <form id="miscIncomePortalForm" class="settings-form misc-income-form">
+      <form id="miscIncomePortalForm" class="settings-form misc-income-form misc-income-form--portal">
         <div class="extra-income-form-head">
           <h3>Umfrageportale / Aufgabenportale</h3>
-          <div class="misc-income-brand">
+          <div class="misc-income-brand misc-income-brand--corner">
             <img class="misc-income-logo misc-income-logo-user-testing" data-misc-income-provider-logo src="/assets/user-testing-logo.svg" alt="User Testing">
           </div>
         </div>
