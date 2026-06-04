@@ -1,34 +1,38 @@
 # Current Task
 
-Last updated: 2026-05-22 13:39:56 +02:00
+Last updated: 2026-06-04 12:48:28 +02:00
 
 ## Task
 
-Make the overview `Auszahlbar` tile open the Prolific Balance Hub in a new
-browser tab.
+Fix the overview `Entwicklung zum Vormonat` tile so it compares current month
+against previous month as an actual EUR revenue delta.
 
 ## Scope
 
 - `dashboard/assets/app.js`
-- `dashboard/assets/style.css`
 - `tests/overview-render.test.js`
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Keep the change local because it is a small shared frontend render change
-  with no safe parallel write split.
-- [x] Add a failing render contract for the external balance-hub link.
-- [x] Extend the overview tile helper to support link tiles.
-- [x] Link `Auszahlbar` to `https://app.prolific.com/balance-hub` with
-  `target="_blank"` and `rel="noopener noreferrer"`.
-- [x] Preserve the tile visual style and avoid default blue link styling.
+- [x] Keep the implementation local because the behavior is contained in one
+  shared frontend render file and one render contract test.
+- [x] Add failing tests for EUR-based previous-month display and signed
+  revenue-delta percentages.
+- [x] Change monthly comparison from current/previous share to
+  `(current EUR - previous EUR) / previous EUR`.
+- [x] Render the previous-month amount as a EUR amount using the existing
+  Frankfurter `fxRates` conversion.
+- [x] Update comparison colors to match delta semantics: negative red, zero
+  yellow, positive green.
 - [x] Deploy runtime files to production.
-- [x] Verify Node render tests, JS syntax, and live production DOM attributes.
+- [x] Verify focused render tests, full JS test suite, live asset contents,
+  server PHP 8.4 lint, live root HTTP 200, and unauthenticated API 401.
 
 ## Notes
 
-- The `In Prüfung` balance tile remains a normal dashboard tile.
-- The linked tile uses the same `earning-tile` structure plus
-  `earning-tile-link`.
+- If `fxRates` are unavailable, the tile falls back to the original currency
+  display rather than rendering a misleading EUR amount.
+- Browser automation reached the login page, so authenticated DOM verification
+  was replaced by live asset verification plus render tests.

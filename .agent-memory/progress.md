@@ -404,3 +404,7 @@
 - 2026-05-22 13:31:32 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-05-22 13:39:56 +02:00 - Linked the overview `Auszahlbar` tile to the Prolific Balance Hub in a new browser tab, preserved the tile styling, added render contract coverage, deployed runtime files, and verified production DOM link attributes.
 - 2026-05-22 13:31:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-05-22 13:44:18 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-04 12:38:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 12:39:16 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-04 12:48:28 +02:00 - Fixed overview monthly comparison semantics: current and previous month are converted to EUR via Frankfurter `fxRates`, percentage now shows actual revenue delta relative to previous month, previous-month subline renders as EUR, and negative/zero/positive deltas map to red/yellow/green. Deployed runtime files and verified focused/full JS tests plus live asset/server checks.

@@ -1,19 +1,20 @@
 # Handoff
 
-Last updated: 2026-05-22 13:39:56 +02:00
+Last updated: 2026-06-04 12:48:28 +02:00
 Update mode: Stop
 
 ## Latest Notes
 
-The overview `Auszahlbar` tile now links to
-`https://app.prolific.com/balance-hub` in a new browser tab while keeping the
-existing tile styling. Runtime files were deployed and the live DOM attributes
-were verified.
+The overview `Entwicklung zum Vormonat` tile now converts current and previous
+month to EUR through the existing Frankfurter `fxRates` before calculating the
+percentage. The displayed percentage is the actual revenue delta relative to
+previous month, and the previous-month subline is shown as EUR when FX rates are
+available. Runtime files were deployed.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 53f3c37 Update memory for efficiency card move
+- Last commit: 11b33b8 Update memory for balance tile link
 
 ## Working Tree
 
@@ -24,7 +25,6 @@ were verified.
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
  M dashboard/assets/app.js
- M dashboard/assets/style.css
  M tests/overview-render.test.js
 ~~~
 

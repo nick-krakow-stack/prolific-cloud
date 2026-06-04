@@ -300,6 +300,11 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
 - The overview `Auszahlbar` tile is a styled external link to
   `https://app.prolific.com/balance-hub` and opens in a new tab with
   `rel="noopener noreferrer"`.
+- The overview `Entwicklung zum Vormonat` tile compares current-month and
+  previous-month Prolific revenue after converting both sides to EUR through
+  the existing Frankfurter `fxRates`. Its percentage is now the actual revenue
+  delta relative to previous month, not the reached share of previous month.
+  The previous-month subline renders as a EUR amount when FX rates are present.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,
