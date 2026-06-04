@@ -1,21 +1,21 @@
 # Handoff
 
-Last updated: 2026-06-05 01:05:00 +02:00
+Last updated: 2026-06-05 02:05:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-The generic `Zusatzeinkommen` portal logo was moved out of the form flow and
-into the top-right corner of the portal card via `misc-income-form--portal` and
-`misc-income-brand--corner`. Runtime files were deployed to production. Full
-Node tests, JS syntax, server PHP 8.4 lint, and live JS/CSS asset checks passed.
-Authenticated browser DOM verification was blocked because the in-app browser
-was on the login page.
+Centered the dashboard top tab navigation on desktop while preserving the
+left-aligned horizontal-scroll behavior for mobile. Runtime files were deployed
+to production. Focused/full Node tests, JS syntax, server PHP 8.4 lint, and live
+CSS delivery checks passed. Current task status is tracked in
+.agent-memory/current-task.md. Owner, browser, and review feedback are persisted
+in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 10660cf Consolidate additional income portals
+- Last commit: 87baa03 Move portal logos to card corner
 
 ## Working Tree
 
@@ -25,9 +25,8 @@ was on the login page.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M dashboard/assets/app.js
  M dashboard/assets/style.css
- M tests/misc-income-render.test.js
+?? tests/nav-layout-render.test.js
 ~~~
 
 ## Current State Summary

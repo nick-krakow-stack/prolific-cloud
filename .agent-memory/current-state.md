@@ -320,6 +320,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   non-interactive top-right corner mark (`misc-income-brand--corner`) instead of
   sitting in the normal form flow. This keeps the provider hint without
   dominating the form layout.
+- The top tab navigation is centered on desktop through a
+  `@media (min-width: 761px)` rule while keeping the default mobile layout
+  left-aligned and horizontally scrollable.
 - `scripts/deploy-webspace.ps1` includes `api/_extra_income.php` and
   `api/_misc_income.php` in the runtime deploy list. Normal deploys still
   exclude `install.php`,
