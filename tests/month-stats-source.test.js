@@ -14,6 +14,13 @@ const checks = [
     buildOverview.includes("'monthStats'       => $monthStats")
   ],
   [
+    'overview exposes a comparable previous-month period for the top comparison tile',
+    buildOverview.includes('$lastMonthComparableEnd') &&
+      buildOverview.includes('$earnedLastMonthComparable') &&
+      buildOverview.includes("'lastMonthComparable' => [") &&
+      buildOverview.includes("'dayCount' => $lastMonthComparableDays")
+  ],
+  [
     'period stats helper exists',
     /function build_period_stats\(\s*PDO \$pdo,\s*array \$paidStatuses,\s*DateTime \$periodStart,\s*array \$earned,\s*array \$pending\s*\): array/.test(source)
   ],

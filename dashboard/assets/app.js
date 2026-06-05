@@ -232,6 +232,27 @@ function fmtComparisonPercent(value) {
   return `${sign} ${formatted} %`;
 }
 
+function fmtMonthName(monthKey) {
+  const match = String(monthKey || '').match(/^(\d{4})-(\d{2})/);
+
+  if (!match) return 'Vormonat';
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+
+  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || monthIndex < 0 || monthIndex > 11) {
+    return 'Vormonat';
+  }
+
+  return new Date(Date.UTC(year, monthIndex, 1)).toLocaleDateString('de-DE', { month: 'long' });
+}
+
+function fmtPeriodEurSubline(earned, pending, fxRates) {
+  const eurMinor = convertToEur(sumCurrencyMaps(earned, pending), fxRates);
+
+  return fmtEur(eurMinor);
+}
+
 function renderProgressBar(percent) {
   const clamped = clampPercent(percent);
 
@@ -3162,6 +3183,7 @@ function renderExpandedOverview(data) {
   const week = e.week || {};
   const month = e.month || {};
   const lastMonth = e.lastMonth || {};
+  const lastMonthComparable = e.lastMonthComparable || e.last_month_comparable || lastMonth;
   const allTime = e.allTime || {};
   const fxRates = data.fxRates || data.fx_rates;
   const goals = asObject(data.goals);
@@ -3253,7 +3275,7 @@ function renderExpandedOverview(data) {
         <div class="label">${label}</div>
         <div class="value">${fmtMulti(displayValue)}</div>
         ${
-          pending && Object.keys(pending).length > 0
+          !options.includePending && pending && Object.keys(pending).length > 0
             ? `<div class="pending">${options.includePending ? 'Davon ' : '+ '}${fmtMulti(pending)} ausstehend</div>`
             : ''
         }
@@ -3262,27 +3284,34 @@ function renderExpandedOverview(data) {
     `;
   };
   const comparisonTile = () => {
-    const percent = monthComparisonPercent(month.earned, lastMonth.earned, fxRates);
-    const lastMonthEur = convertToEur(lastMonth.earned, fxRates);
+    const currentComparable = sumCurrencyMaps(month.earned, month.pending);
+    const previousComparable = sumCurrencyMaps(lastMonthComparable.earned, lastMonthComparable.pending);
+    const percent = monthComparisonPercent(currentComparable, previousComparable, fxRates);
+    const lastMonthEur = convertToEur(previousComparable, fxRates);
+    const dayCount = firstNumber(lastMonthComparable, ['dayCount', 'day_count']) ?? 1;
+    const monthName = fmtMonthName(firstDefined(lastMonthComparable, ['month', 'monthKey', 'month_key', 'label']));
+    const comparisonSubline = lastMonthEur == null
+      ? `${monthName}: ${fmtMulti(previousComparable)} in den ersten ${fmtCount(dayCount)} Tagen`
+      : `${monthName}: ${fmtEurAmount(lastMonthEur)} in den ersten ${fmtCount(dayCount)} Tagen`;
 
     return `
       <div class="earning-tile comparison-tile">
         <div class="label">Entwicklung zum Vormonat</div>
         <div class="value comparison-value ${comparisonPercentClass(percent)}">${fmtComparisonPercent(percent)}</div>
-        <div class="secondary">${lastMonthEur == null ? fmtMulti(lastMonth.earned) : fmtEurAmount(lastMonthEur)}</div>
+        <div class="secondary">${escapeHtml(comparisonSubline)}</div>
       </div>
     `;
   };
 
   let html = '<div class="earnings-grid">';
 
-  html += tile('Heute', today.earned, today.pending, null, { includePending: true });
-  html += tile('Diese Woche', week.earned, week.pending, null, { includePending: true });
-  html += tile('Dieser Monat', month.earned, month.pending, null, { includePending: true });
-  html += tile('Gesamt', allTime.earned, allTime.pending, null, { includePending: true });
+  html += tile('Heute', today.earned, today.pending, fmtPeriodEurSubline(today.earned, today.pending, fxRates), { includePending: true });
+  html += tile('Diese Woche', week.earned, week.pending, fmtPeriodEurSubline(week.earned, week.pending, fxRates), { includePending: true });
+  html += tile('Dieser Monat', month.earned, month.pending, fmtPeriodEurSubline(month.earned, month.pending, fxRates), { includePending: true });
+  html += tile('Gesamt', allTime.earned, allTime.pending, fmtPeriodEurSubline(allTime.earned, allTime.pending, fxRates), { includePending: true });
   html += tile('Auszahlbar', availableByCurrency, null, fmtEur(convertToEur(availableByCurrency, fxRates)), { href: 'https://app.prolific.com/balance-hub' });
   html += tile('In Prüfung', pendingByCurrency, null, fmtEur(convertToEur(pendingByCurrency, fxRates)));
-  if (Object.keys(lastMonth.earned || {}).length) {
+  if (hasCurrencyAmounts(sumCurrencyMaps(lastMonthComparable.earned, lastMonthComparable.pending))) {
     html += comparisonTile();
   }
   html += renderExtraIncomeOverviewTile(data.extraIncome || data.extra_income, data.miscIncome || data.misc_income, fxRates);

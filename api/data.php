@@ -207,6 +207,14 @@ function build_overview(PDO $pdo): array {
     $monthStart     = (clone $today)->modify('first day of this month')->setTime(0, 0, 0);
     $lastMonthStart = (clone $monthStart)->modify('-1 month');
     $lastMonthEnd   = (clone $monthStart);
+    $monthElapsedDays = max(1, ((int)$monthStart->diff($today)->days) + 1);
+    $lastMonthComparableEnd = (clone $lastMonthStart)->modify('+' . $monthElapsedDays . ' days');
+
+    if ($lastMonthComparableEnd > $lastMonthEnd) {
+        $lastMonthComparableEnd = clone $lastMonthEnd;
+    }
+
+    $lastMonthComparableDays = max(1, (int)$lastMonthStart->diff($lastMonthComparableEnd)->days);
 
     if ($weekStart > $today) {
         $weekStart->modify('-7 days');
@@ -228,6 +236,8 @@ function build_overview(PDO $pdo): array {
     $pendingMonth = sum_by_period($pdo, $pendingStatuses, $monthStart, null);
 
     $earnedLastM  = sum_by_period($pdo, $earnedStatuses, $lastMonthStart, $lastMonthEnd);
+    $earnedLastMonthComparable = sum_by_period($pdo, $earnedStatuses, $lastMonthStart, $lastMonthComparableEnd);
+    $pendingLastMonthComparable = sum_by_period($pdo, $pendingStatuses, $lastMonthStart, $lastMonthComparableEnd);
 
     $earnedAll    = sum_by_period($pdo, $earnedStatuses, null, null);
     $pendingAll   = sum_by_period($pdo, $pendingStatuses, null, null);
@@ -310,6 +320,12 @@ function build_overview(PDO $pdo): array {
             ],
             'lastMonth' => [
                 'earned' => $earnedLastM,
+            ],
+            'lastMonthComparable' => [
+                'earned' => $earnedLastMonthComparable,
+                'pending' => $pendingLastMonthComparable,
+                'month' => $lastMonthStart->format('Y-m'),
+                'dayCount' => $lastMonthComparableDays,
             ],
             'allTime' => [
                 'earned'  => $earnedAll,

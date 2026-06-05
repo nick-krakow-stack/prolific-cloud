@@ -305,6 +305,14 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   the existing Frankfurter `fxRates`. Its percentage is now the actual revenue
   delta relative to previous month, not the reached share of previous month.
   The previous-month subline renders as a EUR amount when FX rates are present.
+- The overview top period tiles (`Heute`, `Diese Woche`, `Dieser Monat`,
+  `Gesamt`) keep earned plus pending rewards in the primary value, but their
+  subline now shows only the EUR equivalent (`≈ €...`) instead of
+  `Davon ... ausstehend`. The overview comparison tile uses
+  `earnings.lastMonthComparable`, which is the previous calendar month through
+  the same elapsed month day count, and compares the same earned-plus-pending
+  EUR basis. The subline renders with the German month name and day count, e.g.
+  `Mai: €20,44 in den ersten 5 Tagen`.
 - The generic `Zusatzeinkommen` tab supports `Tech-Support`, `User Testing`,
   and `Testable Minds`. Testable Minds stores date plus USD amount in the
   existing `misc_income_entries` table, uses the same `fxRates` response for EUR

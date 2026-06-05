@@ -1,39 +1,51 @@
 # Current Task
 
-Last updated: 2026-06-05 17:47:04 +02:00
+Last updated: 2026-06-05 19:33:28 +02:00
 
 ## Task
 
-Fix `Statistiken` EUR-first rendering on production after the frontend change
-still showed original currencies.
-
-## Root Cause
-
-The frontend formatter was deployed correctly, but `/api/data.php?type=stats`
-did not include `fxRates`. Therefore `amountEurWithOriginal()` correctly fell
-back to original currencies in the `Statistiken` tab.
+Update the overview top earnings tiles and previous-month comparison.
 
 ## Scope
 
 - `api/data.php`
-- `tests/roadmap-rest-render.test.js`
+- `dashboard/assets/app.js`
+- `tests/overview-render.test.js`
 - memory files
+
+## Requirements
+
+- Top overview period tiles (`Heute`, `Diese Woche`, `Dieser Monat`, `Gesamt`)
+  keep earned + pending in the primary value.
+- Their subline no longer says `Davon ... ausstehend`; it shows only the EUR
+  equivalent as `≈ €XX,XX`.
+- `Entwicklung zum Vormonat` compares the current month-to-date against the
+  previous month through the same number of elapsed month days.
+- The comparison percentage is based on EUR conversion through the existing
+  `fxRates` path.
+- The comparison subline shows the previous month label and day count, e.g.
+  `Mai: €XX,XX in den ersten 5 Tagen`.
 
 ## Checklist
 
-- [x] Reproduce the issue in the live in-app browser.
-- [x] Verify that production loaded the new `app.js?v=1780672518`.
-- [x] Identify missing `fxRates` in the stats API response as root cause.
-- [x] Add a failing regression test for the stats endpoint FX contract.
-- [x] Add `fxRates` to `build_stats_response()`.
+- [x] Add/update failing regression tests.
+- [x] Add comparable previous-month period to overview API data.
+- [x] Update overview renderer for EUR sublines and comparable comparison.
+- [x] Run focused/full verification.
 - [x] Deploy runtime files to production.
-- [x] Verify live `Statistiken` text renders EUR-first.
-- [x] Verify focused/full Node tests, JS syntax, server PHP 8.4 lint, and
-  `config.php` ignore status.
+- [x] Verify live browser output.
+- [x] Update memory and git status.
 
-## Notes
+## Verification Notes
 
-- Browser verification after deploy showed examples such as
-  `€11,47 (£5,95 + $5,34)` in the heatmap and EUR-first requester/monthly
-  report values.
-- No database migration was required.
+- Red tests failed first in `tests/overview-render.test.js` and
+  `tests/month-stats-source.test.js`.
+- Full Node test suite passed after implementation.
+- `node --check dashboard/assets/app.js` passed.
+- `git diff --check` passed after trimming a hook-written trailing space in
+  `.agent-memory/feedback.md`.
+- Production deploy completed through `scripts/deploy-webspace.ps1`.
+- Server PHP 8.4 lint passed for `api/data.php`, `dashboard/app.php`, and
+  `dashboard/index.php`.
+- Live browser verification showed top period tiles with `≈ €...` sublines and
+  `Entwicklung zum Vormonat` with `Mai: €20,44 in den ersten 5 Tagen`.

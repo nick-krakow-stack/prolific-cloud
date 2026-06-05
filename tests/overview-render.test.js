@@ -40,6 +40,12 @@ const sampleOverview = {
     week: { earned: { GBP: 2500 }, pending: { USD: 635 } },
     month: { earned: { GBP: 7500 }, pending: { GBP: 1250, USD: 1270 } },
     lastMonth: { earned: { GBP: 2500, USD: 150 }, pending: {} },
+    lastMonthComparable: {
+      earned: { GBP: 6000 },
+      pending: { USD: 635 },
+      month: '2026-04',
+      dayCount: 17
+    },
     allTime: { earned: { GBP: 15000 }, pending: { GBP: 500, USD: 1270 } }
   },
   worktime: {
@@ -228,6 +234,10 @@ const gbp500 = sandbox.fmtAmount(500, 'GBP');
 const usd127 = sandbox.fmtAmount(127, 'USD');
 const usd635 = sandbox.fmtAmount(635, 'USD');
 const usd1270 = sandbox.fmtAmount(1270, 'USD');
+const eurTodayTile = `\u2248 ${sandbox.fmtEurAmount(sandbox.convertToEur({ GBP: 800, USD: 127 }, sampleOverview.fxRates))}`;
+const eurWeekTile = `\u2248 ${sandbox.fmtEurAmount(sandbox.convertToEur({ GBP: 2500, USD: 635 }, sampleOverview.fxRates))}`;
+const eurMonthTile = `\u2248 ${sandbox.fmtEurAmount(sandbox.convertToEur({ GBP: 8750, USD: 1270 }, sampleOverview.fxRates))}`;
+const eurAllTimeTile = `\u2248 ${sandbox.fmtEurAmount(sandbox.convertToEur({ GBP: 15500, USD: 1270 }, sampleOverview.fxRates))}`;
 
 const checks = [
   ['renders EUR equivalent from GBP-based fxRates', html.includes('≈ €13,44')],
@@ -242,7 +252,7 @@ const checks = [
   ['keeps account tiles', html.includes('Auszahlbar') && html.includes('In Prüfung')],
   ['links cashout tile to Prolific balance hub in a new tab', html.includes('<a class="earning-tile earning-tile-link" href="https://app.prolific.com/balance-hub" target="_blank" rel="noopener noreferrer">') && html.includes('<div class="label">Auszahlbar</div>')],
   ['period tiles include awaiting review in the main amount', html.includes(`<div class="value">${gbp800} + ${usd127}</div>`) && html.includes(`<div class="value">${gbp2500} + ${usd635}</div>`) && html.includes(`<div class="value">${gbp8750} + ${usd1270}</div>`) && html.includes(`<div class="value">${gbp15500} + ${usd1270}</div>`)],
-  ['period tiles label pending as included share', html.includes(`Davon ${gbp300} + ${usd127} ausstehend`) && html.includes(`Davon ${usd635} ausstehend`) && html.includes(`Davon ${gbp1250} + ${usd1270} ausstehend`) && html.includes(`Davon ${gbp500} + ${usd1270} ausstehend`) && !html.includes(`+ ${gbp300} ausstehend`)],
+  ['period tiles show EUR equivalent instead of pending share', html.includes(`<div class="pending">${eurTodayTile}</div>`) && html.includes(`<div class="pending">${eurWeekTile}</div>`) && html.includes(`<div class="pending">${eurMonthTile}</div>`) && html.includes(`<div class="pending">${eurAllTimeTile}</div>`) && !html.includes(`Davon ${gbp300} + ${usd127} ausstehend`) && !html.includes(`Davon ${usd635} ausstehend`) && !html.includes(`Davon ${gbp1250} + ${usd1270} ausstehend`) && !html.includes(`Davon ${gbp500} + ${usd1270} ausstehend`)],
   ['renders worktime cards directly after earnings cards', html.includes('class="earnings-grid worktime-grid"') && html.indexOf('ARBEITSZEIT HEUTE') > html.indexOf('</div>') && html.indexOf('ARBEITSZEIT HEUTE') < html.indexOf('class="goal-card-grid"')],
   ['renders four worktime cards with worktime formatting', (html.match(/ARBEITSZEIT /g) || []).length === 4 && html.includes('<div class="label">ARBEITSZEIT HEUTE</div>') && html.includes('<div class="value">2 h 35 min</div>') && html.includes('<div class="label">ARBEITSZEIT DIESE WOCHE</div>') && html.includes('<div class="value">1 h 1 min</div>') && html.includes('<div class="label">ARBEITSZEIT GESAMT</div>') && html.includes('<div class="value">8 h 20 min</div>')],
   ['renders unpaid worktime subline only when unpaid seconds are at least one minute', html.includes('Davon 12 min unbezahlt') && html.includes('Davon 31 min unbezahlt') && !html.includes('Davon 0 min unbezahlt') && !html.includes('ohne Verg&uuml;tung')],
@@ -289,8 +299,8 @@ const checks = [
   ['renders comparison before monthly additional income tile', html.indexOf('<div class="label">Entwicklung zum Vormonat</div>') >= 0 && html.indexOf('<div class="label">Entwicklung zum Vormonat</div>') < html.indexOf('<div class="label">Zusatzeinkommen</div>')],
   ['renders additional income tile as current month total from all sources', html.includes('class="earning-tile additional-income-tile"') && html.includes('<div class="label">Zusatzeinkommen</div>') && html.includes('<div class="value">€76,05</div>') && html.includes('<div class="secondary">im aktuellen Monat</div>') && !html.includes('<div class="label">Arbeit-Zuhause</div>') && !html.includes('Offen zur Auszahlung')],
   ['styles additional income tile differently from Prolific total tiles', css.includes('.earning-tile.additional-income-tile') && css.includes('#134e4a') && css.includes('#99f6e4')],
-  ['renders monthly comparison percentage from EUR revenue delta', html.includes('class="value comparison-value is-good"') && html.includes('+ 186,5 %')],
-  ['renders previous month as EUR amount without duplicate label', html.includes('<div class="secondary">€30,89</div>') && !html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat:')],
+  ['renders monthly comparison percentage from comparable EUR month-to-date revenue', html.includes('class="value comparison-value is-good"') && html.includes('+ 50 %')],
+  ['renders comparable previous month label, EUR amount, and day count', html.includes('<div class="secondary">April: €76,70 in den ersten 17 Tagen</div>') && !html.includes('<div class="secondary">£25,00 + $1,50</div>') && !html.includes('Vormonat:')],
   ['calculates negative monthly comparison as missing EUR delta', typeof sandbox.monthComparisonPercent === 'function' && sandbox.monthComparisonPercent({ EUR: 1000 }, { EUR: 10000 }, sampleOverview.fxRates) === -90],
   ['formats monthly comparison signs', typeof sandbox.fmtComparisonPercent === 'function' && sandbox.fmtComparisonPercent(-8.9) === '- 8,9 %' && sandbox.fmtComparisonPercent(0) === '= 0 %' && sandbox.fmtComparisonPercent(5.1) === '+ 5,1 %'],
   ['classifies monthly comparison delta thresholds', typeof sandbox.comparisonPercentClass === 'function' && sandbox.comparisonPercentClass(-0.1) === 'is-danger' && sandbox.comparisonPercentClass(0) === 'is-warn' && sandbox.comparisonPercentClass(0.1) === 'is-good'],

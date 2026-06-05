@@ -1,5 +1,14 @@
 # Progress
 
+- 2026-06-05 - Overview period/comparison fix deployed: `Heute`,
+  `Diese Woche`, `Dieser Monat`, and `Gesamt` keep earned plus pending in the
+  main amount, but now show only the EUR equivalent (`≈ €...`) as the subline.
+  `/api/data.php?type=overview` now exposes `earnings.lastMonthComparable`
+  for the previous month through the same elapsed day count; the overview
+  comparison tile uses that earned-plus-pending EUR basis and renders sublines
+  like `Mai: €20,44 in den ersten 5 Tagen`. Regression coverage was updated in
+  `tests/overview-render.test.js` and `tests/month-stats-source.test.js`, and
+  the change was deployed and checked live on production.
 - 2026-05-17 - Browser review fix deployed: `Heute`, `Aktueller Monat`,
   settings money controls, `Monatsprognose`, `Effizienz / Stundenlohn`, and
   `Top-Studien` now render money values and effective hourly averages in Euro
@@ -469,3 +478,6 @@
 - 2026-06-05 17:38:39 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-05 17:39:37 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-05 17:40:11 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:51:03 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 19:13:24 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 19:17:07 +02:00 - Captured owner feedback on UserPromptSubmit.
