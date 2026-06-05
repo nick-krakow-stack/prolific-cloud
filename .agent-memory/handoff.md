@@ -1,33 +1,28 @@
 # Handoff
 
-Last updated: 2026-06-05 16:20:00 +02:00
+Last updated: 2026-06-05 17:25:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Added `Testbirds` and `Respondent` to the generic `Zusatzeinkommen` portal
-provider model. Runtime files were deployed to production. Focused/full Node
-tests, JS syntax, server PHP 8.4 lint, and live JS delivery checks passed.
+`Statistiken` money rendering was switched to EUR-first display with original
+currencies in parentheses. Runtime files were deployed to production. Focused
+statistics render tests, the full Node test suite, JS syntax, server PHP 8.4
+lint, `git diff --check`, `config.php` ignore check, and live JS delivery
+markers passed.
+
 Current task status is tracked in .agent-memory/current-task.md. Owner, browser,
 and review feedback are persisted in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 0adcc11 Center dashboard tab navigation
+- Last commit: current `Render statistics amounts in EUR` commit
 
 ## Working Tree
 
 ~~~text
- M .agent-memory/current-state.md
- M .agent-memory/current-task.md
- M .agent-memory/feedback.md
- M .agent-memory/handoff.md
- M .agent-memory/progress.md
- M api/_misc_income.php
- M dashboard/assets/app.js
- M tests/misc-income-backend-source.test.js
- M tests/misc-income-render.test.js
+clean after commit
 ~~~
 
 ## Current State Summary
@@ -53,6 +48,7 @@ See .agent-memory/next-steps.md.
 - Delegate implementation to Sub-Agents whenever tooling supports it.
 - Keep Sub-Agent write scopes separate for parallel work.
 - No Cloudflare deployment workflow applies to this repository.
-- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens, session secrets, or personal Prolific data into memory files.
+- Do not write secrets, DB credentials, tokens, passwords, raw bearer tokens,
+  session secrets, or personal Prolific data into memory files.
 - Keep config.php local and ignored.
 - Preserve root routing through / and absolute frontend paths.

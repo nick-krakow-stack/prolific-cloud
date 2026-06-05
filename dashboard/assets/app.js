@@ -2972,6 +2972,14 @@ function renderWorktimeCards(worktime) {
 }
 
 function fmtStudyRewardEur(study, fxRates) {
+  if (study.rewardMinor == null) return DASH;
+
+  const byCurrency = { [study.rewardCurrency || 'GBP']: study.rewardMinor };
+
+  if (study.withOriginalMoney) {
+    return amountEurWithOriginal(byCurrency, fxRates);
+  }
+
   const eurMinor = convertToEur({ [study.rewardCurrency || 'GBP']: study.rewardMinor }, fxRates);
 
   return eurMinor == null ? fmtAmount(study.rewardMinor, study.rewardCurrency) : fmtAmount(eurMinor, 'EUR');
@@ -2980,12 +2988,18 @@ function fmtStudyRewardEur(study, fxRates) {
 function fmtStudyHourlyEur(study, fxRates) {
   if (study.hourlyRateMinor == null) return DASH;
 
+  const byCurrency = { [study.rewardCurrency || 'GBP']: study.hourlyRateMinor };
+
+  if (study.withOriginalMoney) {
+    return amountEurWithOriginal(byCurrency, fxRates, { hourly: true });
+  }
+
   const eurMinor = convertToEur({ [study.rewardCurrency || 'GBP']: study.hourlyRateMinor }, fxRates);
 
   return (eurMinor == null ? fmtAmount(study.hourlyRateMinor, study.rewardCurrency) : fmtAmount(eurMinor, 'EUR')) + '/h';
 }
 
-function renderTopStudyList(items, mode, fxRates) {
+function renderTopStudyList(items, mode, fxRates, options = {}) {
   const list = items.slice(0, 5);
 
   if (list.length === 0) {
@@ -2993,8 +3007,11 @@ function renderTopStudyList(items, mode, fxRates) {
   }
 
   const rows = list.map((study, index) => {
-    const reward = fmtStudyRewardEur(study, fxRates);
-    const hourly = fmtStudyHourlyEur(study, fxRates);
+    const formattedStudy = options.withOriginalMoney
+      ? { ...study, withOriginalMoney: true }
+      : study;
+    const reward = fmtStudyRewardEur(formattedStudy, fxRates);
+    const hourly = fmtStudyHourlyEur(formattedStudy, fxRates);
     const primary = mode === 'hourly' ? hourly : reward;
     const secondary = mode === 'hourly' ? reward : hourly;
     const url = study.studyId
@@ -3057,13 +3074,13 @@ function renderDailyStatsCard(dailyStats, fxRates) {
     const label = Number.isNaN(labelDate.getTime())
       ? String(day.date).slice(5)
       : labelDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    const title = `${day.date}: verdient ${fmtMulti(day.earned)}, pending ${fmtMulti(day.pending)}`;
+    const title = `${day.date}: verdient ${amountEurWithOriginal(day.earned, fxRates)}, pending ${amountEurWithOriginal(day.pending, fxRates)}`;
 
     return `
       <div class="daily-bar" title="${escapeHtml(title)}">
         <div class="daily-bar-label">${escapeHtml(label)}</div>
         <div class="daily-bar-fill" style="width:${width.toFixed(2)}%;"></div>
-        <div class="daily-bar-value">${fmtMulti(day.earned)}</div>
+        <div class="daily-bar-value">${amountEurWithOriginal(day.earned, fxRates)}</div>
       </div>
     `;
   }).join('');
@@ -3408,6 +3425,52 @@ function amountWithEur(byCurrency, fxRates) {
   return `${fmtMulti(byCurrency)}${suffix}`;
 }
 
+function absoluteCurrencyMap(byCurrency) {
+  const result = {};
+
+  for (const [currency, value] of Object.entries(asObject(byCurrency))) {
+    const numeric = Number(value);
+
+    if (!Number.isFinite(numeric) || numeric === 0) continue;
+
+    result[String(currency).toUpperCase()] = Math.abs(Math.round(numeric));
+  }
+
+  return result;
+}
+
+function currencyMapSign(byCurrency) {
+  const values = Object.values(asObject(byCurrency))
+    .map(Number)
+    .filter(value => Number.isFinite(value) && value !== 0);
+
+  if (values.length === 0) return '';
+
+  const sum = values.reduce((total, value) => total + value, 0);
+
+  if (sum > 0) return '+';
+  if (sum < 0) return '-';
+
+  return '';
+}
+
+function amountEurWithOriginal(byCurrency, fxRates, options = {}) {
+  const absMap = absoluteCurrencyMap(byCurrency);
+  const original = fmtMulti(absMap);
+
+  if (original === DASH) return DASH;
+
+  const eur = convertToEur(absMap, fxRates);
+  const primary = eur == null ? original : fmtAmount(eur, 'EUR');
+  const sign = options.signed ? currencyMapSign(byCurrency) : '';
+  const prefix = sign ? `${sign} ` : '';
+  const body = eur == null || primary === original
+    ? primary
+    : `${primary} (${original})`;
+
+  return `${prefix}${body}${options.hourly ? '/h' : ''}`;
+}
+
 function normalizeHeatmap(data) {
   const raw = parseJsonMaybe(data.heatmap || data.daily || data.dailyStats || []);
 
@@ -3583,7 +3646,7 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
         const label = date
           ? date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           : String(day.date).slice(-2);
-        const title = `${day.date}: ${fmtMulti(day.earned)}`;
+        const title = `${day.date}: ${amountEurWithOriginal(day.earned, fxRates)}`;
         const empty = !hasCurrencyAmounts(day.earned);
         const classes = [
           'heatmap-day',
@@ -3595,7 +3658,7 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
         return `
           <div class="${classes}" title="${escapeHtml(title)}">
             <span class="heatmap-date">${escapeHtml(label)}</span>
-            <span class="heatmap-value">${day.isFuture ? '–' : fmtMulti(day.earned)}</span>
+            <span class="heatmap-value">${day.isFuture ? '–' : amountEurWithOriginal(day.earned, fxRates)}</span>
           </div>
         `;
       }).join('')}
@@ -3604,7 +3667,7 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
   `;
 }
 
-function renderStatsStudiesSection(studiesData, showAll = statsShowAllStudies) {
+function renderStatsStudiesSection(studiesData, showAll = statsShowAllStudies, fxRates = null) {
   if (!studiesData || !studiesData.ok) {
     return `
       <div class="status-box stats-studies-section">
@@ -3617,14 +3680,15 @@ function renderStatsStudiesSection(studiesData, showAll = statsShowAllStudies) {
   const activeStudies = renderStudies(studiesData, {
     filter: 'active',
     showPagination: false,
-    emptyText: 'Keine aktiven Studien.'
+    emptyText: 'Keine aktiven Studien.',
+    moneyFxRates: fxRates
   });
   const toggleButton = `<button id="statsShowAllStudies" class="filter-reset studies-show-all" type="button">${showAll ? 'Studien ausblenden' : 'Alle Studien anzeigen'}</button>`;
   const allStudies = showAll
     ? `
       <div class="stats-all-studies">
         ${renderStudiesFilterBar()}
-        <div id="studiesContent">${renderStudies(studiesData)}</div>
+        <div id="studiesContent">${renderStudies(studiesData, { moneyFxRates: fxRates })}</div>
       </div>
     `
     : '';
@@ -3673,8 +3737,8 @@ function renderStats(data) {
           <div class="requester-row">
             <span class="requester-name">${escapeHtml(name)}</span>
             <span class="requester-number" data-label="Anzahl">${fmtCount(count)}</span>
-            <span class="requester-number" data-label="Verdienst">${fmtMulti(total)}</span>
-            <span class="requester-number" data-label="Stundenlohn">${fmtMetricHourly(hourly, 'GBP')}</span>
+            <span class="requester-number" data-label="Verdienst">${amountEurWithOriginal(total, fxRates)}</span>
+            <span class="requester-number" data-label="Stundenlohn">${amountEurWithOriginal(hourly, fxRates, { hourly: true })}</span>
             <span class="requester-number" data-label="Approval-Rate">${fmtPercent(approvalRate)}</span>
           </div>
         `;
@@ -3699,15 +3763,15 @@ function renderStats(data) {
       <h3>Monatsvergleich</h3>
       <div class="status-row">
         <span class="key">Dieser Monat</span>
-        <span class="value">${amountWithEur(readCurrencyMetric(current, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+        <span class="value">${amountEurWithOriginal(readCurrencyMetric(current, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
       </div>
       <div class="status-row">
         <span class="key">Vormonat</span>
-        <span class="value">${amountWithEur(readCurrencyMetric(previous, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+        <span class="value">${amountEurWithOriginal(readCurrencyMetric(previous, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
       </div>
       <div class="status-row">
         <span class="key">Ver&auml;nderung</span>
-        <span class="value">${fmtMulti(readCurrencyMetric(delta, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']))} / ${fmtPercent(firstNumeric(delta, ['percent', 'percentage', 'earnedPercent', 'earned_percent']))}</span>
+        <span class="value">${amountEurWithOriginal(readCurrencyMetric(delta, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates, { signed: true })} / ${fmtPercent(firstNumeric(delta, ['percent', 'percentage', 'earnedPercent', 'earned_percent']))}</span>
       </div>
       <div class="status-row">
         <span class="key">Teilnahmen</span>
@@ -3737,11 +3801,11 @@ function renderStats(data) {
       </div>
       <div class="status-row">
         <span class="key">Verdient</span>
-        <span class="value">${amountWithEur(readCurrencyMetric(report, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
+        <span class="value">${amountEurWithOriginal(readCurrencyMetric(report, ['earned', 'earnedByCurrency', 'earned_by_currency'], ['earned_gbp_minor', 'earnedGbpMinor']), fxRates)}</span>
       </div>
       <div class="status-row">
         <span class="key">Pending</span>
-        <span class="value">${amountWithEur(readCurrencyMetric(report, ['pending', 'pendingByCurrency', 'pending_by_currency'], ['pending_gbp_minor', 'pendingGbpMinor']), fxRates)}</span>
+        <span class="value">${amountEurWithOriginal(readCurrencyMetric(report, ['pending', 'pendingByCurrency', 'pending_by_currency'], ['pending_gbp_minor', 'pendingGbpMinor']), fxRates)}</span>
       </div>
       <div class="status-row">
         <span class="key">Teilnahmen</span>
@@ -3760,7 +3824,7 @@ function renderStats(data) {
         <span class="value">${fmtDuration(reportEfficiency.secondsTotal)}</span>
       </div>
       ${statusRows}
-      ${renderTopStudyList(report.topStudies || report.top_studies, 'reward')}
+      ${renderTopStudyList(report.topStudies || report.top_studies, 'reward', fxRates, { withOriginalMoney: true })}
       <div class="status-row">
         <span class="key">CSV Export</span>
         <span class="value"><a href="/api/export.php?type=submissions&amp;format=csv">Teilnahmen exportieren</a></span>
@@ -3769,7 +3833,7 @@ function renderStats(data) {
 
     ${renderDailyStatsCard(dailyStats, fxRates)}
 
-    ${renderStatsStudiesSection(studiesData)}
+    ${renderStatsStudiesSection(studiesData, statsShowAllStudies, fxRates)}
   `;
 }
 
@@ -4725,6 +4789,7 @@ function renderStudies(data, options = {}) {
     ? totalCount
     : currentStudiesVisibleLimit(totalCount);
   const visibleStudies = studies.slice(0, visibleLimit);
+  const moneyFxRates = options.moneyFxRates || null;
 
   const studyCards = visibleStudies.map(s => {
     const tags = [];
@@ -4737,7 +4802,7 @@ function renderStudies(data, options = {}) {
     const detailTiles = [];
 
     if (s.reward_minor != null) {
-      detailTiles.push(renderStudyDetailTile('Vergütung', escapeHtml(fmtAmount(s.reward_minor, s.reward_currency)), 'reward'));
+      detailTiles.push(renderStudyDetailTile('Vergütung', escapeHtml(moneyFxRates ? amountEurWithOriginal({ [s.reward_currency || 'GBP']: s.reward_minor }, moneyFxRates) : fmtAmount(s.reward_minor, s.reward_currency)), 'reward'));
     }
 
     if (s.estimated_minutes != null) {
@@ -4749,7 +4814,7 @@ function renderStudies(data, options = {}) {
     }
 
     if (s.reward_per_hour != null) {
-      detailTiles.push(renderStudyDetailTile('Stundenlohn', `${escapeHtml(fmtAmount(s.reward_per_hour, s.reward_currency))}/h`, 'hourly'));
+      detailTiles.push(renderStudyDetailTile('Stundenlohn', escapeHtml(moneyFxRates ? amountEurWithOriginal({ [s.reward_currency || 'GBP']: s.reward_per_hour }, moneyFxRates, { hourly: true }) : `${fmtAmount(s.reward_per_hour, s.reward_currency)}/h`), 'hourly'));
     }
 
     detailTiles.push(renderStudyDetailTile('Gesehen', escapeHtml(fmtTimestamp(s.first_seen))));

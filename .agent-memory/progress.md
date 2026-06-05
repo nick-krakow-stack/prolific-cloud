@@ -446,3 +446,15 @@
   required, and providers without local logo assets hide the corner logo cleanly.
   Deployed runtime files and verified focused/full Node tests, JS syntax, server
   PHP 8.4 lint, and live JS delivery.
+- 2026-06-05 16:09:52 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 17:02:27 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:03:35 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:04:15 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:04:57 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 17:05:56 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:20:12 +02:00 - Switched `Statistiken` money rendering to
+  EUR-first format with original currencies in parentheses across heatmap,
+  income history, monthly comparison, requester analysis, monthly report/top
+  studies, and the embedded studies list. Added render regression coverage,
+  deployed runtime files, and verified focused/full Node tests, JS syntax,
+  server PHP 8.4 lint, and live JS delivery markers.

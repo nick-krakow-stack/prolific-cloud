@@ -1,34 +1,35 @@
 # Current Task
 
-Last updated: 2026-06-05 16:20:00 +02:00
+Last updated: 2026-06-05 17:20:12 +02:00
 
 ## Task
 
-Add `Testbirds` and `Respondent` as generic portal providers in the
-`Zusatzeinkommen` tab.
+Switch the `Statistiken` tab money displays to EUR-first formatting with the
+original currencies in parentheses.
 
 ## Scope
 
-- `api/_misc_income.php`
 - `dashboard/assets/app.js`
-- `tests/misc-income-backend-source.test.js`
-- `tests/misc-income-render.test.js`
+- `tests/roadmap-rest-render.test.js`
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Add failing tests for the two missing providers.
-- [x] Allow `testbirds` and `respondent` as USD portal categories in the backend.
-- [x] Add both providers to the frontend dropdown and labels.
-- [x] Hide the corner logo cleanly for providers without local logo assets.
+- [x] Delegate read-only statistics renderer mapping to a Sub-Agent.
+- [x] Add regression coverage for EUR-first statistics money rendering.
+- [x] Add shared frontend helpers for EUR-first original-currency display.
+- [x] Update statistics heatmap, daily income history, monthly comparison,
+  requester analysis, monthly report, top studies, and embedded studies list.
 - [x] Deploy runtime files to production.
-- [x] Verify focused tests, full Node test suite, JS syntax, server PHP 8.4 lint,
-  and live JS delivery.
+- [x] Verify focused/full Node tests, JS syntax, server PHP 8.4 lint, and live
+  JS delivery.
 
 ## Notes
 
-- No schema migration was required because the existing `category` column stores
-  provider identifiers generically.
-- `Testbirds` and `Respondent` use the same portal entry model as User Testing
-  and Testable Minds: date, type (`Umfrage`/`Aufgabe`), and USD amount.
+- Target display format is `€ XX,XX (£ XX,XX + $ XX,XX)`.
+- Hourly values use the same format with `/h` after the parenthesized original
+  currencies.
+- Signed deltas keep an explicit sign before the EUR-first amount.
+- Top overview tiles and non-statistics areas were intentionally left on their
+  existing display rules unless they are rendered inside `Statistiken`.

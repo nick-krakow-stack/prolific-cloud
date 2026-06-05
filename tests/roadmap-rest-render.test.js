@@ -78,17 +78,17 @@ const stats = {
     rates: { EUR: 1.18, USD: 1.27 }
   },
   monthlyComparison: {
-    current: { earned: { GBP: 12298 }, submissionsCount: 18 },
-    previous: { earned: { GBP: 1317 }, submissionsCount: 3 },
-    delta: { earned: { GBP: 10981 }, percent: 833.8 }
+    current: { earned: { GBP: 12298, USD: 1000 }, submissionsCount: 18 },
+    previous: { earned: { GBP: 1317, USD: 200 }, submissionsCount: 3 },
+    delta: { earned: { GBP: 10981, USD: 800 }, percent: 833.8 }
   },
   heatmap: [
     { date: '2026-04-30', earned: { GBP: 250 }, pending: {} },
-    { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
+    { date: '2026-05-01', earned: { GBP: 420, USD: 100 }, pending: {} },
     { date: '2026-05-02', earned: {}, pending: {} }
   ],
   dailyStats: [
-    { date: '2026-05-01', earned: { GBP: 420 }, pending: {} },
+    { date: '2026-05-01', earned: { GBP: 420, USD: 100 }, pending: {} },
     { date: '2026-05-02', earned: { GBP: 180 }, pending: { GBP: 40 } }
   ],
   serverTime: '2026-05-17T12:00:00+02:00',
@@ -97,20 +97,20 @@ const stats = {
       requester: 'ABC Research',
       submissionsCount: 4,
       approvedCount: 4,
-      totalReward: { GBP: 4280 },
-      averageHourlyRate: { GBP: 1800 },
+      totalReward: { GBP: 4280, USD: 500 },
+      averageHourlyRate: { GBP: 1800, USD: 300 },
       approvalRate: 100
     }
   ],
   monthlyReport: {
     month: '2026-05',
-    earned: { GBP: 12298 },
-    pending: { GBP: 3583 },
+    earned: { GBP: 12298, USD: 1000 },
+    pending: { GBP: 3583, USD: 500 },
     submissionsCount: 21,
     statusCounts: { APPROVED: 18, 'AWAITING REVIEW': 3 },
     hourlyRate: { byCurrency: { GBP: 1440 }, rewardByCurrency: { GBP: 5040 }, sampleCount: 14, secondsTotal: 12600 },
     topStudies: [
-      { studyId: 's1', name: 'Report study', rewardMinor: 850, rewardCurrency: 'GBP' }
+      { studyId: 's1', name: 'Report study', rewardMinor: 850, rewardCurrency: 'USD' }
     ]
   }
 };
@@ -234,6 +234,8 @@ const exactEurSettingsHtml = sandbox.renderSettings({
 const systemHtml = sandbox.renderSystem({ ...settings, ...events });
 stats.studiesData = studies;
 const statsHtml = sandbox.renderStats(stats);
+const statsMoney = byCurrency => `${sandbox.fmtAmount(sandbox.convertToEur(byCurrency, stats.fxRates), 'EUR')} (${sandbox.fmtMulti(byCurrency)})`;
+const statsMoneyHourly = byCurrency => `${statsMoney(byCurrency)}/h`;
 const studiesFilterHtml = sandbox.renderStudiesFilterBar ? sandbox.renderStudiesFilterBar() : '';
 const expandedStatsStudiesHtml = sandbox.renderStatsStudiesSection ? sandbox.renderStatsStudiesSection(studies, true) : '';
 const aprilHeatmapHtml = sandbox.renderHeatmap ? sandbox.renderHeatmap(sandbox.normalizeHeatmap(stats), stats.fxRates, stats.serverTime, '2026-04') : '';
@@ -327,6 +329,7 @@ const checks = [
   ['overview supports worktime snake and camel fields', worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT HEUTE</div>') && worktimeOverviewHtml.includes(`<div class="value">\u2013</div>`) && worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT DIESE WOCHE</div>') && worktimeOverviewHtml.includes('<div class="value">1 h 2 min</div>') && worktimeOverviewHtml.includes('Davon 2 min unbezahlt') && worktimeOverviewHtml.includes('<div class="label">ARBEITSZEIT GESAMT</div>') && worktimeOverviewHtml.includes('<div class="value">8 h</div>')],
   ['overview renders the four-tile efficiency row instead of duplicate hourly KPIs', worktimeOverviewHtml.includes('class="efficiency-grid"') && (worktimeOverviewHtml.match(/class="efficiency-tile"/g) || []).length === 4 && worktimeOverviewHtml.indexOf('class="efficiency-grid"') > worktimeOverviewHtml.indexOf('ARBEITSZEIT GESAMT') && worktimeOverviewHtml.indexOf('class="efficiency-grid"') < worktimeOverviewHtml.indexOf('class="goal-card-grid"') && !worktimeOverviewHtml.includes('class="effective-hourly-grid"') && !worktimeOverviewHtml.includes('<div class="label">EFFEKTIVER STUNDENLOHN MONAT</div>')],
   ['renders monthly comparison', typeof sandbox.renderStats === 'function' && statsHtml.includes('Monatsvergleich')],
+  ['renders statistics money primarily in EUR with original currencies in parentheses', statsHtml.includes(statsMoney({ GBP: 12298, USD: 1000 })) && statsHtml.includes(statsMoney({ GBP: 420, USD: 100 })) && statsHtml.includes(statsMoney({ GBP: 4280, USD: 500 })) && statsHtml.includes(statsMoneyHourly({ GBP: 1800, USD: 300 })) && statsHtml.includes(statsMoney({ USD: 850 }))],
   ['renders requester analysis', typeof sandbox.renderStats === 'function' && statsHtml.includes('ABC Research')],
   ['renders requester analysis as table columns', statsHtml.includes('class="requester-table"') && statsHtml.includes('<span>Requester</span>') && statsHtml.includes('<span>Anzahl</span>') && statsHtml.includes('<span>Verdienst</span>') && statsHtml.includes('<span>Stundenlohn</span>') && statsHtml.includes('<span>Approval-Rate</span>')],
   ['centers requester metric columns while keeping requester names left aligned', css.includes('.requester-row > span') && css.includes('.requester-row > span:first-child') && /\.requester-number\s*\{[\s\S]*text-align:\s*center;/.test(css)],
