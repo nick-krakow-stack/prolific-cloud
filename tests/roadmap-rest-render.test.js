@@ -344,6 +344,7 @@ const checks = [
   ['renders selected previous heatmap month', aprilHeatmapHtml.includes('April 2026') && (aprilHeatmapHtml.match(/class="heatmap-day/g) || []).length === 30 && aprilHeatmapHtml.includes('30.04.') && aprilHeatmapHtml.includes('£2,50') && !/data-heatmap-nav="next"[\s\S]*disabled/.test(aprilHeatmapHtml)],
   ['stats binds heatmap navigation controls', code.includes("target.dataset.heatmapNav") && code.includes('statsHeatmapMonth = shiftMonthKey') && code.includes('statsHeatmapMonth = currentHeatmapMonthKey')],
   ['stats endpoint provides historical heatmap data', /'heatmap'\s*=>\s*build_heatmap_history\(/.test(apiData)],
+  ['stats endpoint provides fx rates for EUR statistics rendering', /function build_stats_response\(PDO \$pdo\): array \{[\s\S]*'monthlyReport'\s*=>\s*build_monthly_report\([^\n]+\),\s*'fxRates'\s*=>\s*decode_setting_value\(get_setting\('fxRates'\)\),\s*'serverTime'\s*=>\s*date\('c'\)/.test(apiData)],
   ['moves studies into stats tab', !appShell.includes('data-tab="studies"') && !appShell.includes('id="panel-studies"') && statsHtml.includes('<h3>Studien</h3>')],
   ['stats studies default shows only active studies', statsHtml.includes('Quality study') && !statsHtml.includes('Older study') && statsHtml.includes('Alle Studien anzeigen') && !statsHtml.includes('id="studiesSort"')],
   ['expanded stats studies keeps the toggle button before filters', expandedStatsStudiesHtml.includes('Studien ausblenden') && expandedStatsStudiesHtml.indexOf('Studien ausblenden') < expandedStatsStudiesHtml.indexOf('id="studiesSort"')],

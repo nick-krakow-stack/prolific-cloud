@@ -458,3 +458,14 @@
   studies, and the embedded studies list. Added render regression coverage,
   deployed runtime files, and verified focused/full Node tests, JS syntax,
   server PHP 8.4 lint, and live JS delivery markers.
+- 2026-06-05 17:47:04 +02:00 - Fixed production `Statistiken` still showing
+  original currencies after the frontend deploy. Root cause was missing
+  `fxRates` in `/api/data.php?type=stats`; `build_stats_response()` now includes
+  the stored Frankfurter rates. Added a focused stats API contract test,
+  deployed runtime files, verified live browser output as EUR-first
+  `€ ... (£ ... + $ ...)`, full Node tests, server PHP 8.4 lint, and
+  `config.php` ignore status.
+- 2026-06-05 17:26:56 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 17:38:39 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:39:37 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 17:40:11 +02:00 - Captured owner feedback on UserPromptSubmit.

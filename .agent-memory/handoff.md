@@ -1,15 +1,19 @@
 # Handoff
 
-Last updated: 2026-06-05 17:25:00 +02:00
+Last updated: 2026-06-05 17:47:04 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-`Statistiken` money rendering was switched to EUR-first display with original
-currencies in parentheses. Runtime files were deployed to production. Focused
-statistics render tests, the full Node test suite, JS syntax, server PHP 8.4
-lint, `git diff --check`, `config.php` ignore check, and live JS delivery
-markers passed.
+Fixed the live `Statistiken` EUR-first rendering issue. The frontend JS was
+already deployed correctly, but `/api/data.php?type=stats` lacked `fxRates`.
+`build_stats_response()` now returns the stored Frankfurter rates, and browser
+verification on production shows EUR-first values in the stats heatmap,
+monthly comparison, requester analysis, monthly report, and top studies.
+
+Runtime files were deployed to production. Focused/full Node tests, JS syntax,
+server PHP 8.4 lint for `api/data.php`, live browser verification, and
+`config.php` ignore check passed.
 
 Current task status is tracked in .agent-memory/current-task.md. Owner, browser,
 and review feedback are persisted in .agent-memory/feedback.md.
@@ -17,12 +21,18 @@ and review feedback are persisted in .agent-memory/feedback.md.
 ## Git Snapshot
 
 - Branch: main
-- Last commit: current `Render statistics amounts in EUR` commit
+- Last commit: 0962aeb Render statistics amounts in EUR
 
 ## Working Tree
 
 ~~~text
-clean after commit
+ M .agent-memory/current-state.md
+ M .agent-memory/current-task.md
+ M .agent-memory/feedback.md
+ M .agent-memory/handoff.md
+ M .agent-memory/progress.md
+ M api/data.php
+ M tests/roadmap-rest-render.test.js
 ~~~
 
 ## Current State Summary

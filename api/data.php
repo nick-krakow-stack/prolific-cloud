@@ -825,6 +825,7 @@ function build_stats_response(PDO $pdo): array {
         'heatmap' => build_heatmap_history($pdo, $earnedStatuses, $pendingStatuses, $today),
         'requesterStats' => build_requester_stats($pdo, $paidStatuses),
         'monthlyReport' => build_monthly_report($pdo, $earnedStatuses, $pendingStatuses, $paidStatuses, $monthStart, $nextMonthStart),
+        'fxRates' => decode_setting_value(get_setting('fxRates')),
         'serverTime' => date('c'),
     ];
 }

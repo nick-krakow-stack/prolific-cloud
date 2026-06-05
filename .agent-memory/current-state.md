@@ -324,6 +324,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   requester analysis, monthly report/top studies, and the studies list embedded
   at the bottom of `Statistiken`. Conversions use the existing Frankfurter
   `fxRates` path; the original currency values remain visible for traceability.
+- The stats endpoint explicitly includes `fxRates` in `build_stats_response()`.
+  This is required for the EUR-first `Statistiken` rendering; without it the
+  frontend intentionally falls back to original GBP/USD amounts.
 - The portal logo in the generic `Zusatzeinkommen` card is positioned as a small
   non-interactive top-right corner mark (`misc-income-brand--corner`) instead of
   sitting in the normal form flow. This keeps the provider hint without

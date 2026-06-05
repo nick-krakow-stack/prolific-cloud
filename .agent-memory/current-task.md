@@ -1,35 +1,39 @@
 # Current Task
 
-Last updated: 2026-06-05 17:20:12 +02:00
+Last updated: 2026-06-05 17:47:04 +02:00
 
 ## Task
 
-Switch the `Statistiken` tab money displays to EUR-first formatting with the
-original currencies in parentheses.
+Fix `Statistiken` EUR-first rendering on production after the frontend change
+still showed original currencies.
+
+## Root Cause
+
+The frontend formatter was deployed correctly, but `/api/data.php?type=stats`
+did not include `fxRates`. Therefore `amountEurWithOriginal()` correctly fell
+back to original currencies in the `Statistiken` tab.
 
 ## Scope
 
-- `dashboard/assets/app.js`
+- `api/data.php`
 - `tests/roadmap-rest-render.test.js`
 - memory files
 
 ## Checklist
 
-- [x] Read required startup files and git status.
-- [x] Delegate read-only statistics renderer mapping to a Sub-Agent.
-- [x] Add regression coverage for EUR-first statistics money rendering.
-- [x] Add shared frontend helpers for EUR-first original-currency display.
-- [x] Update statistics heatmap, daily income history, monthly comparison,
-  requester analysis, monthly report, top studies, and embedded studies list.
+- [x] Reproduce the issue in the live in-app browser.
+- [x] Verify that production loaded the new `app.js?v=1780672518`.
+- [x] Identify missing `fxRates` in the stats API response as root cause.
+- [x] Add a failing regression test for the stats endpoint FX contract.
+- [x] Add `fxRates` to `build_stats_response()`.
 - [x] Deploy runtime files to production.
-- [x] Verify focused/full Node tests, JS syntax, server PHP 8.4 lint, and live
-  JS delivery.
+- [x] Verify live `Statistiken` text renders EUR-first.
+- [x] Verify focused/full Node tests, JS syntax, server PHP 8.4 lint, and
+  `config.php` ignore status.
 
 ## Notes
 
-- Target display format is `€ XX,XX (£ XX,XX + $ XX,XX)`.
-- Hourly values use the same format with `/h` after the parenthesized original
-  currencies.
-- Signed deltas keep an explicit sign before the EUR-first amount.
-- Top overview tiles and non-statistics areas were intentionally left on their
-  existing display rules unless they are rendered inside `Statistiken`.
+- Browser verification after deploy showed examples such as
+  `€11,47 (£5,95 + $5,34)` in the heatmap and EUR-first requester/monthly
+  report values.
+- No database migration was required.
