@@ -316,6 +316,8 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   `Aufgabe`), date, and USD amount. Provider identity is still stored in the
   existing `category` column (`user_testing`, `testable_minds`), so no schema
   migration was required. Existing legacy `test` entry types remain readable.
+- The generic `Zusatzeinkommen` portal form also supports `Testbirds` and
+  `Respondent` as USD providers through the same provider/category model.
 - The portal logo in the generic `Zusatzeinkommen` card is positioned as a small
   non-interactive top-right corner mark (`misc-income-brand--corner`) instead of
   sitting in the normal form flow. This keeps the provider hint without

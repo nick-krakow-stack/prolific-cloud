@@ -1,21 +1,20 @@
 # Handoff
 
-Last updated: 2026-06-05 02:05:00 +02:00
+Last updated: 2026-06-05 16:20:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-Centered the dashboard top tab navigation on desktop while preserving the
-left-aligned horizontal-scroll behavior for mobile. Runtime files were deployed
-to production. Focused/full Node tests, JS syntax, server PHP 8.4 lint, and live
-CSS delivery checks passed. Current task status is tracked in
-.agent-memory/current-task.md. Owner, browser, and review feedback are persisted
-in .agent-memory/feedback.md.
+Added `Testbirds` and `Respondent` to the generic `Zusatzeinkommen` portal
+provider model. Runtime files were deployed to production. Focused/full Node
+tests, JS syntax, server PHP 8.4 lint, and live JS delivery checks passed.
+Current task status is tracked in .agent-memory/current-task.md. Owner, browser,
+and review feedback are persisted in .agent-memory/feedback.md.
 
 ## Git Snapshot
 
 - Branch: main
-- Last commit: 87baa03 Move portal logos to card corner
+- Last commit: 0adcc11 Center dashboard tab navigation
 
 ## Working Tree
 
@@ -25,8 +24,10 @@ in .agent-memory/feedback.md.
  M .agent-memory/feedback.md
  M .agent-memory/handoff.md
  M .agent-memory/progress.md
- M dashboard/assets/style.css
-?? tests/nav-layout-render.test.js
+ M api/_misc_income.php
+ M dashboard/assets/app.js
+ M tests/misc-income-backend-source.test.js
+ M tests/misc-income-render.test.js
 ~~~
 
 ## Current State Summary

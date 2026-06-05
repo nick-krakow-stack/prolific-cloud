@@ -2435,6 +2435,8 @@ function miscIncomeCategoryLabel(category) {
   if (normalized === 'tech_support' || normalized === 'tech-support') return 'Tech-Support';
   if (normalized === 'user_testing' || normalized === 'user-testing') return 'User Testing';
   if (normalized === 'testable_minds' || normalized === 'testable-minds') return 'Testable Minds';
+  if (normalized === 'testbirds') return 'Testbirds';
+  if (normalized === 'respondent') return 'Respondent';
 
   return category ? String(category) : DASH;
 }
@@ -2451,6 +2453,18 @@ const MISC_INCOME_PORTAL_PROVIDERS = [
     label: 'Testable Minds',
     logo: '/assets/testable-minds-logo.svg',
     logoClass: 'misc-income-logo-testable-minds'
+  },
+  {
+    value: 'testbirds',
+    label: 'Testbirds',
+    logo: '',
+    logoClass: ''
+  },
+  {
+    value: 'respondent',
+    label: 'Respondent',
+    logo: '',
+    logoClass: ''
   }
 ];
 
@@ -2463,6 +2477,8 @@ function renderMiscIncomePortalOptions() {
   return `
               <option value="user_testing" data-logo="/assets/user-testing-logo.svg" data-label="User Testing" data-logo-class="misc-income-logo-user-testing">User Testing</option>
               <option value="testable_minds" data-logo="/assets/testable-minds-logo.svg" data-label="Testable Minds" data-logo-class="misc-income-logo-testable-minds">Testable Minds</option>
+              <option value="testbirds" data-label="Testbirds">Testbirds</option>
+              <option value="respondent" data-label="Respondent">Respondent</option>
   `;
 }
 
@@ -2495,7 +2511,7 @@ function miscIncomeAmountParts(entry, fxRates) {
     amountCents = Math.round(normalizedHours * normalizedHourly * 100);
   }
 
-  if (amountCents == null && (category === 'user_testing' || category === 'testable_minds')) {
+  if (amountCents == null && ['user_testing', 'testable_minds', 'testbirds', 'respondent'].includes(category)) {
     const amountUsd = firstNumber(entry, ['amountUsd', 'amount_usd', 'amount']) ?? 0;
     amountCents = Math.round(amountUsd * 100);
   }
@@ -2686,6 +2702,15 @@ function updateMiscIncomePortalBrand(formOrElement) {
   const label = option?.dataset?.label || provider.label;
   const logoClass = option?.dataset?.logoClass || provider.logoClass;
 
+  if (!logo) {
+    image.hidden = true;
+    image.removeAttribute('src');
+    image.alt = label;
+    image.className = 'misc-income-logo';
+    return;
+  }
+
+  image.hidden = false;
   image.src = logo;
   image.alt = label;
   image.className = `misc-income-logo ${logoClass}`;

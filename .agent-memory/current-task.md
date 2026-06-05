@@ -1,32 +1,34 @@
 # Current Task
 
-Last updated: 2026-06-05 02:05:00 +02:00
+Last updated: 2026-06-05 16:20:00 +02:00
 
 ## Task
 
-Center the dashboard top tab navigation on desktop again while preserving the
-existing mobile horizontal-scroll behavior.
+Add `Testbirds` and `Respondent` as generic portal providers in the
+`Zusatzeinkommen` tab.
 
 ## Scope
 
-- `dashboard/assets/style.css`
-- `tests/nav-layout-render.test.js`
+- `api/_misc_income.php`
+- `dashboard/assets/app.js`
+- `tests/misc-income-backend-source.test.js`
+- `tests/misc-income-render.test.js`
 - memory files
 
 ## Checklist
 
 - [x] Read required startup files and git status.
-- [x] Add a focused render/style contract for tab navigation layout.
-- [x] Keep mobile/default `.tabs` alignment scroll-friendly.
-- [x] Center `.tabs` on desktop with a responsive media rule.
+- [x] Add failing tests for the two missing providers.
+- [x] Allow `testbirds` and `respondent` as USD portal categories in the backend.
+- [x] Add both providers to the frontend dropdown and labels.
+- [x] Hide the corner logo cleanly for providers without local logo assets.
 - [x] Deploy runtime files to production.
-- [x] Verify focused test, full Node test suite, JS syntax, server PHP 8.4 lint,
-  and live CSS delivery.
+- [x] Verify focused tests, full Node test suite, JS syntax, server PHP 8.4 lint,
+  and live JS delivery.
 
 ## Notes
 
-- The desktop breakpoint is `min-width: 761px`, matching the existing mobile
-  responsive boundary used elsewhere in the dashboard.
-- The in-app browser execution bridge exposed only a reset tool in this session,
-  so authenticated DOM verification was not available. Live CSS delivery checks
-  confirmed the deployed centering rule is present.
+- No schema migration was required because the existing `category` column stores
+  provider identifiers generically.
+- `Testbirds` and `Respondent` use the same portal entry model as User Testing
+  and Testable Minds: date, type (`Umfrage`/`Aufgabe`), and USD amount.

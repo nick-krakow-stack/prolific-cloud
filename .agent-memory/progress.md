@@ -438,3 +438,11 @@
   desktop with a responsive CSS rule while preserving mobile horizontal scroll.
   Added `tests/nav-layout-render.test.js`, deployed runtime files, and verified
   focused/full Node tests, JS syntax, server PHP 8.4 lint, and live CSS delivery.
+- 2026-06-05 01:52:18 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-05 16:03:27 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-05 16:20:00 +02:00 - Added `Testbirds` and `Respondent` to the
+  generic `Zusatzeinkommen` portal provider dropdown and backend allow-list.
+  Providers use the existing USD date/type/amount flow, no schema migration was
+  required, and providers without local logo assets hide the corner logo cleanly.
+  Deployed runtime files and verified focused/full Node tests, JS syntax, server
+  PHP 8.4 lint, and live JS delivery.

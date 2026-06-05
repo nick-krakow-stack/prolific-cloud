@@ -29,6 +29,8 @@ assert(helper.includes('category'));
 assert(helper.includes('tech_support'));
 assert(helper.includes('user_testing'));
 assert(helper.includes('testable_minds'));
+assert(helper.includes('testbirds'));
+assert(helper.includes('respondent'));
 assert(helper.includes('entry_type'));
 assert(helper.includes('test'));
 assert(helper.includes('survey'));
