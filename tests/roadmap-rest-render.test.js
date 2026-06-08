@@ -85,11 +85,11 @@ const stats = {
   heatmap: [
     { date: '2026-04-30', earned: { GBP: 250 }, pending: {} },
     { date: '2026-05-01', earned: { GBP: 420, USD: 100 }, pending: {} },
-    { date: '2026-05-02', earned: {}, pending: {} }
+    { date: '2026-05-02', earned: { GBP: 180 }, pending: { GBP: 40 } }
   ],
   dailyStats: [
     { date: '2026-05-01', earned: { GBP: 420, USD: 100 }, pending: {} },
-    { date: '2026-05-02', earned: { GBP: 180 }, pending: { GBP: 40 } }
+    { date: '2026-05-02', earned: { GBP: 180 }, pending: { GBP: 50 } }
   ],
   serverTime: '2026-05-17T12:00:00+02:00',
   requesterStats: [
@@ -338,7 +338,9 @@ const checks = [
   ['renders monthly report basis as studies not samples', statsHtml.includes('14 Studien') && !statsHtml.includes('Samples')],
   ['renders monthly report hourly in EUR with separate study and work-hour rows', statsHtml.includes('<span class="key">Stundenlohn</span>') && statsHtml.includes('<span class="value">€16,99/h</span>') && /<span class="key">Stundenlohn<\/span>[\s\S]*<span class="key">Studien<\/span>[\s\S]*<span class="value">14 Studien<\/span>[\s\S]*<span class="key">Arbeitszeit<\/span>[\s\S]*<span class="value">3 Std 30 Min<\/span>/.test(statsHtml) && !statsHtml.includes('£14,40/h &middot; 14 Studien')],
   ['renders full current-month heatmap with future days', statsHtml.includes('class="heatmap-grid"') && (statsHtml.match(/class="heatmap-day/g) || []).length === 31 && statsHtml.includes('is-future') && statsHtml.includes('31.05.')],
+  ['renders heatmap days with earned plus pending amounts', statsHtml.includes(statsMoney({ GBP: 220 }))],
   ['renders income history in stats tab', statsHtml.includes('<h3>Einnahmen-Verlauf</h3>') && statsHtml.includes('class="daily-chart"') && statsHtml.includes('class="daily-bar"')],
+  ['renders income history with earned plus pending amounts', statsHtml.includes(statsMoney({ GBP: 230 }))],
   ['renders heatmap month navigation', statsHtml.includes('class="heatmap-header"') && statsHtml.includes('data-heatmap-nav="prev"') && statsHtml.includes('Mai 2026') && statsHtml.includes('data-heatmap-nav="next"') && statsHtml.includes('data-heatmap-nav="today"')],
   ['disables heatmap next button in current month', /data-heatmap-nav="next"[\s\S]*disabled/.test(statsHtml)],
   ['renders selected previous heatmap month', aprilHeatmapHtml.includes('April 2026') && (aprilHeatmapHtml.match(/class="heatmap-day/g) || []).length === 30 && aprilHeatmapHtml.includes('30.04.') && aprilHeatmapHtml.includes('£2,50') && !/data-heatmap-nav="next"[\s\S]*disabled/.test(aprilHeatmapHtml)],

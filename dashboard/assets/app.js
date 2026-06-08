@@ -3087,21 +3087,22 @@ function renderDailyStatsCard(dailyStats, fxRates) {
     `;
   }
 
-  const maxValue = Math.max(...dailyStats.map(day => chartValueMinor(day.earned, fxRates)), 0);
+  const maxValue = Math.max(...dailyStats.map(day => chartValueMinor(dayTotalIncome(day), fxRates)), 0);
   const bars = dailyStats.map(day => {
-    const value = chartValueMinor(day.earned, fxRates);
+    const total = dayTotalIncome(day);
+    const value = chartValueMinor(total, fxRates);
     const width = maxValue > 0 ? Math.max(2, (value / maxValue) * 100) : 0;
     const labelDate = new Date(day.date);
     const label = Number.isNaN(labelDate.getTime())
       ? String(day.date).slice(5)
       : labelDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-    const title = `${day.date}: verdient ${amountEurWithOriginal(day.earned, fxRates)}, pending ${amountEurWithOriginal(day.pending, fxRates)}`;
+    const title = `${day.date}: ${amountEurWithOriginal(total, fxRates)}`;
 
     return `
       <div class="daily-bar" title="${escapeHtml(title)}">
         <div class="daily-bar-label">${escapeHtml(label)}</div>
         <div class="daily-bar-fill" style="width:${width.toFixed(2)}%;"></div>
-        <div class="daily-bar-value">${amountEurWithOriginal(day.earned, fxRates)}</div>
+        <div class="daily-bar-value">${amountEurWithOriginal(total, fxRates)}</div>
       </div>
     `;
   }).join('');
@@ -3645,6 +3646,10 @@ function buildMonthHeatmapDays(days, serverTime, selectedMonthKey = null) {
   });
 }
 
+function dayTotalIncome(day) {
+  return sumCurrencyMaps(day.earned, day.pending);
+}
+
 function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
   if (!days.length && !serverTime) {
     return '<div class="loading">Keine Heatmap-Daten.</div>';
@@ -3653,7 +3658,7 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
   const currentMonthKey = currentHeatmapMonthKey(serverTime);
   const activeMonthKey = selectedMonthKey || statsHeatmapMonth || currentMonthKey;
   const monthDays = buildMonthHeatmapDays(days, serverTime, activeMonthKey);
-  const maxValue = Math.max(...monthDays.map(day => chartValueMinor(day.earned, fxRates)), 0);
+  const maxValue = Math.max(...monthDays.map(day => chartValueMinor(dayTotalIncome(day), fxRates)), 0);
   const canGoNext = compareMonthKeys(activeMonthKey, currentMonthKey) < 0;
 
   return `
@@ -3669,14 +3674,15 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
       </div>
       <div class="heatmap-grid">
       ${monthDays.map(day => {
-        const value = chartValueMinor(day.earned, fxRates);
+        const total = dayTotalIncome(day);
+        const value = chartValueMinor(total, fxRates);
         const level = maxValue > 0 ? Math.min(4, Math.ceil((value / maxValue) * 4)) : 0;
         const date = parseDateKey(day.date);
         const label = date
           ? date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           : String(day.date).slice(-2);
-        const title = `${day.date}: ${amountEurWithOriginal(day.earned, fxRates)}`;
-        const empty = !hasCurrencyAmounts(day.earned);
+        const title = `${day.date}: ${amountEurWithOriginal(total, fxRates)}`;
+        const empty = !hasCurrencyAmounts(total);
         const classes = [
           'heatmap-day',
           `level-${level}`,
@@ -3687,7 +3693,7 @@ function renderHeatmap(days, fxRates, serverTime, selectedMonthKey = null) {
         return `
           <div class="${classes}" title="${escapeHtml(title)}">
             <span class="heatmap-date">${escapeHtml(label)}</span>
-            <span class="heatmap-value">${day.isFuture ? '–' : amountEurWithOriginal(day.earned, fxRates)}</span>
+            <span class="heatmap-value">${day.isFuture ? '–' : amountEurWithOriginal(total, fxRates)}</span>
           </div>
         `;
       }).join('')}

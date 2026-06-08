@@ -332,6 +332,10 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   requester analysis, monthly report/top studies, and the studies list embedded
   at the bottom of `Statistiken`. Conversions use the existing Frankfurter
   `fxRates` path; the original currency values remain visible for traceability.
+- Calendar heatmap and income history day values use the same income basis as
+  the overview period tiles: `earned + pending`. The backend already exposes
+  both buckets; `dashboard/assets/app.js` combines them for visible daily
+  values, heat intensity, and tooltips.
 - The stats endpoint explicitly includes `fxRates` in `build_stats_response()`.
   This is required for the EUR-first `Statistiken` rendering; without it the
   frontend intentionally falls back to original GBP/USD amounts.
