@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 const MISC_INCOME_TABLE = 'misc_income_entries';
-const MISC_INCOME_CATEGORIES = ['tech_support', 'user_testing', 'testable_minds', 'testbirds', 'respondent'];
+const MISC_INCOME_CATEGORIES = ['tech_support', 'user_testing', 'testable_minds', 'testbirds', 'respondent', 'user_interviews'];
 const MISC_INCOME_PORTAL_TYPES = ['survey', 'task', 'test'];
-const MISC_INCOME_USD_AMOUNT_CATEGORIES = ['user_testing', 'testable_minds', 'testbirds', 'respondent'];
+const MISC_INCOME_USD_AMOUNT_CATEGORIES = ['user_testing', 'testable_minds', 'testbirds', 'respondent', 'user_interviews'];
 const MISC_INCOME_REQUIRED_COLUMNS = [
     'id',
     'category',
@@ -354,6 +354,7 @@ function misc_income_calculate_summary(array $entries): array {
             'testable_minds' => [],
             'testbirds' => [],
             'respondent' => [],
+            'user_interviews' => [],
         ],
         'totalByCurrency' => [],
         'todayByCurrency' => [],
@@ -364,6 +365,7 @@ function misc_income_calculate_summary(array $entries): array {
             'testable_minds' => 0,
             'testbirds' => 0,
             'respondent' => 0,
+            'user_interviews' => 0,
         ],
         'hoursHundredthsByCategory' => [
             'tech_support' => 0,
@@ -371,6 +373,7 @@ function misc_income_calculate_summary(array $entries): array {
             'testable_minds' => 0,
             'testbirds' => 0,
             'respondent' => 0,
+            'user_interviews' => 0,
         ],
     ];
 

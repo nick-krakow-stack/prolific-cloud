@@ -324,8 +324,9 @@ Phase 1 + Phase 2 is implemented in the working tree and deployed to production:
   `Aufgabe`), date, and USD amount. Provider identity is still stored in the
   existing `category` column (`user_testing`, `testable_minds`), so no schema
   migration was required. Existing legacy `test` entry types remain readable.
-- The generic `Zusatzeinkommen` portal form also supports `Testbirds` and
-  `Respondent` as USD providers through the same provider/category model.
+- The generic `Zusatzeinkommen` portal form also supports `Testbirds`,
+  `Respondent`, and `User Interviews` as USD providers through the same
+  provider/category model.
 - The `Statistiken` tab now renders Prolific money values EUR-first with
   original currencies in parentheses, e.g. `€ XX,XX (£ XX,XX + $ XX,XX)`.
   This covers the calendar heatmap, income history, monthly comparison,

@@ -31,6 +31,7 @@ assert(helper.includes('user_testing'));
 assert(helper.includes('testable_minds'));
 assert(helper.includes('testbirds'));
 assert(helper.includes('respondent'));
+assert(helper.includes('user_interviews'));
 assert(helper.includes('entry_type'));
 assert(helper.includes('test'));
 assert(helper.includes('survey'));

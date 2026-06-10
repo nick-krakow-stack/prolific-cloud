@@ -1,18 +1,16 @@
 # Handoff
 
-Last updated: 2026-06-08 02:38:00 +02:00
+Last updated: 2026-06-10 17:40:00 +02:00
 Update mode: Manual
 
 ## Latest Notes
 
-The statistics heatmap and income history were fixed and deployed.
+`User Interviews` was added to the generic `Zusatzeinkommen` survey/task portal provider list.
 
-- Backend already exposes daily `earned` and `pending` buckets for heatmap data.
-- Root cause was frontend-only: `renderHeatmap()` and `renderDailyStatsCard()` used only `earned`.
-- `dashboard/assets/app.js` now combines `earned + pending` for visible daily values, heatmap intensity, and tooltips.
-- Regression coverage was added in `tests/roadmap-rest-render.test.js`.
-- Runtime files were deployed to production and the live asset contains the combined day-total renderer.
-- Live browser check confirmed the `Statistiken` heatmap is visible and renders EUR-first combined day values.
+- Backend `api/_misc_income.php` now accepts `user_interviews` as a category and treats it as a USD amount provider.
+- Frontend `dashboard/assets/app.js` maps and renders `User Interviews` in the provider dropdown and labels.
+- Existing `misc_income_entries.category` storage is reused; no schema migration was needed.
+- Runtime files were deployed to production.
 
 Current task status is tracked in `.agent-memory/current-task.md`.
 Owner, browser, and review feedback are persisted in `.agent-memory/feedback.md`.
@@ -20,22 +18,24 @@ Owner, browser, and review feedback are persisted in `.agent-memory/feedback.md`
 ## Git Snapshot
 
 - Branch: main
-- Last product commit: `86ef09b Include pending rewards in heatmap days`
+- Last product commit before final commit: `1e26ed4 Update handoff after heatmap fix`
 
 ## Working Tree
 
-Expected after handoff commit: clean.
+Expected after final commit: clean.
 
 ## Verification
 
-- Red tests failed first in `tests/roadmap-rest-render.test.js` for heatmap and income-history earned+pending expectations.
-- `node tests\roadmap-rest-render.test.js`: passed.
+- Red tests failed first in `tests/misc-income-render.test.js` and `tests/misc-income-backend-source.test.js` for missing `User Interviews`.
+- `node tests\misc-income-render.test.js`: passed.
+- `node tests\misc-income-backend-source.test.js`: passed.
 - Full Node test suite under `tests/*.js`: passed.
 - `node --check dashboard\assets\app.js`: passed.
-- `git diff --check`: passed.
+- Local `php` is not available in PATH.
 - Production deploy completed through `scripts/deploy-webspace.ps1`.
-- Live asset check passed for `https://prolific.nickkrakow.de/assets/app.js`.
-- Live browser DOM check showed the `Statistiken` tab active with visible heatmap values such as EUR-first original-currency combined amounts.
+- Server `php84 -l api/_misc_income.php`: passed.
+- Live asset check confirmed `https://prolific.nickkrakow.de/assets/app.js` contains `User Interviews` / `user_interviews`.
+- `git diff --check`: passed.
 
 ## Required Startup For Next Agent
 

@@ -2458,6 +2458,7 @@ function miscIncomeCategoryLabel(category) {
   if (normalized === 'testable_minds' || normalized === 'testable-minds') return 'Testable Minds';
   if (normalized === 'testbirds') return 'Testbirds';
   if (normalized === 'respondent') return 'Respondent';
+  if (normalized === 'user_interviews' || normalized === 'user-interviews') return 'User Interviews';
 
   return category ? String(category) : DASH;
 }
@@ -2486,6 +2487,12 @@ const MISC_INCOME_PORTAL_PROVIDERS = [
     label: 'Respondent',
     logo: '',
     logoClass: ''
+  },
+  {
+    value: 'user_interviews',
+    label: 'User Interviews',
+    logo: '',
+    logoClass: ''
   }
 ];
 
@@ -2500,6 +2507,7 @@ function renderMiscIncomePortalOptions() {
               <option value="testable_minds" data-logo="/assets/testable-minds-logo.svg" data-label="Testable Minds" data-logo-class="misc-income-logo-testable-minds">Testable Minds</option>
               <option value="testbirds" data-label="Testbirds">Testbirds</option>
               <option value="respondent" data-label="Respondent">Respondent</option>
+              <option value="user_interviews" data-label="User Interviews">User Interviews</option>
   `;
 }
 
@@ -2532,7 +2540,7 @@ function miscIncomeAmountParts(entry, fxRates) {
     amountCents = Math.round(normalizedHours * normalizedHourly * 100);
   }
 
-  if (amountCents == null && ['user_testing', 'testable_minds', 'testbirds', 'respondent'].includes(category)) {
+  if (amountCents == null && ['user_testing', 'testable_minds', 'testbirds', 'respondent', 'user_interviews'].includes(category)) {
     const amountUsd = firstNumber(entry, ['amountUsd', 'amount_usd', 'amount']) ?? 0;
     amountCents = Math.round(amountUsd * 100);
   }

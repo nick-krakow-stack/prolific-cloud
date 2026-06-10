@@ -484,3 +484,6 @@
 - 2026-06-05 19:37:47 +02:00 - Stop hook ran and refreshed central memory snapshot.
 - 2026-06-08 02:01:52 +02:00 - Captured owner feedback on UserPromptSubmit.
 - 2026-06-08 02:32:00 +02:00 - Fixed `Statistiken` heatmap day totals and income history to use `earned + pending` instead of approved/earned only. Backend already exposed both buckets; frontend now combines them for heatmap intensity, visible day values, daily chart values, and tooltips. Added regression coverage in `tests/roadmap-rest-render.test.js`, verified red tests first, then full JS suite, JS syntax, `git diff --check`, production deploy, live asset delivery, and live browser heatmap visibility.
+- 2026-06-08 02:22:49 +02:00 - Stop hook ran and refreshed central memory snapshot.
+- 2026-06-10 17:22:31 +02:00 - Captured owner feedback on UserPromptSubmit.
+- 2026-06-10 17:35:00 +02:00 - Added `User Interviews` as a generic `Zusatzeinkommen` survey/task portal provider. Backend category validation and USD amount handling now include `user_interviews`; the frontend label/dropdown/provider mapping includes `User Interviews`. Added source/render contract coverage and verified focused tests plus the full Node suite. Local PHP CLI was unavailable in PATH.
